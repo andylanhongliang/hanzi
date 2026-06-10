@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>文字图谱 · 象形取义</title>
+  <!-- 引入 ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+  <!-- 引入数据文件（需自行准备，格式见 data.js） -->
+  <script src="data.js"></script>
+  <style>
+    :root {
+      --bg: #fef9f0;
+      --surface: #fffaf0;
+      --card: #ffffff;
+      --gold: #f5a623;
+      --primary: #4a90e2;
+      --text: #332a1f;
+      --muted: #8a7a6a;
+      --border: rgba(74, 144, 226, 0.15);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --radius-sm: 10px;
+      --radius: 16px;
+      --radius-lg: 24px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: "KaiTi", "楷体", "STKaiti", "华文楷体", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+      color: var(--text);
+    }
+
+    #header {
+      position: fixed; top: 0; left: 0; width: 100%; height: 56px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    #logo {
+      font-size: 22px; color: var(--primary); font-weight: bold;
+      letter-spacing: 3px; display: flex; align-items: center; gap: 8px;
+    }
+
+    #logo-icon { font-size: 28px; }
+
+    #header-right { display: flex; gap: 10px; align-items: center; }
+    #search-wrap { display: flex; gap: 4px; }
+
+    #search-input {
+      width: 80px; padding: 6px 12px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: var(--bg);
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: width 0.3s, border-color 0.3s; color: var(--text);
+    }
+
+    #search-input:focus { width: 110px; border-color: var(--primary); }
+
+    .header-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: var(--surface);
+      font-size: 18px; cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); position: relative;
+    }
+
+    .header-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .header-btn .badge-dot {
+      position: absolute; top: 2px; right: 2px;
+      width: 8px; height: 8px; border-radius: 50%; background: #ff4d4f;
+    }
+
+    .badge-dot.hidden { display: none; }
+
+    #chart {
+      position: fixed; top: 56px; left: 0;
+      width: 100%; height: calc(100vh - 56px); min-height: 500px;
+    }
+
+    #hint-text {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      color: var(--muted); font-size: 13px; z-index: 50; pointer-events: none;
+      opacity: 0.7; transition: opacity 0.5s; background: var(--surface);
+      padding: 6px 18px; border-radius: 20px; border: 1px solid var(--border);
+    }
+
+    #legend {
+      position: fixed; top: 68px; right: 16px; display: flex; flex-direction: column;
+      gap: 6px; z-index: 50; background: var(--surface); padding: 12px 14px;
+      border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow);
+      font-size: 11px;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .legend-dot.root { background: var(--primary); border: 2px solid #357abd; }
+    .legend-dot.normal { background: var(--gold); border: 2px solid #e6951a; }
+    .legend-dot.question { background: transparent; border: 2px dashed #ccc; width: 6px; height: 6px; }
+
+    .legend-line { width: 18px; height: 2px; border-radius: 1px; }
+    .legend-line.shape-green { background: #8bc34a; }
+    .legend-line.add-blue { border-top: 2px dashed #64b5f6; height: 0; width: 18px; }
+    .legend-line.stroke-orange { border-top: 2px dotted #ffb74d; height: 0; width: 18px; }
+    .legend-line.comp-purple { border-top: 2px dashed #ba68c8; height: 0; width: 18px; }
+    .legend-line.meaning-red { position: relative; height: 4px; }
+    .legend-line.meaning-red::after {
+      content: ''; position: absolute; top: -2px; left: 0; width: 18px;
+      border-top: 2px solid #e57373; border-bottom: 2px solid #e57373; height: 2px;
+    }
+    .legend-line.voice-cyan { border-top: 2px dotted #4dd0e1; height: 0; width: 18px; }
+
+    #float-tools {
+      position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px; z-index: 50;
+    }
+
+    .tool-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: var(--surface);
+      font-size: 18px; cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); box-shadow: var(--shadow);
+    }
+
+    .tool-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: scale(1.1); }
+
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.3); z-index: 200; display: none;
+      justify-content: center; align-items: center;
+    }
+
+    .overlay.show { display: flex; }
+
+    .card {
+      background: var(--card); border-radius: var(--radius-lg);
+      padding: 28px 24px; max-width: 420px; width: 90%;
+      box-shadow: var(--shadow); position: relative; max-height: 80vh;
+      overflow-y: auto; border: 1px solid var(--border);
+    }
+
+    .card-close { position: absolute; top: 14px; right: 18px; font-size: 22px; color: var(--muted); cursor: pointer; }
+    .card-close:hover { color: var(--text); }
+
+    .card-title { font-size: 22px; color: var(--primary); text-align: center; margin-bottom: 16px; font-weight: bold; }
+
+    #guess-question { font-size: 64px; color: var(--muted); text-align: center; margin-bottom: 4px; transition: 0.3s; }
+    #guess-question.solved { color: var(--gold); transform: scale(1.15); }
+
+    #guess-hint { font-size: 16px; color: var(--text); text-align: center; margin-bottom: 14px; min-height: 40px; line-height: 1.6; padding: 12px; background: rgba(74,144,226,0.06); border-radius: var(--radius-sm); }
+
+    #guess-input { display: block; margin: 0 auto; width: 120px; padding: 10px 16px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 24px; text-align: center; font-family: inherit; outline: none; color: var(--text); transition: 0.2s; }
+    #guess-input:focus { border-color: var(--primary); }
+    #guess-input.shake { animation: shake 0.3s; border-color: #ff4d4f; }
+    @keyframes shake { 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-6px); } 50%{ transform:translateX(6px); } 75%{ transform:translateX(-4px); } }
+
+    #guess-submit { display: block; margin: 14px auto 0; padding: 10px 32px; border-radius: var(--radius-sm); border: none; background: var(--primary); color: #fff; font-size: 16px; font-family: inherit; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    #guess-submit:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    #guess-more { display: block; margin: 8px auto 0; padding: 6px 18px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-size: 13px; font-family: inherit; cursor: pointer; transition: 0.2s; }
+    #guess-more:hover { border-color: var(--primary); color: var(--primary); }
+
+    #guess-feedback { margin-top: 10px; font-size: 15px; min-height: 20px; text-align: center; }
+    #guess-feedback.wrong { color: #ff4d4f; }
+    #guess-feedback.right { color: #52c41a; }
+
+    /* 粒子动画等保留原有样式 */
+    #celebrate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 300; }
+    .particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: particleFly 0.9s ease-out forwards; }
+    @keyframes particleFly { 0%{ opacity:1; transform:translate(0,0) scale(1); } 100%{ opacity:0; transform:translate(var(--dx),var(--dy)) scale(0); } }
+
+    #badge-toast {
+      position: fixed; top: 70px; right: 20px; z-index: 300;
+      background: var(--card); border: 2px solid var(--gold); border-radius: var(--radius);
+      padding: 14px 20px; color: var(--text); display: none;
+      align-items: center; gap: 10px; animation: toastIn 0.4s ease-out; box-shadow: var(--shadow);
+    }
+    #badge-toast.show { display: flex; }
+    @keyframes toastIn { 0%{ transform:translateX(120%); opacity:0; } 100%{ transform:translateX(0); opacity:1; } }
+    #badge-toast .toast-icon { font-size: 26px; }
+    #badge-toast .toast-text { font-size: 13px; }
+    #badge-toast .toast-text b { color: var(--gold); }
+
+    @media (max-width: 600px) {
+      #legend { display: none; }
+      #search-input { width: 50px; font-size: 12px; }
+      #search-input:focus { width: 70px; }
+      .card { padding: 20px 16px; }
+      #float-tools { left: 8px; gap: 8px; }
+      .tool-btn { width: 36px; height: 36px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="header">
+  <div id="logo"><span id="logo-icon">📖</span>文字图谱</div>
+  <div id="header-right">
+    <div id="search-wrap">
+      <input id="search-input" type="text" maxlength="2" placeholder="搜字" onkeydown="if(event.key==='Enter')searchJump()">
+      <button class="header-btn" onclick="searchJump()" title="搜索">🔍</button>
+    </div>
+    <button class="header-btn" onclick="openBadges()" title="成就">🏆<span id="badge-new-dot" class="badge-dot hidden"></span></button>
+    <button class="header-btn" onclick="openDaily()" title="每日挑战">📅</button>
+    <button class="header-btn" onclick="toggleTheme()" id="theme-btn" title="切换主题">🌓</button>
+  </div>
+</header>
+
+<main id="chart"></main>
+
+<footer id="hint-text">💡 单击问号猜字 · 双击节点聚焦 · 右键查看详情 · 滚轮缩放</footer>
+
+<nav id="float-tools">
+  <button class="tool-btn" onclick="zoomIn()" title="放大">➕</button>
+  <button class="tool-btn" onclick="zoomOut()" title="缩小">➖</button>
+  <button class="tool-btn" onclick="resetView()" title="重置视图">↺</button>
+  <button class="tool-btn" id="globalViewBtn" title="全局视图">🗺️</button>
+</nav>
+
+<aside id="legend">
+  <div class="legend-item"><span class="legend-dot root"></span> 根字</div>
+  <div class="legend-item"><span class="legend-dot normal"></span> 已解锁</div>
+  <div class="legend-item"><span class="legend-dot question"></span> 待猜</div>
+  <div class="legend-item" style="margin-top:4px;"><span class="legend-line shape-green"></span> 形似</div>
+  <div class="legend-item"><span class="legend-line add-blue"></span> 加笔</div>
+  <div class="legend-item"><span class="legend-line stroke-orange"></span> 笔数</div>
+  <div class="legend-item"><span class="legend-line comp-purple"></span> 构件</div>
+  <div class="legend-item"><span class="legend-line meaning-red"></span> 意义</div>
+  <div class="legend-item"><span class="legend-line voice-cyan"></span> 语音</div>
+</aside>
+
+<div class="overlay" id="guess-overlay"><div class="card">
+  <span class="card-close" id="guess-close">✕</span>
+  <div id="guess-question">？</div>
+  <div id="guess-hint"></div>
+  <input id="guess-input" type="text" maxlength="1" placeholder="输入汉字">
+  <button id="guess-submit">猜！</button>
+  <button id="guess-more">💡 更多提示</button>
+  <div id="guess-feedback"></div>
+</div></div>
+
+<div class="overlay" id="detail-overlay"><div class="card" id="detail-card">
+  <span class="card-close" id="detail-close">✕</span>
+  <div id="detail-char"></div>
+  <div id="detail-pinyin"></div>
+  <img id="detail-oracle-img" src="" alt="字形演变" onerror="this.style.display='none'">
+  <div class="detail-section"><div class="detail-label">📜 字形描述</div><div class="detail-text" id="detail-oracle"></div></div>
+  <div class="detail-section"><div class="detail-label">💡 造字本义</div><div class="detail-text" id="detail-origin"></div></div>
+  <div class="detail-section"><div class="detail-label">📝 常用组词</div><div class="detail-tags" id="detail-words"></div></div>
+  <div class="detail-section"><div class="detail-label">📚 成语</div><div class="detail-text" id="detail-idioms"></div></div>
+  <div class="detail-section"><div class="detail-label">🧩 谜语</div><div class="detail-text" id="detail-riddles"></div></div>
+  <div class="detail-section"><div class="detail-label">🔗 同义 / 反义</div><div class="detail-text" id="detail-synant"></div></div>
+  <div id="detail-explore">
+    <button onclick="exploreSearch('字形演变')">🔍 字形演变</button>
+    <button onclick="exploreSearch('说文解字')">📖 说文解字</button>
+    <button onclick="exploreSearch('汉字故事')">📚 汉字故事</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="badge-overlay"><div class="card">
+  <span class="card-close" id="badge-close">✕</span>
+  <div class="card-title">🏆 成就徽章</div>
+  <div id="badge-grid"></div>
+</div></div>
+
+<div class="overlay" id="daily-overlay"><div class="card">
+  <span class="card-close" id="daily-close">✕</span>
+  <div class="card-title">📅 今日挑战</div>
+  <p style="text-align:center;font-size:13px;color:var(--muted);">完成全部3个挑战获得 ⭐ 奖励</p>
+  <div id="daily-list"></div>
+  <div id="daily-stars"></div>
+</div></div>
+
+<div id="celebrate"></div>
+<div id="badge-toast"><span class="toast-icon">🏆</span><span class="toast-text"></span></div>
+
+<script>
+  // ==================== 数据安全校验 ====================
+  if (typeof WORD_DATA === 'undefined' || !WORD_DATA.nodes || !WORD_DATA.links) {
+    document.body.innerHTML = '<div style="text-align:center;padding:60px;font-size:18px;color:#ff4d4f;">⚠️ 缺少数据文件 data.js，请确保已正确引入。</div>';
+    throw new Error('WORD_DATA 未定义');
+  }
+
+  const rawNodes = WORD_DATA.nodes;
+  const rawLinks = WORD_DATA.links;
+
+  // ==================== 音频引擎（延迟初始化） ====================
+  let AUDIO_CTX = null;
+  function getAudioCtx() {
+    if (!AUDIO_CTX) {
+      try { AUDIO_CTX = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+      if (AUDIO_CTX.state === 'suspended') AUDIO_CTX.resume();
+    }
+    return AUDIO_CTX;
+  }
+
+  function playTone(freq, type, duration, vol = 0.06) {
+    const ctx = getAudioCtx(); if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = type; osc.frequency.value = freq; gain.gain.value = vol;
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function sfxCorrect() { playTone(880, 'sine', 0.12); setTimeout(() => playTone(1100, 'sine', 0.15), 100); }
+  function sfxWrong() { playTone(200, 'triangle', 0.2, 0.04); }
+  function sfxClick() { playTone(600, 'sine', 0.06, 0.03); }
+  function sfxBadge() { playTone(660, 'sine', 0.1); setTimeout(() => playTone(880, 'sine', 0.1), 80); setTimeout(() => playTone(1100, 'sine', 0.15), 160); }
+
+  function speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text); utter.lang = 'zh-CN'; utter.rate = 0.9; utter.pitch = 1.1;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function celebrateAt(x, y) {
+    const c = document.getElementById('celebrate');
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement('div'); p.className = 'particle';
+      const angle = (i / 16) * Math.PI * 2; const dist = 50 + Math.random() * 60;
+      p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+      p.style.left = x + 'px'; p.style.top = y + 'px';
+      p.style.background = ['#f5a623', '#4a90e2', '#52c41a', '#ff4d4f', '#ffb74d'][Math.floor(Math.random() * 5)];
+      c.appendChild(p); setTimeout(() => p.remove(), 900);
+    }
+  }
+
+  function loadStore(key, def) {
+    try { const v = localStorage.getItem('wzpt_' + key); return v ? JSON.parse(v) : def; } catch (e) { return def; }
+  }
+  function saveStore(key, val) {
+    try { localStorage.setItem('wzpt_' + key, JSON.stringify(val)); } catch (e) {}
+  }
+
+  // ==================== 状态管理 ====================
+  const totalChars = rawNodes.length;
+  let unlocked = loadStore('unlocked', null);
+  if (!unlocked || !Array.isArray(unlocked)) {
+    unlocked = ["一"];
+    saveStore('unlocked', unlocked);
+  }
+  unlocked = new Set(unlocked);
+
+  let currentGuessTarget = null, currentHintIndex = 0;
+  let focusMode = false, focusNodeId = null;
+
+  // ★ 优化1：节点位置缓存 + 固定标志
+  let nodePositionsCache = {};
+  let useFixedPositions = false;
+
+  function updateProgress() {
+    const logo = document.getElementById('logo');
+    if (logo) {
+      logo.innerHTML = `<span id="logo-icon">📖</span>文字图谱 <span style="font-size:12px;color:var(--muted);font-weight:normal;">${unlocked.size}/${totalChars}</span>`;
+    }
+  }
+  updateProgress();
+
+  // 预构建索引
+  const nodeMap = {}; rawNodes.forEach(n => nodeMap[n.id] = n);
+  const childrenMap = {}; rawNodes.forEach(n => childrenMap[n.id] = []);
+  rawLinks.forEach(l => { if (childrenMap[l.source]) childrenMap[l.source].push(l.target); });
+  const parentMap = {}; rawNodes.forEach(n => parentMap[n.id] = []);
+  rawLinks.forEach(l => { if (parentMap[l.target]) parentMap[l.target].push(l.source); });
+
+  // 链接索引
+  const linkIndex = new Map();
+  rawLinks.forEach(l => linkIndex.set(l.source + '→' + l.target, l));
+
+  function getVisibleData() {
+    const vn = new Set(["一"]), vl = new Set();
+    const visited = new Set(["一"]), queue = ["一"];
+    while (queue.length) {
+      const cur = queue.shift();
+      (childrenMap[cur] || []).forEach(ch => {
+        vn.add(ch);
+        const key = cur + '→' + ch;
+        const link = linkIndex.get(key);
+        if (link) vl.add(link);
+        if (!visited.has(ch)) { visited.add(ch); queue.push(ch); }
+      });
+    }
+    return { vn, vl: Array.from(vl) };
+  }
+
+  const linkStyleMap = {
+    '形似': { color: '#8bc34a', type: 'solid' },
+    '加笔': { color: '#64b5f6', type: 'dashed' },
+    '笔数': { color: '#ffb74d', type: 'dotted' },
+    '构件': { color: '#ba68c8', type: 'dashed' },
+    '意义': { color: '#e57373', type: 'solid' },
+    '语音': { color: '#4dd0e1', type: 'dotted' }
+  };
+
+  // ★ 优化2：记录当前节点坐标
+  function captureNodePositions() {
+    if (!myChart) return;
+    try {
+      const model = myChart.getModel();
+      const series = model.getSeriesByIndex(0);
+      if (!series) return;
+      const data = series.getData();
+      nodePositionsCache = {};
+      data.each((idx) => {
+        const id = data.getId(idx);
+        const x = data.getItemModel(idx).get('x');
+        const y = data.getItemModel(idx).get('y');
+        if (x != null && y != null) nodePositionsCache[id] = [x, y];
+      });
+      useFixedPositions = true;   // 启用固定
+    } catch (e) {}
+  }
+
+  let optionCache = null, optionCacheKey = '';
+
+  function buildOption() {
+    const { vn, vl } = getVisibleData();
+    const nodes = [], links = [];
+
+    vn.forEach(id => {
+      const n = nodeMap[id]; if (!n) return;
+      const isUnlocked = unlocked.has(id);
+      const isRoot = id === '一';
+
+      // ★ 优化3：节点对象中加入固定坐标
+      nodes.push({
+        id: n.id,
+        name: isUnlocked ? n.name : '?',
+        symbolSize: isRoot ? 68 : (isUnlocked ? 52 : 28),
+        itemStyle: {
+          color: isUnlocked ? (isRoot ? '#4a90e2' : '#f5a623') : 'transparent',
+          borderColor: isUnlocked ? (isRoot ? '#357abd' : '#e6951a') : '#ccc',
+          borderWidth: isUnlocked ? 3 : 2,
+          borderType: isUnlocked ? 'solid' : 'dashed',
+          shadowBlur: isUnlocked ? (isRoot ? 20 : 10) : 0,
+          shadowColor: isUnlocked ? (isRoot ? 'rgba(74,144,226,0.3)' : 'rgba(245,166,35,0.2)') : 'transparent',
+          opacity: isUnlocked ? 1 : 0.5
+        },
+        label: { show: true, color: isUnlocked ? '#fff' : '#999', fontSize: isRoot ? 26 : (isUnlocked ? 20 : 14), fontWeight: 'bold' },
+        ...(useFixedPositions && nodePositionsCache[n.id] ? {
+          x: nodePositionsCache[n.id][0],
+          y: nodePositionsCache[n.id][1],
+          fixed: true
+        } : {}),
+        _raw: n
+      });
+    });
+
+    vl.forEach(l => {
+      const st = linkStyleMap[l.linkType] || linkStyleMap['形似'];
+      links.push({
+        source: l.source, target: l.target,
+        lineStyle: { color: st.color, type: st.type, width: 2.5, opacity: 0.7, curveness: 0.06 },
+        label: { show: true, formatter: l.branchName, fontSize: 11, color: '#888', backgroundColor: 'rgba(255,255,255,0.7)', padding: [2, 6], borderRadius: 4 },
+        _branch: l.branchName, _type: l.linkType
+      });
+    });
+
+    return {
+      tooltip: {
+        formatter: p => {
+          if (p.dataType === 'node') {
+            const n = p.data._raw; if (!n) return '';
+            return unlocked.has(n.id) ? `<b>${n.name}</b><br/>${n.oracle || ''}` : '🔒 点击猜猜这个字是什么？';
+          }
+          return (p.data._branch || '') + '<br/><span style="color:#888">' + (p.data._type || '') + '</span>';
+        }
+      },
+      series: [{
+        type: 'graph', layout: 'force', roam: true, draggable: true,
+        force: { repulsion: 400, gravity: 0.2, edgeLength: [80, 150], friction: 0.6, layoutAnimation: true },
+        data: nodes, links: links,
+        emphasis: { focus: 'adjacency', lineStyle: { width: 4 }, itemStyle: { shadowBlur: 30 } }
+      }]
+    };
+  }
+
+  let myChart = null;
+
+  function initChart() {
+    if (myChart) myChart.dispose();
+    myChart = echarts.init(document.getElementById('chart'), null, { renderer: 'canvas' });
+    myChart.setOption(buildOption(), true);
+
+    myChart.off('click');
+    myChart.on('click', params => {
+      if (params.dataType === 'node') {
+        try { sfxClick(); } catch (e) {}
+        if (!unlocked.has(params.data.id)) openGuess(params.data.id);
+        else { const n = params.data._raw; if (n) speakText(n.name); }
+      }
+    });
+
+    myChart.off('dblclick');
+    myChart.on('dblclick', params => {
+      if (params.dataType === 'node' && unlocked.has(params.data.id)) {
+        const nid = params.data.id;
+        if (focusMode && focusNodeId === nid) exitFocus();
+        else applyFocus(nid);
+      }
+    });
+
+    myChart.off('contextmenu');
+    myChart.on('contextmenu', params => {
+      params.event.event.preventDefault();
+      if (params.dataType === 'node' && unlocked.has(params.data.id)) openDetail(params.data._raw);
+    });
+  }
+
+  function applyFocus(nid) {
+    focusMode = true; focusNodeId = nid;
+    const related = new Set([nid]);
+    (parentMap[nid] || []).forEach(p => related.add(p));
+    (childrenMap[nid] || []).forEach(c => related.add(c));
+    const opt = myChart.getOption();
+    opt.series[0].data.forEach(item => {
+      if (related.has(item.id)) { item.itemStyle.opacity = 1; item.itemStyle.shadowBlur = item.id === nid ? 35 : 15; }
+      else { item.itemStyle.opacity = 0.08; item.itemStyle.shadowBlur = 0; }
+    });
+    if (opt.series[0].links) opt.series[0].links.forEach(l => {
+      l.lineStyle.opacity = (related.has(l.source) && related.has(l.target)) ? 0.9 : 0.04;
+    });
+    myChart.setOption(opt);
+    setTimeout(() => {
+      const d = myChart.getOption().series[0].data.find(x => x.id === nid);
+      if (d && d.x != null && d.y != null) myChart.dispatchAction({ type: 'graphRoam', dx: myChart.getWidth() / 2 - d.x, dy: myChart.getHeight() / 2 - d.y });
+    }, 200); // 缩短至200ms
+  }
+
+  function exitFocus() { focusMode = false; focusNodeId = null; myChart.setOption(buildOption(), true); }
+
+  function zoomIn() { if (myChart) myChart.dispatchAction({ type: 'zoom', zoom: 1.2 }); }
+  function zoomOut() { if (myChart) myChart.dispatchAction({ type: 'zoom', zoom: 0.8 }); }
+  function resetView() { if (myChart) { exitFocus(); myChart.dispatchAction({ type: 'restore' }); } }
+  document.getElementById('globalViewBtn').addEventListener('click', () => { exitFocus(); resetView(); });
+
+  // 主题
+  let isLight = loadStore('theme', true);
+  function applyTheme() {
+    const r = document.documentElement.style;
+    if (isLight) {
+      r.setProperty('--bg', '#fef9f0'); r.setProperty('--surface', '#fffaf0'); r.setProperty('--card', '#ffffff');
+      r.setProperty('--gold', '#f5a623'); r.setProperty('--primary', '#4a90e2'); r.setProperty('--text', '#332a1f');
+      r.setProperty('--muted', '#8a7a6a'); r.setProperty('--border', 'rgba(74,144,226,0.15)');
+    } else {
+      r.setProperty('--bg', '#1a1a2e'); r.setProperty('--surface', '#16213e'); r.setProperty('--card', '#1e1e36');
+      r.setProperty('--gold', '#e2b04a'); r.setProperty('--primary', '#e2b04a'); r.setProperty('--text', '#e0d5c1');
+      r.setProperty('--muted', '#7a8a9a'); r.setProperty('--border', 'rgba(226,176,74,0.2)');
+    }
+    document.getElementById('theme-btn').innerText = isLight ? '☀️' : '🌙';
+  }
+  function toggleTheme() { isLight = !isLight; saveStore('theme', isLight); applyTheme(); initChart(); }
+
+  function searchJump() {
+    const q = document.getElementById('search-input').value.trim();
+    if (!q) return;
+    let found = rawNodes.find(n => n.name === q || n.id === q);
+    if (!found) { alert('未找到字：' + q); return; }
+    if (!unlocked.has(found.id)) { unlocked.add(found.id); saveStore('unlocked', [...unlocked]); updateProgress(); checkBadges(); }
+    optionCache = null;
+    myChart.setOption(buildOption(), true);
+    setTimeout(() => applyFocus(found.id), 200);
+    document.getElementById('search-input').value = '';
+  }
+
+  // 猜字
+  function openGuess(nodeId) {
+    currentGuessTarget = nodeId; currentHintIndex = 0;
+    const n = nodeMap[nodeId]; if (!n) return;
+    document.getElementById('guess-question').innerText = '？';
+    document.getElementById('guess-question').classList.remove('solved');
+    document.getElementById('guess-hint').innerText = n.hints ? n.hints.split('|')[0] : '猜猜这个字是什么？';
+    document.getElementById('guess-input').value = '';
+    document.getElementById('guess-feedback').innerText = '';
+    document.getElementById('guess-feedback').className = '';
+    document.getElementById('guess-overlay').classList.add('show');
+    setTimeout(() => document.getElementById('guess-input').focus(), 200);
+  }
+
+  function closeGuess() {
+    currentGuessTarget = null;
+    document.getElementById('guess-overlay').classList.remove('show');
+    useFixedPositions = false; // 安全重置
+  }
+
+  document.getElementById('guess-close').addEventListener('click', closeGuess);
+  document.getElementById('guess-overlay').addEventListener('click', e => { if (e.target === document.getElementById('guess-overlay')) closeGuess(); });
+  document.getElementById('guess-more').addEventListener('click', () => {
+    if (!currentGuessTarget) return;
+    const n = nodeMap[currentGuessTarget]; if (!n || !n.hints) return;
+    const arr = n.hints.split('|');
+    currentHintIndex = Math.min(currentHintIndex + 1, arr.length - 1);
+    document.getElementById('guess-hint').innerText = arr[currentHintIndex];
+  });
+
+  // ★ 优化4：重写答对流程（核心修改）
+  document.getElementById('guess-submit').addEventListener('click', () => {
+    if (!currentGuessTarget) return;
+    const n = nodeMap[currentGuessTarget];
+    const ans = document.getElementById('guess-input').value.trim();
+    if (!ans) return;
+
+    if (ans === n.name) {
+      try { sfxCorrect(); } catch (e) {}
+      document.getElementById('guess-feedback').innerText = '✓ 答对了！';
+      document.getElementById('guess-feedback').className = 'right';
+      document.getElementById('guess-question').innerText = n.name;
+      document.getElementById('guess-question').classList.add('solved');
+
+      const unlockedNodeId = currentGuessTarget;
+      unlocked.add(unlockedNodeId);
+      saveStore('unlocked', [...unlocked]);
+      updateProgress();
+      checkBadges();
+      onDailyComplete();
+
+      const rect = document.getElementById('guess-question').getBoundingClientRect();
+      celebrateAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      speakText('答对了！' + n.name);
+
+      // ★ 步骤1：先捕获当前所有节点的位置
+      captureNodePositions();
+      optionCache = null;
+      // ★ 步骤2：静默刷新图谱，已有节点位置固定，只有新节点生长
+      myChart.setOption(buildOption(), true);
+
+      // ★ 步骤3：等待新节点轻微稳定后，关闭弹窗并聚焦
+      setTimeout(() => {
+        closeGuess();
+        applyFocus(unlockedNodeId);
+        // 额外高亮一下新节点，更加醒目
+        myChart.dispatchAction({
+          type: 'highlight',
+          seriesIndex: 0,
+          dataIndex: myChart.getOption().series[0].data.findIndex(d => d.id === unlockedNodeId)
+        });
+        setTimeout(() => myChart.dispatchAction({ type: 'downplay', seriesIndex: 0 }), 1500);
+        useFixedPositions = false; // 恢复正常拖拽
+      }, 300);
+    } else {
+      try { sfxWrong(); } catch (e) {}
+      document.getElementById('guess-feedback').innerText = '再试试！';
+      document.getElementById('guess-feedback').className = 'wrong';
+      const input = document.getElementById('guess-input');
+      input.classList.add('shake');
+      setTimeout(() => input.classList.remove('shake'), 300);
+    }
+  });
+
+  document.getElementById('guess-input').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('guess-submit').click(); });
+
+  // 详情
+  let exploreChar = '', detailCharData = null;
+  function openDetail(n) {
+    detailCharData = n; exploreChar = n.name;
+    document.getElementById('detail-char').innerText = n.name;
+    document.getElementById('detail-pinyin').innerText = n.nameTrad && n.nameTrad !== n.name ? '繁体：' + n.nameTrad : '';
+    document.getElementById('detail-oracle').innerText = n.oracle || '';
+    document.getElementById('detail-origin').innerText = n.origin || '';
+    const img = document.getElementById('detail-oracle-img');
+    img.src = 'https://glyphwiki.org/glyph/' + encodeURIComponent(n.name) + '.svg';
+    img.style.display = 'block'; img.onerror = () => img.style.display = 'none';
+    const wd = document.getElementById('detail-words'); wd.innerHTML = '';
+    if (n.groupWords) n.groupWords.split('|').forEach(w => { const t = document.createElement('span'); t.className = 'detail-tag'; t.innerText = w; wd.appendChild(t); });
+    document.getElementById('detail-idioms').innerText = n.idioms ? n.idioms.replace(/::/g, '：').replace(/\|/g, '\n') : '';
+    document.getElementById('detail-riddles').innerText = n.riddles ? n.riddles.replace(/::/g, '：').replace(/\|/g, '\n') : '';
+    const syn = []; if (n.synonyms) syn.push('同义：' + n.synonyms); if (n.antonyms) syn.push('反义：' + n.antonyms);
+    document.getElementById('detail-synant').innerText = syn.join(' | ');
+    document.getElementById('detail-overlay').classList.add('show');
+    speakText(n.name);
+  }
+  function exploreSearch(type) { if (exploreChar) window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(exploreChar + ' ' + type)); }
+  document.getElementById('detail-close').addEventListener('click', () => document.getElementById('detail-overlay').classList.remove('show'));
+  document.getElementById('detail-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+
+  // 徽章
+  const badgeDefs = [
+    { id:'first', icon:'🌱', name:'初识一字', desc:'猜出第一个字', check:()=>unlocked.size>=2 },
+    { id:'five', icon:'⭐', name:'小有成就', desc:'猜出5个字', check:()=>unlocked.size>=6 },
+    { id:'ten', icon:'🌟', name:'渐入佳境', desc:'猜出10个字', check:()=>unlocked.size>=11 },
+    { id:'twenty', icon:'💫', name:'博学多才', desc:'猜出20个字', check:()=>unlocked.size>=21 },
+    { id:'thirty', icon:'🔥', name:'汉字达人', desc:'猜出30个字', check:()=>unlocked.size>=31 },
+    { id:'fifty', icon:'👑', name:'汉字大师', desc:'猜出50个字', check:()=>unlocked.size>=51 },
+    { id:'all', icon:'🏆', name:'汉字猎人', desc:'猜出全部'+totalChars+'个字', check:()=>unlocked.size>=totalChars },
+    { id:'number', icon:'🔢', name:'数字大师', desc:'完整数字序列', check:()=>['二','三','四','五','六','七','八','九','十','百','千','万','亿','兆'].every(c=>unlocked.has(c)) },
+    { id:'sky', icon:'☁️', name:'仰望星空', desc:'"天"字族', check:()=>['天','日','月','星','气','云'].every(c=>unlocked.has(c)) },
+    { id:'tree', icon:'🌳', name:'枝繁叶茂', desc:'"木"字族', check:()=>['木','本','末','林','森','果','采','集','休'].every(c=>unlocked.has(c)) },
+    { id:'water', icon:'💧', name:'上善若水', desc:'"水"字族', check:()=>['水','冰','江','河','海','雨','雪','川','州'].every(c=>unlocked.has(c)) },
+    { id:'people', icon:'🧑‍🤝‍🧑', name:'仁者爱人', desc:'"人"字族', check:()=>['人','大','太','夫','立','从','众','仁','休','仙'].every(c=>unlocked.has(c)) },
+  ];
+  let earnedBadges = loadStore('badges', []);
+  function checkBadges() {
+    let newBadge = null;
+    badgeDefs.forEach(b => { if (!earnedBadges.includes(b.id) && b.check()) { earnedBadges.push(b.id); newBadge = b; } });
+    saveStore('badges', earnedBadges);
+    if (newBadge) showBadgeToast(newBadge);
+    updateBadgeDot();
+  }
+  function showBadgeToast(badge) {
+    try { sfxBadge(); } catch (e) {}
+    const toast = document.getElementById('badge-toast');
+    toast.querySelector('.toast-text').innerHTML = '<b>' + badge.name + '</b><br/>' + badge.desc;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+  function updateBadgeDot() {
+    const dot = document.getElementById('badge-new-dot');
+    const unviewed = loadStore('badges_viewed', []);
+    dot.classList.toggle('hidden', !earnedBadges.some(b => !unviewed.includes(b)));
+  }
+  updateBadgeDot();
+  function openBadges() {
+    saveStore('badges_viewed', [...earnedBadges]); updateBadgeDot();
+    const grid = document.getElementById('badge-grid'); grid.innerHTML = '';
+    badgeDefs.forEach(b => {
+      const earned = earnedBadges.includes(b.id);
+      const d = document.createElement('div'); d.className = 'badge-item ' + (earned ? 'earned' : 'locked');
+      d.innerHTML = '<div class="badge-icon">' + (earned ? b.icon : '🔒') + '</div><div class="badge-name">' + b.name + '</div><div class="badge-desc">' + b.desc + '</div>';
+      grid.appendChild(d);
+    });
+    document.getElementById('badge-overlay').classList.add('show');
+  }
+  document.getElementById('badge-close').addEventListener('click', () => document.getElementById('badge-overlay').classList.remove('show'));
+  document.getElementById('badge-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+
+  // 每日挑战
+  const todayStr = new Date().toISOString().slice(0,10);
+  let dailyData = loadStore('daily', { date:'', words:[], completed:[] });
+  function generateDaily() {
+    if (dailyData.date === todayStr && dailyData.words.length > 0) return;
+    const pool = rawNodes.filter(n => n.id !== '一' && !unlocked.has(n.id));
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    dailyData = { date: todayStr, words: pool.slice(0,3).map(n => n.id), completed: [] };
+    saveStore('daily', dailyData);
+  }
+  function openDaily() {
+    generateDaily();
+    const list = document.getElementById('daily-list'); list.innerHTML = '';
+    dailyData.words.forEach(wid => {
+      const n = nodeMap[wid]; if (!n) return;
+      const done = dailyData.completed.includes(wid) || unlocked.has(wid);
+      if (done && !dailyData.completed.includes(wid)) { dailyData.completed.push(wid); saveStore('daily', dailyData); }
+      const row = document.createElement('div'); row.className = 'daily-row ' + (done ? 'completed' : '');
+      row.innerHTML = '<div class="daily-char">' + (done ? n.name : '?') + '</div><div class="daily-hint">' + (n.hints ? n.hints.split('|')[0] : '') + '</div><div class="daily-status ' + (done ? 'done' : 'pending') + '">' + (done ? '✓ 已完成' : '待挑战') + '</div>';
+      list.appendChild(row);
+    });
+    document.getElementById('daily-stars').innerText = '⭐ 累计星星：' + loadStore('stars', 0) + ' 颗';
+    document.getElementById('daily-overlay').classList.add('show');
+  }
+  document.getElementById('daily-close').addEventListener('click', () => document.getElementById('daily-overlay').classList.remove('show'));
+  document.getElementById('daily-overlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+  function onDailyComplete() {
+    if (dailyData.date !== todayStr) return;
+    if (dailyData.words.length > 0 && dailyData.words.every(w => unlocked.has(w) || dailyData.completed.includes(w))) {
+      let stars = loadStore('stars', 0); stars++; saveStore('stars', stars);
+    }
+  }
+
+  // 键盘事件
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (currentGuessTarget) closeGuess();
+      else if (focusMode) exitFocus();
+      document.querySelectorAll('.overlay.show').forEach(o => o.classList.remove('show'));
+    }
+  });
+
+  // 响应式
+  let resizeTimer;
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => myChart && myChart.resize(), 200); });
+
+  // 启动
+  applyTheme();
+  initChart();
+  setTimeout(() => { const h = document.getElementById('hint-text'); if (h) h.style.opacity = '0'; }, 12000);
+
+  window.addEventListener('beforeunload', () => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (myChart) { myChart.dispose(); myChart = null; }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,2034 @@
+// ==================== 节点数据 ====================
+const ALL_NODES = [
+  // ── 数字序列 ──
+  { id:"一",name:"一",nameTrad:"一",pinyin:"yi",category:"root",oracle:"一条横线，古人用算筹计数",origin:"最小的数字，也是万物的开始",hints:"一条横线像一根树枝|也像远处的地平线|还像一个人张开双臂|最小的数字",groupWords:"一个|一片|一直|唯一|万一",idioms:"一马当先::形容领先|独一无二::形容非常稀少",riddles:"一视同仁::拆字法",synonyms:"首",antonyms:"" },
+  { id:"二",name:"二",nameTrad:"二",pinyin:"er",category:"normal",oracle:"两根算筹并列",origin:"数字2",hints:"一根树枝旁边又放了一根|两个一靠在一起|比一多一个|两笔写成的字",groupWords:"二人|二手|二月|独一无二",idioms:"三心二意::形容不专心",riddles:"二人同心::二个人在一起心连心",synonyms:"两",antonyms:"" },
+  { id:"三",name:"三",nameTrad:"三",pinyin:"san",category:"normal",oracle:"三根算筹并列",origin:"数字3",hints:"一根又一根一共三根树枝|比二多一个|三笔写成的字",groupWords:"三个|三天|三只|再三",idioms:"三人成虎::三个人都说有老虎假的也像真的",riddles:"",synonyms:"",antonyms:"" },
+  { id:"四",name:"四",nameTrad:"四",pinyin:"si",category:"normal",oracle:"四四方方像一个框",origin:"数字4",hints:"一个四四方方的框|比三多一个",groupWords:"四个|四季|四方|四周",idioms:"四平八稳::形容非常稳当|四面八方::各个方向",riddles:"",synonyms:"",antonyms:"" },
+  { id:"五",name:"五",nameTrad:"五",pinyin:"wu",category:"normal",oracle:"五根算筹交错",origin:"数字5，五行",hints:"金木水火__|五个|__颜六色",groupWords:"五个|五行|五天|五光十色",idioms:"五光十色::形容色彩繁多|五湖四海::全国各地",riddles:"",synonyms:"",antonyms:"" },
+  { id:"六",name:"六",nameTrad:"六",pinyin:"liu",category:"normal",oracle:"像一个房子的侧面",origin:"数字6",hints:"像一个房子|比五多一个|__六大顺",groupWords:"六个|六月|六神无主",idioms:"六六大顺::形容一切顺利|六神无主::形容惊慌失措",riddles:"",synonyms:"",antonyms:"" },
+  { id:"七",name:"七",nameTrad:"七",pinyin:"qi",category:"normal",oracle:"一横加一竖弯",origin:"数字7",hints:"一横加一个弯|比六多一个|__上八下",groupWords:"七个|七月|七上八下",idioms:"七上八下::形容心里不安|七嘴八舌::形容人多嘴杂",riddles:"",synonyms:"",antonyms:"" },
+  { id:"八",name:"八",nameTrad:"八",pinyin:"ba",category:"normal",oracle:"两个人背对背",origin:"数字8",hints:"两个人背对背|分开的意思|__面威风",groupWords:"八个|八月|八面|八方",idioms:"八面玲珑::形容为人圆滑|四面八方::各个方向",riddles:"",synonyms:"",antonyms:"" },
+  { id:"九",name:"九",nameTrad:"九",pinyin:"jiu",category:"normal",oracle:"一只手肘弯曲的样子",origin:"数字9",hints:"弯曲的样子|最大的个位数|__牛一毛",groupWords:"九个|九月|九天|九牛一毛",idioms:"九牛一毛::形容极其微小|九死一生::形容极其危险",riddles:"",synonyms:"",antonyms:"" },
+  { id:"十",name:"十",nameTrad:"十",pinyin:"shi",category:"normal",oracle:"一根绳子打一个结",origin:"数字10，圆满",hints:"一根绳子打一个结|十个一|__全十美",groupWords:"十个|十月|十分|十足",idioms:"十全十美::形容完美|十万火急::形容非常紧急",riddles:"",synonyms:"",antonyms:"" },
+  { id:"百",name:"百",nameTrad:"百",pinyin:"bai",category:"normal",oracle:"一白，十十为百",origin:"数字100",hints:"十个十|一百|__分百",groupWords:"一百|百万|百姓|百分比",idioms:"百发百中::形容非常准确|千方百计::想尽各种办法",riddles:"",synonyms:"",antonyms:"" },
+  { id:"千",name:"千",nameTrad:"千",pinyin:"qian",category:"normal",oracle:"人加一横表示很多",origin:"数字1000",hints:"十个百|很多很多|__万",groupWords:"一千|千万|千里|秋千",idioms:"千山万水::形容路途遥远|千军万马::形容人马众多",riddles:"",synonyms:"",antonyms:"" },
+  { id:"万",name:"万",nameTrad:"萬",pinyin:"wan",category:"normal",oracle:"像蝎子形后假借为数字",origin:"数字10000",hints:"十个千|最大的常用数字单位|__一",groupWords:"一万|千万|万事|万一",idioms:"万事如意::一切都符合心意",riddles:"",synonyms:"",antonyms:"" },
+  { id:"亿",name:"亿",nameTrad:"億",pinyin:"yi",category:"normal",oracle:"人加意省表示心意极多",origin:"数字1亿",hints:"一万个万|非常大|__万",groupWords:"一亿|亿万|亿兆",idioms:"亿万斯年::形容时间极长",riddles:"",synonyms:"",antonyms:"" },
+  { id:"兆",name:"兆",nameTrad:"兆",pinyin:"zhao",category:"normal",oracle:"龟甲烧裂的纹路",origin:"数字1兆",hints:"龟甲上的裂纹|亿的万倍|预__",groupWords:"兆头|预兆|吉兆|亿兆",idioms:"瑞雪兆丰年::好雪预示着丰收",riddles:"",synonyms:"",antonyms:"" },
+
+  // ── 天地自然 ──
+  { id:"天",name:"天",nameTrad:"天",pinyin:"tian",category:"normal",oracle:"一个正面站立的人头特别大",origin:"人头顶上的广阔空间",hints:"人头顶上那个很大很大的地方|画一个大人头顶上加一横|日月星辰住的地方|__空、蓝__",groupWords:"天空|每天|春天|秋天|天真",idioms:"天马行空::形容想象力丰富|冰天雪地::形容极其寒冷",riddles:"二人力大顶破天::二+人+力组合",synonyms:"空",antonyms:"地" },
+  { id:"地",name:"地",nameTrad:"地",pinyin:"di",category:"normal",oracle:"土和也组成表示大地",origin:"大地与天相对",hints:"脚下踩的就是__|天的另一半|和天相对|大__",groupWords:"大地|地方|地上|天地|地点",idioms:"地久天长::形容时间长久|脚踏实地::形容做事踏实",riddles:"土也是地::会意法",synonyms:"土",antonyms:"天" },
+  { id:"日",name:"日",nameTrad:"日",pinyin:"ri",category:"normal",oracle:"一个圆形中间一点",origin:"太阳",hints:"天上面最亮的那个|白天出来晚上回去|圆圆的红红的|__出",groupWords:"日出|日光|日记|日期|生日",idioms:"日积月累::形容长时间积累|风和日丽::形容天气好",riddles:"画一个圆中间一点::象形法",synonyms:"阳",antonyms:"夜" },
+  { id:"月",name:"月",nameTrad:"月",pinyin:"yue",category:"normal",oracle:"一弯新月形状",origin:"月亮",hints:"天上面弯弯的那个|太阳睡了它出来|有时圆有时弯|__亮",groupWords:"月亮|月光|月球|每月|年月",idioms:"花好月圆::形容美好",riddles:"有时像镰刀有时像圆盘::象形法",synonyms:"",antonyms:"" },
+  { id:"星",name:"星",nameTrad:"星",pinyin:"xing",category:"normal",oracle:"日加生天上的亮点",origin:"星星",hints:"天上很多小亮点|晚上才看得到|__星|金__",groupWords:"星星|星光|明星|星空|火星",idioms:"星罗棋布::形容分布很广",riddles:"日字头加生::形声",synonyms:"辰",antonyms:"" },
+  { id:"明",name:"明",nameTrad:"明",pinyin:"ming",category:"normal",oracle:"日加月日月在一起",origin:"光明，明亮",hints:"太阳和月亮在一起|亮亮的|光__|__天",groupWords:"明天|明日|明亮|光明|明白",idioms:"明察秋毫::形容眼光敏锐",riddles:"日月组合::会意",synonyms:"亮",antonyms:"暗" },
+  { id:"旦",name:"旦",nameTrad:"旦",pinyin:"dan",category:"normal",oracle:"日下面一横太阳从地平线升起",origin:"天亮，早晨",hints:"太阳从地平线升起|天刚亮的时候|元__|一__",groupWords:"元旦|一旦|旦夕|花旦|武旦",idioms:"通宵达旦::形容一整夜到天亮",riddles:"日加一横::指事法",synonyms:"晨",antonyms:"夕" },
+  { id:"早",name:"早",nameTrad:"早",pinyin:"zao",category:"normal",oracle:"日加十太阳照到草上",origin:"早晨",hints:"太阳照到草上了|天亮了不久|__上|__晨",groupWords:"早上|早晨|早操|早点|清早",idioms:"早出晚归::形容辛苦劳作",riddles:"日字头加十::会意",synonyms:"晨",antonyms:"晚" },
+  { id:"气",name:"气",nameTrad:"氣",pinyin:"qi",category:"normal",oracle:"三横加撇捺像气流",origin:"空气，气体",hints:"天上飘着的看不见的|呼吸的东__|空__|天__",groupWords:"空气|天气|气球|生气|力气",idioms:"气吞山河::形容气势宏大",riddles:"象形",synonyms:"",antonyms:"" },
+  { id:"云",name:"云",nameTrad:"雲",pinyin:"yun",category:"normal",oracle:"二加厶气聚在一起",origin:"云彩，云朵",hints:"气聚在一起飘在天上|白白的像棉花|白__|__彩",groupWords:"白云|乌云|云朵|云南|风云",idioms:"风起云涌::形容事物迅速发展",riddles:"气的上面加一横::象形",synonyms:"",antonyms:"" },
+  { id:"风",name:"风",nameTrad:"風",pinyin:"feng",category:"normal",oracle:"风字框加乂空气流动",origin:"风",hints:"空气在流动|吹在脸上凉凉的|春__|大__",groupWords:"大风|春风|风车|风向|风沙",idioms:"风和日丽::形容天气好|一帆风顺::形容非常顺利",riddles:"风字框::象形",synonyms:"",antonyms:"" },
+  { id:"雷",name:"雷",nameTrad:"雷",pinyin:"lei",category:"normal",oracle:"雨+田，下雨时打雷",origin:"打雷，雷电",hints:"下雨时轰隆隆的|打__|__电|春__",groupWords:"打雷|雷声|雷电|春雷|雷雨",idioms:"雷厉风行::行动迅速|如雷贯耳::名声极大",riddles:"雨加田::会意",synonyms:"",antonyms:"" },
+  { id:"电",name:"电",nameTrad:"電",pinyin:"dian",category:"normal",oracle:"申（闪电）+乚，闪电",origin:"闪电，电力",hints:"打雷时看到的亮光|闪__|__灯|充__",groupWords:"闪电|电灯|电话|电力|充电",idioms:"风驰电掣::速度极快|雷电交加::雷声和闪电同时",riddles:"申加乚::象形",synonyms:"",antonyms:"" },
+
+  // ── 人及衍生 ──
+  { id:"人",name:"人",nameTrad:"人",pinyin:"ren",category:"normal",oracle:"一个侧身站立弯腰的人形",origin:"人类",hints:"两条腿走路的动物|你也是我也是|一个站立的身影|大__",groupWords:"人们|大人|好人|人才|人生",idioms:"人山人海::形容人非常多|人才济济::形容有才能的人很多",riddles:"独木难支::一个木字撑不住去掉木是人",synonyms:"",antonyms:"" },
+  { id:"大",name:"大",nameTrad:"大",pinyin:"da",category:"normal",oracle:"一个正面站立双臂伸展的人形",origin:"与'小'相对",hints:"一个人张开双臂显得很__|比人多了一横|和小相反|__象",groupWords:"大人|大家|大门|大小|大象",idioms:"大公无私::形容公正不偏私|大材小用::形容浪费人才",riddles:"一人::一个人就是大",synonyms:"巨",antonyms:"小" },
+  { id:"太",name:"太",nameTrad:"太",pinyin:"tai",category:"normal",oracle:"大下面加一个点指事",origin:"太过，非常",hints:"比大还多一个点|非常非常|__好了|__阳",groupWords:"太阳|太太|太多|太好了",idioms:"太平盛世::形容社会安定",riddles:"大加一点::指事法",synonyms:"很",antonyms:"" },
+  { id:"夫",name:"夫",nameTrad:"夫",pinyin:"fu",category:"normal",oracle:"大上面加一横，成年男子头上的簪子",origin:"成年男子",hints:"大人头上插的簪子|结了婚的男子|丈__|__妻",groupWords:"丈夫|夫人|大夫|夫妻|农夫",idioms:"夫唱妇随::形容夫妻和睦",riddles:"大上加一横::指事法",synonyms:"男",antonyms:"妇" },
+  { id:"立",name:"立",nameTrad:"立",pinyin:"li",category:"normal",oracle:"一个人站在地面上",origin:"站立",hints:"一个人站在大地上|站着的姿势|坐的反面|__正",groupWords:"立正|立刻|立方|站立|起立",idioms:"顶天立地::形容气势豪迈|坐立不安::形容心里有事坐不住",riddles:"一个人站得直直的::象形法",synonyms:"站",antonyms:"坐" },
+  { id:"从",name:"从",nameTrad:"從",pinyin:"cong",category:"normal",oracle:"两个人一前一后",origin:"跟随，跟从",hints:"两个人在一起|一个人跟着另一个人|跟__|__来",groupWords:"跟从|从来|从前|自从|从今",idioms:"言听计从::形容完全听从",riddles:"两个人一前一后::会意",synonyms:"跟",antonyms:"主" },
+  { id:"众",name:"众",nameTrad:"眾",pinyin:"zhong",category:"normal",oracle:"三个人叠在一起",origin:"众人，很多人",hints:"比从还多一个人|很多很多人|大__|群__",groupWords:"众人|大众|群众|众多|观众",idioms:"众志成城::大家一条心力量大",riddles:"三个人叠在一起::会意",synonyms:"多",antonyms:"寡" },
+  { id:"仁",name:"仁",nameTrad:"仁",pinyin:"ren",category:"normal",oracle:"人加二表示两个人之间的关系",origin:"仁爱，爱人",hints:"两个人之间的感情|爱别人|__爱|__义",groupWords:"仁爱|仁慈|仁义|仁心",idioms:"一视同仁::用同样的态度对待大家",riddles:"人字旁加二::会意",synonyms:"爱",antonyms:"" },
+  { id:"仙",name:"仙",nameTrad:"仙",pinyin:"xian",category:"normal",oracle:"人加山人在山边",origin:"神仙，仙人",hints:"一个人住在山里|不会老的|神__|__女",groupWords:"神仙|仙女|仙人|仙境|修仙",idioms:"仙风道骨::形容气质超凡脱俗",riddles:"人字旁加山::会意",synonyms:"神",antonyms:"" },
+  { id:"男",name:"男",nameTrad:"男",pinyin:"nan",category:"normal",oracle:"田+力，在田里出力的人",origin:"男子，男人",hints:"在田里干活出力的人|和女相对|__生|__人",groupWords:"男人|男生|男子|男性|男孩",idioms:"男耕女织::男女分工合作",riddles:"田里出力的人::会意",synonyms:"",antonyms:"女" },
+  { id:"女",name:"女",nameTrad:"女",pinyin:"nv",category:"normal",oracle:"一个跪坐的女子形象",origin:"女子，女人",hints:"和男相对|温柔的人|__生|妇__",groupWords:"女人|女生|女子|女性|女儿",idioms:"郎才女貌::男女般配",riddles:"一个跪坐的人形::象形",synonyms:"",antonyms:"男" },
+  { id:"子",name:"子",nameTrad:"子",pinyin:"zi",category:"normal",oracle:"一个大头婴儿张开双臂",origin:"婴儿，孩子",hints:"小宝宝|爸爸妈妈的__|孩__|儿__",groupWords:"孩子|子女|儿子|子孙|种子",idioms:"望子成龙::希望孩子成才",riddles:"大头婴儿::象形",synonyms:"儿",antonyms:"" },
+  { id:"儿",name:"儿",nameTrad:"兒",pinyin:"er",category:"normal",oracle:"一个大头婴儿（与子相似）",origin:"儿童，孩子",hints:"小朋友|比子还小一点|__童|女__",groupWords:"儿童|儿子|女儿|婴儿|孩儿",idioms:"妻儿老小::指全家老小",riddles:"简化的大头婴儿::象形",synonyms:"童",antonyms:"" },
+  { id:"好",name:"好",nameTrad:"好",pinyin:"hao",category:"normal",oracle:"女子抱着孩子，美好的样子",origin:"美好，善良",hints:"妈妈抱着宝宝|很美很善良|美__|__人",groupWords:"美好|好人|好友|好处|好像",idioms:"花好月圆::形容美好|好事多磨::好事往往要经历波折",riddles:"女子抱着孩子::会意",synonyms:"优",antonyms:"坏" },
+
+  // ── 土石山田 ──
+  { id:"土",name:"土",nameTrad:"土",pinyin:"tu",category:"normal",oracle:"地面上的一堆土",origin:"泥土、大地",hints:"地平线上堆起来的就是__|种花种草用的|泥__|__地",groupWords:"土地|泥土|土壤|土豆|水土",idioms:"土生土长::形容在本地生长|挥金如土::形容花钱如流水",riddles:"两横一竖像个十::象形法",synonyms:"地",antonyms:"" },
+  { id:"山",name:"山",nameTrad:"山",pinyin:"shan",category:"normal",oracle:"三座山峰的形状",origin:"山峰",hints:"土堆高了就是__|石头和树很多的地方|比地面高出很多|高__",groupWords:"大山|山水|山峰|山河|山林",idioms:"山清水秀::形容风景美|开门见山::形容说话直接",riddles:"三座山峰叠在一起::象形法",synonyms:"峰",antonyms:"" },
+  { id:"石",name:"石",nameTrad:"石",pinyin:"shi",category:"normal",oracle:"山崖下的一块石头",origin:"石头，岩石",hints:"山上掉下来的，很硬|可以用来盖房子|__头|宝__",groupWords:"石头|岩石|宝石|石板|石油",idioms:"石破天惊::形容事物令人震惊|水落石出::真相大白",riddles:"山下面一块硬东西::会意",synonyms:"岩",antonyms:"" },
+  { id:"田",name:"田",nameTrad:"田",pinyin:"tian",category:"normal",oracle:"一块方方正正的田地",origin:"田地，农田",hints:"农民伯伯种地的地方|方方正正的|农__|__野",groupWords:"田地|农田|水田|田野|田园",idioms:"沧海桑田::形容世事变化巨大",riddles:"四四方方一块地::象形",synonyms:"地",antonyms:"" },
+  { id:"力",name:"力",nameTrad:"力",pinyin:"li",category:"normal",oracle:"一个手臂鼓起肌肉的样子",origin:"力量，力气",hints:"身体里的劲儿|能搬重东西|__气|大__",groupWords:"力气|力量|大力|能力|努力",idioms:"力大无穷::力气非常大|自力更生::依靠自己力量",riddles:"手臂鼓起肌肉::象形",synonyms:"劲",antonyms:"" },
+
+  // ── 木及衍生 ──
+  { id:"木",name:"木",nameTrad:"木",pinyin:"mu",category:"normal",oracle:"一棵树的样子有根有枝有冠",origin:"树木",hints:"一横是大地上面长出一棵小苗|有叶子有枝干|森林里最多的就是__|树__",groupWords:"树木|木头|木马|木板|木工",idioms:"木已成舟::形容事情已经定型|入木三分::形容描写深刻",riddles:"十字对十字日头对月亮::拆字法",synonyms:"树",antonyms:"" },
+  { id:"本",name:"本",nameTrad:"本",pinyin:"ben",category:"normal",oracle:"木下面加一横指事",origin:"树根，根本",hints:"一棵树的根|事情最重要的部分|原来的|__来",groupWords:"本来|本子|书本|本分|根本",idioms:"本末倒置::形容把轻重搞反了",riddles:"木字下面加一横::指事法",synonyms:"根",antonyms:"末" },
+  { id:"末",name:"末",nameTrad:"末",pinyin:"mo",category:"normal",oracle:"木上面加一横指事",origin:"树梢，末梢",hints:"一棵树最上面的尖尖|和本相反|尾__|__尾",groupWords:"末尾|末了|末日|周末|年末",idioms:"穷途末路::形容走投无路",riddles:"木字上面加一横::指事法",synonyms:"梢",antonyms:"本" },
+  { id:"休",name:"休",nameTrad:"休",pinyin:"xiu",category:"normal",oracle:"人靠在木旁边",origin:"休息",hints:"一个人走累了靠在树旁边|停下来不干活|午__|__息",groupWords:"休息|休想|休闲|退休|午休",idioms:"休戚相关::形容关系密切",riddles:"一个人靠着一棵树::会意法",synonyms:"歇",antonyms:"" },
+  { id:"林",name:"林",nameTrad:"林",pinyin:"lin",category:"normal",oracle:"两棵树并排",origin:"树林",hints:"一棵树叫木两棵树叫__|比一棵树多得多|森__|__子",groupWords:"树林|森林|竹林|林地|园林",idioms:"林林总总::形容种类繁多",riddles:"两棵树并排站::会意法",synonyms:"森",antonyms:"" },
+  { id:"森",name:"森",nameTrad:"森",pinyin:"sen",category:"normal",oracle:"三棵树叠在一起",origin:"森林，树木茂密",hints:"比林子还多一棵树|很多很多树在一起|__林|阴__",groupWords:"森林|阴森|森严|森森",idioms:"森罗万象::形容包含万物",riddles:"三棵树在一起::会意法",synonyms:"林",antonyms:"" },
+  { id:"果",name:"果",nameTrad:"果",pinyin:"guo",category:"normal",oracle:"木加田树上结的果实",origin:"果实，果子",hints:"树上结了圆圆的|可以吃的|水__|苹__",groupWords:"水果|苹果|果实|果园|如果",idioms:"瓜熟蒂落::形容时机成熟",riddles:"木上长东西::象形",synonyms:"实",antonyms:"" },
+  { id:"采",name:"采",nameTrad:"采",pinyin:"cai",category:"normal",oracle:"爪加木手在树上摘东西",origin:"采摘，采集",hints:"一只手在树上|摘东西|__花|__果子",groupWords:"采摘|采购|采花|采访|神采",idioms:"神采奕奕::形容精神饱满",riddles:"手在木上::会意",synonyms:"摘",antonyms:"" },
+  { id:"集",name:"集",nameTrad:"集",pinyin:"ji",category:"normal",oracle:"隹加木鸟停在树上",origin:"集合，聚集",hints:"鸟停在树上|很多鸟聚在一起|聚__|__合",groupWords:"集合|集中|集体|召集|赶集",idioms:"集思广益::形容汇集大家的智慧",riddles:"鸟在木上::会意",synonyms:"聚",antonyms:"散" },
+
+  // ── 水火 ──
+  { id:"水",name:"水",nameTrad:"水",pinyin:"shui",category:"normal",oracle:"三道波纹水流的样子",origin:"水，生命之源",hints:"三笔写成的字|生命离不开的|喝__|__流",groupWords:"河水|海水|水果|水花|泪水",idioms:"水落石出::形容真相大白|水滴石穿::形容坚持不懈",riddles:"三道波纹::象形",synonyms:"",antonyms:"" },
+  { id:"冰",name:"冰",nameTrad:"冰",pinyin:"bing",category:"normal",oracle:"两点水水的凝固状态",origin:"冰，水遇冷结成的固体",hints:"水遇冷变成的|冬天河里结的|__棍|__冷",groupWords:"冰雪|冰块|冰凉|冰棍|结冰",idioms:"冰天雪地::形容极其寒冷",riddles:"两点水::象形",synonyms:"冻",antonyms:"火" },
+  { id:"江",name:"江",nameTrad:"江",pinyin:"jiang",category:"normal",oracle:"三点水加工大的水流",origin:"长江，大的河流",hints:"比河更大的水流|长__|__水|__南",groupWords:"长江|江水|江河|江南|江湖",idioms:"江山如画::形容风景美",riddles:"水字旁加工::形声",synonyms:"河",antonyms:"" },
+  { id:"河",name:"河",nameTrad:"河",pinyin:"he",category:"normal",oracle:"三点水加可可以渡过的水流",origin:"黄河，河流",hints:"可以渡过去的水流|黄__|__水|小__",groupWords:"河流|黄河|河水|小河|河谷",idioms:"大好河山::形容国土美丽",riddles:"水字旁加可::形声",synonyms:"江",antonyms:"" },
+  { id:"海",name:"海",nameTrad:"海",pinyin:"hai",category:"normal",oracle:"三点水加每水最多的地方",origin:"海洋，大海",hints:"水最多的地方|比江河大很多很多|大__|__洋",groupWords:"大海|海洋|海水|海边|海浪",idioms:"海阔天空::形容心胸宽广",riddles:"水字旁加每::形声",synonyms:"洋",antonyms:"" },
+  { id:"雨",name:"雨",nameTrad:"雨",pinyin:"yu",category:"normal",oracle:"一横是天下面是雨点",origin:"雨，天上落下的水",hints:"天上掉下来的水|春天经常下|下__|__水",groupWords:"下雨|雨水|雨点|大雨|暴雨",idioms:"风调雨顺::形容天气好适合种地",riddles:"横下面是点::象形",synonyms:"",antonyms:"" },
+  { id:"雪",name:"雪",nameTrad:"雪",pinyin:"xue",category:"normal",oracle:"雨加彐雨遇冷变成",origin:"雪，雨遇冷变成的白色物体",hints:"雨遇到冷变成的|冬天才会下|下__|白__",groupWords:"下雪|雪花|雪人|雪山|雪白",idioms:"雪中送炭::形容在别人困难时帮助",riddles:"雨字头加彐::形声",synonyms:"",antonyms:"" },
+  { id:"川",name:"川",nameTrad:"川",pinyin:"chuan",category:"normal",oracle:"三道水流河流",origin:"河流，平川",hints:"三道水流并排|三竖排在一起|山__|__流",groupWords:"山川|川流|四川|冰川|平川",idioms:"川流不息::形容来来往往不停",riddles:"三竖并列::象形",synonyms:"河",antonyms:"" },
+  { id:"州",name:"州",nameTrad:"州",pinyin:"zhou",category:"normal",oracle:"川中间加一点水中的陆地",origin:"州，水中的陆地",hints:"川中间有个小岛|水中的陆地|九__|杭__",groupWords:"九州|杭州|苏州|广州|自治州",idioms:"九州四海::指整个中国",riddles:"川字加一点::指事法",synonyms:"",antonyms:"" },
+  { id:"火",name:"火",nameTrad:"火",pinyin:"huo",category:"normal",oracle:"一团火焰的形状",origin:"火焰，燃烧",hints:"红红的很烫的|可以做饭取暖|水能灭__|__焰",groupWords:"大火|火焰|火星|火苗|火把",idioms:"火眼金睛::形容眼光锐利|如火如荼::形容气势旺盛",riddles:"一点一横长，一撇到南洋::象形",synonyms:"焰",antonyms:"水" },
+  { id:"炎",name:"炎",nameTrad:"炎",pinyin:"yan",category:"normal",oracle:"两团火焰叠在一起",origin:"炎热，两把火更热",hints:"两把火在一起|非常热|__热|__夏",groupWords:"炎热|炎夏|炎黄|发炎|消炎",idioms:"烈日炎炎::形容夏天阳光强烈",riddles:"两把火::会意",synonyms:"热",antonyms:"凉" },
+  { id:"灾",name:"灾",nameTrad:"災",pinyin:"zai",category:"normal",oracle:"宀（房子）+火，房子着火",origin:"灾难，火灾",hints:"房子着火了|不好的事情发生了|火__|__难",groupWords:"灾难|火灾|水灾|灾区|救灾",idioms:"天灾人祸::自然灾害和人为祸患",riddles:"家里着火了::会意",synonyms:"祸",antonyms:"福" },
+  { id:"灭",name:"灭",nameTrad:"滅",pinyin:"mie",category:"normal",oracle:"一横盖住火，把火扑灭",origin:"熄灭，扑灭",hints:"把火盖住|让火消失|熄__|__火",groupWords:"灭火|消灭|灭亡|毁灭|熄灭",idioms:"自生自灭::自然地发生和消亡",riddles:"一横盖在火上::会意",synonyms:"熄",antonyms:"生" },
+  { id:"灯",name:"灯",nameTrad:"燈",pinyin:"deng",category:"normal",oracle:"火+丁（声旁），照明的器具",origin:"灯，照明的器具",hints:"晚上照亮用的|用电的|开__|__光",groupWords:"电灯|灯光|灯笼|台灯|路灯",idioms:"张灯结彩::形容节日喜庆景象",riddles:"火字旁加丁::形声",synonyms:"烛",antonyms:"" },
+  { id:"光",name:"光",nameTrad:"光",pinyin:"guang",category:"normal",oracle:"人头上顶着火把，发出光亮",origin:"光亮，光芒",hints:"照亮黑暗的东西|太阳发出__|明__|__芒",groupWords:"光明|阳光|灯光|光亮|光荣",idioms:"五光十色::形容色彩繁多|光明正大::形容行为正派",riddles:"人举着火把::会意",synonyms:"亮",antonyms:"暗" },
+
+  // ── 金贝 ──
+  { id:"贝",name:"贝",nameTrad:"貝",pinyin:"bei",category:"normal",oracle:"一个贝壳的形状",origin:"贝壳，古代用作货币",hints:"海里的，有壳|古代人用它当钱|宝__|__壳",groupWords:"贝壳|宝贝|贝类|海贝|川贝",idioms:"齿如齐贝::形容牙齿整齐洁白",riddles:"一个张开壳的样子::象形",synonyms:"",antonyms:"" },
+  { id:"财",name:"财",nameTrad:"財",pinyin:"cai",category:"normal",oracle:"贝+才（声旁），金钱和物资",origin:"财富，财产",hints:"和钱有关|贝是古代的钱|__富|理__",groupWords:"财富|财产|理财|财务|发财",idioms:"生财有道::赚钱有正当途径",riddles:"贝字旁加才::形声",synonyms:"钱",antonyms:"穷" },
+  { id:"金",name:"金",nameTrad:"金",pinyin:"jin",category:"normal",oracle:"金属颗粒在土中的形状",origin:"金属，黄金",hints:"黄黄的，很值钱|一种金属|__子|黄__",groupWords:"黄金|金色|金属|金钱|金牌",idioms:"一字千金::形容文辞精妙|金碧辉煌::形容建筑华丽",riddles:"土里面埋着宝贝::会意",synonyms:"银",antonyms:"" },
+  { id:"银",name:"银",nameTrad:"銀",pinyin:"yin",category:"normal",oracle:"金+艮（声旁），白色的贵金属",origin:"白银，银色的",hints:"白色的贵金属|和金一样值钱|__行|白__",groupWords:"白银|银行|银色|银河|银牌",idioms:"火树银花::形容灯光烟火绚丽",riddles:"金字旁加艮::形声",synonyms:"金",antonyms:"" },
+
+  // ── 口舌言 ──
+  { id:"口",name:"口",nameTrad:"口",pinyin:"kou",category:"normal",oracle:"四四方方像一个张开的嘴",origin:"嘴巴",hints:"四四方方一个框|吃饭说话的洞|张__|__水",groupWords:"口水|口腔|开口|人口|口味",idioms:"口若悬河::形容说话滔滔不绝|异口同声::形容大家说一样的话",riddles:"象形",synonyms:"嘴",antonyms:"" },
+  { id:"舌",name:"舌",nameTrad:"舌",pinyin:"she",category:"normal",oracle:"口里伸出一条舌头",origin:"舌头，味觉器官",hints:"嘴巴里的，尝味道的|说话用的|口__|__头",groupWords:"舌头|口舌|舌尖|舌战|学舌",idioms:"口干舌燥::形容口渴|七嘴八舌::形容人多嘴杂",riddles:"口里伸出一条东西::象形",synonyms:"",antonyms:"" },
+  { id:"言",name:"言",nameTrad:"言",pinyin:"yan",category:"normal",oracle:"口上有一横，表示说话",origin:"言语，说话",hints:"嘴巴说出来的|用来交流的|语__|发__",groupWords:"语言|发言|言论|言语|名言",idioms:"言而有信::说话算话|自言自语::自己对自己说话",riddles:"口上面一横::指事",synonyms:"语",antonyms:"行" },
+  { id:"话",name:"话",nameTrad:"話",pinyin:"hua",category:"normal",oracle:"言+舌，用舌头说的话",origin:"话语，说话",hints:"嘴巴说出来的句子|说__|讲__|__语",groupWords:"说话|话语|电话|话题|笑话",idioms:"话中有话::话里包含别的意思|二话不说::立刻行动",riddles:"言字旁加舌::形声",synonyms:"言",antonyms:"" },
+  { id:"语",name:"语",nameTrad:"語",pinyin:"yu",category:"normal",oracle:"言+吾，言语",origin:"语言，说话",hints:"用嘴巴表达的|言__|汉__|外__",groupWords:"语言|汉语|英语|成语|口语",idioms:"自言自语|千言万语::形容有很多话要说",riddles:"言字旁加吾::形声",synonyms:"言",antonyms:"" },
+  { id:"讲",name:"讲",nameTrad:"講",pinyin:"jiang",category:"normal",oracle:"言+井（声旁），说话",origin:"讲话，讲述",hints:"上课老师做的事|__课|__故事|演__",groupWords:"讲话|讲课|讲解|讲台|演讲",idioms:"讲信修睦::讲究信用睦邻友好",riddles:"言字旁加井::形声",synonyms:"说",antonyms:"" },
+  { id:"读",name:"读",nameTrad:"讀",pinyin:"du",category:"normal",oracle:"言+卖（声旁），念书",origin:"读书，念出来",hints:"看着书念出来|__书|朗__|阅__",groupWords:"读书|朗读|阅读|读者|读报",idioms:"百读不厌::读很多遍也不厌倦",riddles:"言字旁加卖::形声",synonyms:"念",antonyms:"" },
+  { id:"诗",name:"诗",nameTrad:"詩",pinyin:"shi",category:"normal",oracle:"言+寺（声旁），诗歌",origin:"诗歌，诗句",hints:"有韵律的文字|唐__|__句|写__",groupWords:"诗歌|诗句|诗人|唐诗|作诗",idioms:"诗情画意::形容意境优美|出口成诗::形容文思敏捷",riddles:"言字旁加寺::形声",synonyms:"歌",antonyms:"" },
+  { id:"唱",name:"唱",nameTrad:"唱",pinyin:"chang",category:"normal",oracle:"口+昌（声旁），唱歌",origin:"唱歌，咏唱",hints:"用嘴巴发出好听的歌声|__歌|歌__|合__",groupWords:"唱歌|演唱|合唱|唱戏|唱片",idioms:"一唱一和::互相配合呼应|高唱入云::歌声嘹亮",riddles:"口字旁加昌::形声",synonyms:"歌",antonyms:"" },
+  { id:"吃",name:"吃",nameTrad:"吃",pinyin:"chi",category:"normal",oracle:"口+乞，张嘴吃东西",origin:"吃，进食",hints:"用嘴巴做的，肚子饿了就__|__饭|__东西|小__",groupWords:"吃饭|小吃|吃菜|好吃|吃货",idioms:"吃苦耐劳::能忍受艰苦|大吃一惊::非常惊讶",riddles:"口字旁加乞::会意",synonyms:"食",antonyms:"" },
+  { id:"喝",name:"喝",nameTrad:"喝",pinyin:"he",category:"normal",oracle:"口+曷，张嘴喝水",origin:"喝，饮水",hints:"用嘴巴做的，渴了就__|__水|__茶|__粥",groupWords:"喝水|喝茶|喝酒|喝汤|好喝",idioms:"喝西北风::形容没有东西吃|大吃大喝::挥霍浪费",riddles:"口字旁加曷::形声",synonyms:"饮",antonyms:"" },
+  { id:"吐",name:"吐",nameTrad:"吐",pinyin:"tu",category:"normal",oracle:"口+土（声旁），吐出",origin:"吐出，呕吐",hints:"把嘴巴里的东西弄出来|__出来|呕__|吞__",groupWords:"呕吐|吐出|吞吐|吐露|吐痰",idioms:"吐故纳新::淘汰旧的吸收新的|吞吞吐吐::说话不流利",riddles:"口字旁加土::形声",synonyms:"呕",antonyms:"吞" },
+  { id:"吞",name:"吞",nameTrad:"吞",pinyin:"tun",category:"normal",oracle:"天+口，大口吞下",origin:"吞咽，吞下",hints:"把东西直接咽下去|和吐相反|__下去|狼__虎咽",groupWords:"吞咽|吞下|吞没|吞食|吞吐",idioms:"吞吞吐吐::说话含糊|狼吞虎咽::吃东西又急又多",riddles:"天加口::会意",synonyms:"咽",antonyms:"吐" },
+  { id:"信",name:"信",nameTrad:"信",pinyin:"xin",category:"normal",oracle:"人+言，人说话要守信",origin:"诚信，信件",hints:"人要说话算话|诚__|写__|相__",groupWords:"信心|信用|信任|写信|自信",idioms:"信誓旦旦::誓言诚恳|难以置信::很难相信",riddles:"人言为信::会意",synonyms:"诚",antonyms:"疑" },
+  { id:"诚",name:"诚",nameTrad:"誠",pinyin:"cheng",category:"normal",oracle:"言+成，真心的话",origin:"诚实，真诚",hints:"真心真意|__实|真__|忠__",groupWords:"诚实|诚信|真诚|诚意|诚挚",idioms:"诚心诚意::真心实意|开诚布公::坦白无私",riddles:"言字旁加成::形声",synonyms:"信",antonyms:"伪" },
+  { id:"误",name:"误",nameTrad:"誤",pinyin:"wu",category:"normal",oracle:"言+吴，说错话",origin:"错误，耽误",hints:"不对的|错__|耽__|失__",groupWords:"错误|耽误|误会|误解|失误",idioms:"误入歧途::走错了路|一误再误::一错再错",riddles:"言字旁加吴::形声",synonyms:"错",antonyms:"正" },
+  { id:"让",name:"让",nameTrad:"讓",pinyin:"rang",category:"normal",oracle:"言+上，谦让",origin:"谦让，退让",hints:"不争不抢|谦__|__座|退__",groupWords:"让座|谦让|礼让|出让|忍让",idioms:"当仁不让::应做的事不推辞|寸土不让::一点也不退让",riddles:"言字旁加上::形声",synonyms:"谦",antonyms:"争" },
+
+  // ── 手心 ──
+  { id:"心",name:"心",nameTrad:"心",pinyin:"xin",category:"normal",oracle:"一个心脏的形状",origin:"心脏，心思",hints:"身体里的，会跳动|用来想事情的|开__|爱__",groupWords:"心脏|心情|爱心|关心|开心",idioms:"心想事成::心里想的都能实现|心满意足::非常满足",riddles:"一个跳动的器官::象形",synonyms:"",antonyms:"" },
+  { id:"想",name:"想",nameTrad:"想",pinyin:"xiang",category:"normal",oracle:"心+相（声旁），用心想",origin:"思考，想念",hints:"用脑子做的事|思__|__法|回__",groupWords:"想法|想念|思想|想象|理想",idioms:"心想事成::心里想的都能实现|想入非非::胡思乱想",riddles:"心字底加相::形声",synonyms:"思",antonyms:"" },
+  { id:"思",name:"思",nameTrad:"思",pinyin:"si",category:"normal",oracle:"心+田（头顶），用心想",origin:"思考，思念",hints:"和想差不多|__考|意__|相__",groupWords:"思考|思想|思念|意思|思路",idioms:"思前想后::反复考虑|不可思议::无法想象",riddles:"心字底加田::形声",synonyms:"想",antonyms:"" },
+  { id:"念",name:"念",nameTrad:"念",pinyin:"nian",category:"normal",oracle:"心+今（声旁），心中念着",origin:"想念，念着",hints:"心里一直记着|想__|__书|留__",groupWords:"想念|思念|念头|念书|纪念",idioms:"念念不忘::一直想念着|一念之差::一个念头导致的差别",riddles:"心字底加今::形声",synonyms:"想",antonyms:"" },
+  { id:"忘",name:"忘",nameTrad:"忘",pinyin:"wang",category:"normal",oracle:"亡+心，心中丢失",origin:"忘记，遗忘",hints:"心里不记得了|__记|遗__|难__",groupWords:"忘记|忘掉|难忘|遗忘|忘我",idioms:"废寝忘食::形容非常专心|得意忘形::高兴得失去常态",riddles:"亡加心::会意",synonyms:"",antonyms:"记" },
+  { id:"记",name:"记",nameTrad:"記",pinyin:"ji",category:"normal",oracle:"言+己（声旁），用语言记下来",origin:"记住，记录",hints:"和忘相反|__住|笔__|日__",groupWords:"记住|记录|笔记|日记|忘记",idioms:"记忆犹新::过去的事还记得很清楚|死记硬背::机械地记忆",riddles:"言字旁加己::形声",synonyms:"忆",antonyms:"忘" },
+  { id:"怕",name:"怕",nameTrad:"怕",pinyin:"pa",category:"normal",oracle:"心+白（声旁），心中害怕",origin:"害怕，恐惧",hints:"心里很紧张|害__|可__|不__",groupWords:"害怕|可怕|不怕|只怕|怕生",idioms:"胆小怕事::胆子小怕事情|初生牛犊不怕虎::年轻人无所畏惧",riddles:"心字旁加白::形声",synonyms:"惧",antonyms:"勇" },
+  { id:"惊",name:"惊",nameTrad:"驚",pinyin:"jing",category:"normal",oracle:"心+京（声旁），心里受惊",origin:"吃惊，惊吓",hints:"突然吓一跳|吃__|__讶|__吓",groupWords:"吃惊|惊吓|惊奇|惊讶|惊喜",idioms:"大惊小怪::对小事过分惊讶|惊弓之鸟::受过惊吓后很胆小",riddles:"心字旁加京::形声",synonyms:"吓",antonyms:"定" },
+  { id:"快",name:"快",nameTrad:"快",pinyin:"kuai",category:"normal",oracle:"心+夬（声旁），心里痛快",origin:"快乐，快速",hints:"心里高兴|愉__|__乐|飞__",groupWords:"快乐|愉快|快速|飞快|赶快",idioms:"快人快语::说话爽快|先睹为快::先看到为快乐",riddles:"心字旁加夬::形声",synonyms:"乐",antonyms:"慢" },
+  { id:"慢",name:"慢",nameTrad:"慢",pinyin:"man",category:"normal",oracle:"心+曼（声旁），心里不急",origin:"缓慢，不急",hints:"和快相反|缓__|__慢|傲__",groupWords:"慢慢|缓慢|慢走|慢车|傲慢",idioms:"慢条斯理::说话做事不慌不忙",riddles:"心字旁加曼::形声",synonyms:"缓",antonyms:"快" },
+  { id:"忙",name:"忙",nameTrad:"忙",pinyin:"mang",category:"normal",oracle:"心+亡，心丢了，很忙",origin:"忙碌，繁忙",hints:"事情很多做不完|繁__|__碌|帮__",groupWords:"帮忙|忙碌|繁忙|忙乱|农忙",idioms:"手忙脚乱::形容做事慌张|忙里偷闲::在忙碌中抽出一点空闲",riddles:"心加亡::会意",synonyms:"碌",antonyms:"闲" },
+  { id:"手",name:"手",nameTrad:"手",pinyin:"shou",category:"normal",oracle:"一只张开五指的手掌",origin:"手，上肢末端",hints:"身体上用来拿东西的|有五个指头|双__|左__",groupWords:"双手|手指|手心|手表|手工",idioms:"手忙脚乱::形容慌张|得心应手::形容熟练",riddles:"五个兄弟住一起，长短不齐::象形",synonyms:"",antonyms:"脚" },
+  { id:"打",name:"打",nameTrad:"打",pinyin:"da",category:"normal",oracle:"扌+丁，用手敲击",origin:"敲击，拍打",hints:"用手做的动作|__球|__架|拍__",groupWords:"打球|打架|打开|打扫|打听",idioms:"打草惊蛇::比喻行动不密|打抱不平::替人出头",riddles:"手字旁加丁::形声",synonyms:"击",antonyms:"" },
+  { id:"拍",name:"拍",nameTrad:"拍",pinyin:"pai",category:"normal",oracle:"扌+白，用手拍打",origin:"拍打，拍摄",hints:"用手掌打|__手|__照|球__",groupWords:"拍手|拍照|拍球|拍摄|节拍",idioms:"拍案叫绝::极其赞赏|一拍即合::一下子就合得来",riddles:"手字旁加白::形声",synonyms:"打",antonyms:"" },
+  { id:"拉",name:"拉",nameTrad:"拉",pinyin:"la",category:"normal",oracle:"扌+立，用手拉动",origin:"拉动，牵引",hints:"和推相反|用手把东西往身边带|__车|拖__",groupWords:"拉车|拉手|拉链|拖拉|拉扯",idioms:"拉帮结派::结成小团体|摧枯拉朽::比喻轻易摧毁",riddles:"手字旁加立::形声",synonyms:"拖",antonyms:"推" },
+  { id:"推",name:"推",nameTrad:"推",pinyin:"tui",category:"normal",oracle:"扌+隹，用手推动",origin:"推动，推开",hints:"和拉相反|用手把东西往外送|__门|__车",groupWords:"推开|推车|推荐|推动|推理",idioms:"推心置腹::真心待人|推波助澜::助长事态发展",riddles:"手字旁加隹::形声",synonyms:"",antonyms:"拉" },
+  { id:"抱",name:"抱",nameTrad:"抱",pinyin:"bao",category:"normal",oracle:"扌+包，用手臂环绕",origin:"拥抱，怀抱",hints:"用手臂把东西围住|拥__|__住|怀__",groupWords:"拥抱|抱住|怀抱|抱怨|抱歉",idioms:"抱薪救火::方法不对反而坏事|打抱不平::见义勇为",riddles:"手字旁加包::形声",synonyms:"搂",antonyms:"" },
+  { id:"拿",name:"拿",nameTrad:"拿",pinyin:"na",category:"normal",oracle:"合+手，手合起来拿东西",origin:"拿取，手持",hints:"用手抓住东西|__起来|__走|抓__",groupWords:"拿来|拿走|拿出|拿着|捉拿",idioms:"十拿九稳::非常有把握|拿手好戏::最擅长的本事",riddles:"合手为拿::会意",synonyms:"取",antonyms:"放" },
+  { id:"挂",name:"挂",nameTrad:"掛",pinyin:"gua",category:"normal",oracle:"扌+圭，悬挂",origin:"悬挂，挂念",hints:"把东西吊起来|__衣服|__念|悬__",groupWords:"挂念|挂衣|挂钟|挂号|牵挂",idioms:"挂一漏万::遗漏很多|牵肠挂肚::非常挂念",riddles:"手字旁加圭::形声",synonyms:"悬",antonyms:"" },
+  { id:"扔",name:"扔",nameTrad:"扔",pinyin:"reng",category:"normal",oracle:"扌+乃，抛出去",origin:"扔，抛弃",hints:"把东西丢出去|__球|__掉|投__",groupWords:"扔掉|扔球|扔下|扔弃|乱扔",idioms:"扔在脑后::完全忘记",riddles:"手字旁加乃::形声",synonyms:"丢",antonyms:"捡" },
+  { id:"捡",name:"捡",nameTrad:"撿",pinyin:"jian",category:"normal",oracle:"扌+佥，拾起来",origin:"捡起，拾取",hints:"把地上的东西拿起来|__起来|__到|__垃圾",groupWords:"捡起|捡到|捡拾|捡漏|捡柴",idioms:"捡了芝麻丢了西瓜::因小失大",riddles:"手字旁加佥::形声",synonyms:"拾",antonyms:"扔" },
+
+  // ── 目 ──
+  { id:"目",name:"目",nameTrad:"目",pinyin:"mu",category:"normal",oracle:"一只眼睛的形状",origin:"眼睛",hints:"脸上看东西的器官|眼__|__光|注__",groupWords:"目光|目前|目的|目录|目标",idioms:"目不转睛::看得出神|目中无人::骄傲自大",riddles:"一个方框里面两横::象形",synonyms:"眼",antonyms:"" },
+  { id:"见",name:"见",nameTrad:"見",pinyin:"jian",category:"normal",oracle:"目+人，人睁大眼睛看",origin:"看见，见到",hints:"用眼睛做的事|看__|__面|遇__",groupWords:"看见|见面|见到|见识|再见",idioms:"见义勇为::见到正义的事就勇敢去做|开门见山::说话直接",riddles:"目加人::会意",synonyms:"看",antonyms:"" },
+  { id:"看",name:"看",nameTrad:"看",pinyin:"kan",category:"normal",oracle:"手搭在眼睛上远望",origin:"观看，看见",hints:"用眼睛做的事|__书|__电视|好__",groupWords:"看见|看书|好看|观看|看法",idioms:"刮目相看::用新的眼光看待|另眼相看::特别看待",riddles:"手搭在目上::会意",synonyms:"见",antonyms:"" },
+  { id:"眼",name:"眼",nameTrad:"眼",pinyin:"yan",category:"normal",oracle:"目+艮，眼球",origin:"眼睛",hints:"脸上看东西的器官|__睛|__泪|双__",groupWords:"眼睛|眼泪|眼光|眼前|眼镜",idioms:"眼高手低::要求高能力低|火眼金睛::洞察一切",riddles:"目字旁加艮::形声",synonyms:"目",antonyms:"" },
+  { id:"睛",name:"睛",nameTrad:"睛",pinyin:"jing",category:"normal",oracle:"目+青，眼珠",origin:"眼珠，眼球",hints:"眼睛里黑色的部分|眼__|画龙点__|目不转__",groupWords:"眼睛|目不转睛|画龙点睛|定睛",idioms:"画龙点睛::在关键处加上精辟的语句|火眼金睛::敏锐的眼力",riddles:"目字旁加青::形声",synonyms:"眸",antonyms:"" },
+  { id:"泪",name:"泪",nameTrad:"淚",pinyin:"lei",category:"normal",oracle:"氵+目，眼睛里流出的水",origin:"眼泪",hints:"眼睛里流出来的水|眼__|流__|__水",groupWords:"眼泪|泪水|流泪|泪珠|泪痕",idioms:"泪流满面::哭得很伤心|热泪盈眶::非常感动",riddles:"水从眼睛里出来::会意",synonyms:"涕",antonyms:"" },
+  { id:"盲",name:"盲",nameTrad:"盲",pinyin:"mang",category:"normal",oracle:"亡+目，眼睛看不见",origin:"失明，盲人",hints:"眼睛看不见了|__人|文__|色__",groupWords:"盲人|盲目|文盲|色盲|盲从",idioms:"盲人摸象::看问题片面|盲目乐观::不看实际情况",riddles:"亡加目::会意",synonyms:"瞎",antonyms:"明" },
+
+  // ── 足 ──
+  { id:"足",name:"足",nameTrad:"足",pinyin:"zu",category:"normal",oracle:"一个脚丫的形状",origin:"脚，足够",hints:"身体最下面用来走路的|__球|充__|满__",groupWords:"足球|充足|满足|足够|足迹",idioms:"足智多谋::很有智谋|微不足道::非常渺小",riddles:"一个脚丫的形状::象形",synonyms:"脚",antonyms:"" },
+  { id:"走",name:"走",nameTrad:"走",pinyin:"zou",category:"normal",oracle:"一个人迈步走路的形状",origin:"行走，走路",hints:"用脚移动|行__|__路|奔__",groupWords:"走路|行走|走开|走道|出走",idioms:"走马观花::粗略地看|远走高飞::离开去远方",riddles:"一个人迈开大步::象形",synonyms:"行",antonyms:"停" },
+  { id:"跑",name:"跑",nameTrad:"跑",pinyin:"pao",category:"normal",oracle:"足+包，快步奔跑",origin:"跑步，奔跑",hints:"比走快|奔__|赛__|__步",groupWords:"跑步|奔跑|跑车|跑道|赛跑",idioms:"东奔西跑::到处奔走|跑马观花::粗略地看",riddles:"足字旁加包::形声",synonyms:"奔",antonyms:"走" },
+  { id:"跳",name:"跳",nameTrad:"跳",pinyin:"tiao",category:"normal",oracle:"足+兆，双脚离地",origin:"跳跃，跳动",hints:"双脚离开地面|蹦__|__高|__舞",groupWords:"跳舞|跳高|跳跃|跳动|心跳",idioms:"心惊肉跳::非常害怕|跳梁小丑::捣乱的小人",riddles:"足字旁加兆::形声",synonyms:"跃",antonyms:"" },
+  { id:"踢",name:"踢",nameTrad:"踢",pinyin:"ti",category:"normal",oracle:"足+易，用脚踢",origin:"踢，脚击",hints:"用脚做的动作|__球|__毽子|脚__",groupWords:"踢球|踢腿|踢毽|踢踏|脚踢",idioms:"拳打脚踢::又打又踢",riddles:"足字旁加易::形声",synonyms:"踹",antonyms:"" },
+  { id:"路",name:"路",nameTrad:"路",pinyin:"lu",category:"normal",oracle:"足+各，脚走的路",origin:"道路，路途",hints:"脚走的地方|道__|马__|公__",groupWords:"道路|马路|路程|路过|路线",idioms:"路遥知马力::时间久才知好坏|半路出家::中途改行",riddles:"足字旁加各::形声",synonyms:"道",antonyms:"" },
+
+  // ── 辶（走之底） ──
+  { id:"辶",name:"辶",nameTrad:"辶",pinyin:"chuo",category:"normal",oracle:"一只脚在路上行走",origin:"走之底，表示行走",hints:"很多和走路有关的字都有它|走__|行__|__动",groupWords:"",idioms:"",riddles:"一只脚在路上走::象形",synonyms:"走",antonyms:"" },
+  { id:"过",name:"过",nameTrad:"過",pinyin:"guo",category:"normal",oracle:"辶+寸，走过",origin:"经过，过去",hints:"从这儿到那儿|经__|__去|走__",groupWords:"过去|过来|经过|过年|过程",idioms:"过目不忘::记忆力极强|过河拆桥::利用完就抛弃",riddles:"走之底加寸::形声",synonyms:"经",antonyms:"" },
+  { id:"进",name:"进",nameTrad:"進",pinyin:"jin",category:"normal",oracle:"辶+井，向前走",origin:"前进，进入",hints:"向前走|前__|__步|走__",groupWords:"进入|前进|进步|进来|进口",idioms:"进退两难::进退都为难|循序渐进::按步骤逐步深入",riddles:"走之底加井::形声",synonyms:"入",antonyms:"退" },
+  { id:"退",name:"退",nameTrad:"退",pinyin:"tui",category:"normal",oracle:"辶+艮，向后走",origin:"后退，退出",hints:"向后走|后__|倒__|撤__",groupWords:"后退|退出|退步|退后|退休",idioms:"退避三舍::主动退让|急流勇退::在得意时主动退出",riddles:"走之底加艮::形声",synonyms:"",antonyms:"进" },
+  { id:"送",name:"送",nameTrad:"送",pinyin:"song",category:"normal",oracle:"辶+关，送别",origin:"送别，赠送",hints:"把东西给别人|赠__|__人|欢__",groupWords:"送给|送别|赠送|送走|欢送",idioms:"雪中送炭::在困难时给予帮助|千里送鹅毛::礼轻情意重",riddles:"走之底加关::形声",synonyms:"赠",antonyms:"迎" },
+  { id:"迎",name:"迎",nameTrad:"迎",pinyin:"ying",category:"normal",oracle:"辶+卬，迎接",origin:"迎接，欢迎",hints:"和送相反|欢__|__接|__面",groupWords:"欢迎|迎接|迎面|迎春|迎宾",idioms:"迎刃而解::问题很容易解决|迎头赶上::加紧追上",riddles:"走之底加卬::形声",synonyms:"接",antonyms:"送" },
+  { id:"运",name:"运",nameTrad:"運",pinyin:"yun",category:"normal",oracle:"辶+云，移动运送",origin:"运动，运输",hints:"把东西搬来搬去|搬__|__动|命__",groupWords:"运动|运气|运输|运行|搬运",idioms:"运筹帷幄::策划决策|时来运转::运气变好了",riddles:"走之底加云::形声",synonyms:"搬",antonyms:"" },
+  { id:"远",name:"远",nameTrad:"遠",pinyin:"yuan",category:"normal",oracle:"辶+袁，距离大",origin:"远方，长远",hints:"距离很大|遥__|__方|长__",groupWords:"远方|远处|遥远|远离|远古",idioms:"远走高飞::离开去远方|高瞻远瞩::眼光远大",riddles:"走之底加袁::形声",synonyms:"遥",antonyms:"近" },
+  { id:"近",name:"近",nameTrad:"近",pinyin:"jin",category:"normal",oracle:"辶+斤，距离小",origin:"附近，靠近",hints:"距离很小|附__|__处|靠__",groupWords:"附近|近处|最近|近代|近视",idioms:"近在咫尺::就在眼前|平易近人::态度和蔼可亲",riddles:"走之底加斤::形声",synonyms:"",antonyms:"远" },
+
+  // ── 示（祭祀礼仪） ──
+  { id:"示",name:"示",nameTrad:"示",pinyin:"shi",category:"normal",oracle:"一张祭桌，上面放着供品",origin:"神示，显示",hints:"和祭祀有关|表__|显__|告__",groupWords:"表示|显示|展示|提示|暗示",idioms:"不甘示弱::不愿意显得比别人差",riddles:"二小::拆字",synonyms:"显",antonyms:"" },
+  { id:"礼",name:"礼",nameTrad:"禮",pinyin:"li",category:"normal",oracle:"示+豊，用祭品敬神",origin:"礼仪，礼貌",hints:"对人有礼貌|敬__|__物|婚__",groupWords:"礼物|礼貌|礼节|礼品|礼仪",idioms:"礼尚往来::礼节上讲究有来有往|彬彬有礼::文雅而有礼貌",riddles:"示字旁加乚::形声",synonyms:"仪",antonyms:"" },
+  { id:"神",name:"神",nameTrad:"神",pinyin:"shen",category:"normal",oracle:"示+申，天神",origin:"神灵，神仙",hints:"天上的神仙|精__|__奇|传__",groupWords:"神仙|精神|神奇|神话|神秘",idioms:"神出鬼没::变化多端|聚精会神::注意力非常集中",riddles:"示字旁加申::形声",synonyms:"仙",antonyms:"鬼" },
+  { id:"福",name:"福",nameTrad:"福",pinyin:"fu",category:"normal",oracle:"示+畐，向神祈求富足",origin:"幸福，福气",hints:"过年贴的|幸__|__气|祝__",groupWords:"幸福|福气|祝福|福字|福如东海",idioms:"福星高照::好运来临|因祸得福::坏事变成好事",riddles:"示字旁加一口田::形声",synonyms:"幸",antonyms:"祸" },
+  { id:"祝",name:"祝",nameTrad:"祝",pinyin:"zhu",category:"normal",oracle:"示+兄，向神祷告祝福",origin:"祝福，祝愿",hints:"给人好话|__愿|__贺|庆__",groupWords:"祝福|祝贺|庆祝|祝愿|祝寿",idioms:"祝哽祝噎::表示对老人的尊敬",riddles:"示字旁加兄::形声",synonyms:"贺",antonyms:"" },
+  { id:"祖",name:"祖",nameTrad:"祖",pinyin:"zu",category:"normal",oracle:"示+且，祖先的牌位",origin:"祖先，祖宗",hints:"爸爸妈妈的爸爸妈妈的……|__先|__国|始__",groupWords:"祖国|祖先|祖父|祖母|祖宗",idioms:"光宗耀祖::为家族争光|开山鼻祖::创始人",riddles:"示字旁加且::形声",synonyms:"宗",antonyms:"孙" },
+  { id:"祭",name:"祭",nameTrad:"祭",pinyin:"ji",category:"normal",oracle:"手持肉块放在祭台上",origin:"祭祀，祭奠",hints:"用供品敬神敬祖先|__祀|__祖|扫__",groupWords:"祭祀|祭祖|祭拜|祭品|祭奠",idioms:"祭神如神在::祭祀时要虔诚",riddles:"手持肉块在台上::会意",synonyms:"祀",antonyms:"" },
+
+  // ── 衣 ──
+  { id:"衣",name:"衣",nameTrad:"衣",pinyin:"yi",category:"normal",oracle:"一件衣服的样子",origin:"衣服，衣裳",hints:"穿在身上的|__服|上__|大__",groupWords:"衣服|衣裳|大衣|毛衣|睡衣",idioms:"衣冠楚楚::穿戴整齐|丰衣足食::生活富裕",riddles:"一件上衣的形状::象形",synonyms:"服",antonyms:"" },
+  { id:"衫",name:"衫",nameTrad:"衫",pinyin:"shan",category:"normal",oracle:"衣+彡，单衣",origin:"衬衫，单衣",hints:"穿在上半身的|衬__|汗__|长__",groupWords:"衬衫|汗衫|衣衫|长衫|棉衫",idioms:"衣衫褴褛::衣服破烂",riddles:"衣字旁加彡::形声",synonyms:"衣",antonyms:"" },
+  { id:"裤",name:"裤",nameTrad:"褲",pinyin:"ku",category:"normal",oracle:"衣+库，穿在下半身的",origin:"裤子",hints:"穿在下半身的|长__|短__|内__",groupWords:"裤子|长裤|短裤|内裤|牛仔裤",idioms:"穿一条裤子::形容关系密切",riddles:"衣字旁加库::形声",synonyms:"",antonyms:"" },
+  { id:"袜",name:"袜",nameTrad:"襪",pinyin:"wa",category:"normal",oracle:"衣+末，穿在脚上的",origin:"袜子",hints:"穿在脚上的|__子|丝__|棉__",groupWords:"袜子|丝袜|棉袜|短袜|鞋袜",idioms:"鞋袜整齐::穿戴整洁",riddles:"衣字旁加末::形声",synonyms:"",antonyms:"" },
+  { id:"被",name:"被",nameTrad:"被",pinyin:"bei",category:"normal",oracle:"衣+皮，盖在身上的",origin:"被子，被褥",hints:"睡觉时盖的|__子|棉__|薄__",groupWords:"被子|棉被|被动|被迫|被告",idioms:"被宠若惊::受到宠爱而惊喜不安",riddles:"衣字旁加皮::形声",synonyms:"",antonyms:"" },
+  { id:"初",name:"初",nameTrad:"初",pinyin:"chu",category:"normal",oracle:"衣+刀，用刀裁衣是开始",origin:"开始，起初",hints:"开始的|__次|__学|起__",groupWords:"初次|初步|初一|初中|初始",idioms:"初出茅庐::刚入社会|初露锋芒::刚开始显出才能",riddles:"衣加刀::会意",synonyms:"始",antonyms:"终" },
+
+  // ── 宀（宝盖头） ──
+  { id:"宀",name:"宀",nameTrad:"宀",pinyin:"mian",category:"normal",oracle:"一个屋顶的样子",origin:"宝盖头，表示房屋",hints:"和房子有关的字很多都有它|房__|__顶|屋__",groupWords:"",idioms:"",riddles:"一个屋顶的样子::象形",synonyms:"",antonyms:"" },
+
+  // ── 反义词成对 ──
+  { id:"多",name:"多",nameTrad:"多",pinyin:"duo",category:"normal",oracle:"两个夕叠在一起，很多",origin:"数量大，和少相反",hints:"和少相反|很__|许__|大__",groupWords:"多少|很多|许多|多大|多数",idioms:"多才多艺::有多种才能|多此一举::做不必要的事",riddles:"两个夕字叠一起::会意",synonyms:"众",antonyms:"少" },
+  { id:"少",name:"少",nameTrad:"少",pinyin:"shao",category:"normal",oracle:"小+丿，数量小",origin:"数量小，和多相反",hints:"和多相反|很__|缺__|减__",groupWords:"少数|缺少|少见|少量|多少",idioms:"少见多怪::见识少就容易大惊小怪|凶多吉少::情况不妙",riddles:"小加一撇::指事",synonyms:"寡",antonyms:"多" },
+  { id:"长",name:"长",nameTrad:"長",pinyin:"zhang",category:"normal",oracle:"一个老人头发很长的样子",origin:"长短的长，也指生长",hints:"和短相反|很__|__度|成__",groupWords:"长短|长久|长大|成长|长度",idioms:"长年累月::形容很长时间|取长补短::吸取别人的优点",riddles:"老人头发长::象形",synonyms:"",antonyms:"短" },
+  { id:"短",name:"短",nameTrad:"短",pinyin:"duan",category:"normal",oracle:"矢+豆，箭矢短小",origin:"长度小，和长相反",hints:"和长相反|很__|__处|缩__",groupWords:"短处|短暂|缩短|长短|短小",idioms:"取长补短::吸取优点弥补不足|短兵相接::近距离搏斗",riddles:"矢加豆::形声",synonyms:"",antonyms:"长" },
+  { id:"高",name:"高",nameTrad:"高",pinyin:"gao",category:"normal",oracle:"一座高楼的样子",origin:"高大，和低相反",hints:"和低相反|很__|__山|升__",groupWords:"高大|高山|高兴|提高|高度",idioms:"高瞻远瞩::眼光远大|高山流水::比喻知音难觅",riddles:"一座高楼的样子::象形",synonyms:"",antonyms:"低" },
+  { id:"低",name:"低",nameTrad:"低",pinyin:"di",category:"normal",oracle:"亻+氐，低头",origin:"低下，和高相反",hints:"和高相反|很__|__头|降__",groupWords:"低头|低下|低处|降低|高低",idioms:"低三下四::形容卑躬屈膝|眼高手低::要求高能力低",riddles:"人低头的样子::形声",synonyms:"矮",antonyms:"高" },
+  { id:"冷",name:"冷",nameTrad:"冷",pinyin:"leng",category:"normal",oracle:"冫+令，寒冷",origin:"寒冷，和热相反",hints:"和热相反|寒__|冰__|天__",groupWords:"寒冷|冰冷|冷冻|冷气|冷静",idioms:"冷若冰霜::态度冷淡|冷眼旁观::不参与只观看",riddles:"两点水加令::形声",synonyms:"寒",antonyms:"热" },
+  { id:"热",name:"热",nameTrad:"熱",pinyin:"re",category:"normal",oracle:"灬+执，火热",origin:"炎热，和冷相反",hints:"和冷相反|炎__|闷__|发__",groupWords:"热情|热爱|热闹|炎热|热心",idioms:"热火朝天::气氛热烈|热情洋溢::充满热情",riddles:"四点底加执::形声",synonyms:"炎",antonyms:"冷" },
+  { id:"白",name:"白",nameTrad:"白",pinyin:"bai",category:"normal",oracle:"一粒白米的样子",origin:"白色，明白",hints:"和黑相反|雪是__的|明__|空__",groupWords:"白天|明白|白色|白云|空白",idioms:"白日做梦::比喻幻想|真相大白::真相完全清楚了",riddles:"一粒白米的形状::象形",synonyms:"",antonyms:"黑" },
+  { id:"黑",name:"黑",nameTrad:"黑",pinyin:"hei",category:"normal",oracle:"火焰把窗户熏黑",origin:"黑色，和红相反",hints:"和白相反|暗的颜色|__夜|__暗",groupWords:"黑色|黑夜|黑暗|黑板|漆黑",idioms:"黑白分明::是非清楚|颠倒黑白::歪曲事实",riddles:"火把窗熏黑::会意",synonyms:"暗",antonyms:"白" },
+  { id:"夜",name:"夜",nameTrad:"夜",pinyin:"ye",category:"normal",oracle:"夕+亻，夜晚",origin:"夜晚，和日相反",hints:"太阳下山以后|黑__|深__|半__",groupWords:"黑夜|夜晚|深夜|半夜|夜空",idioms:"夜以继日::日夜不停|夜深人静::深夜安静",riddles:"夕加人::会意",synonyms:"晚",antonyms:"日" },
+
+  // ── 自然季节 ──
+  { id:"春",name:"春",nameTrad:"春",pinyin:"chun",category:"normal",oracle:"艹+日+屯，草木在春天生长",origin:"春天，春季",hints:"一年四季的第一个|__天|__节|暖__",groupWords:"春天|春风|春雨|春节|春光",idioms:"春风化雨::比喻良好教育|妙手回春::医术高明",riddles:"三人日::拆字",synonyms:"",antonyms:"秋" },
+  { id:"夏",name:"夏",nameTrad:"夏",pinyin:"xia",category:"normal",oracle:"一个跪坐的人，表示夏天炎热",origin:"夏天，夏季",hints:"最热的季节|__天|盛__|炎__",groupWords:"夏天|夏季|盛夏|炎夏|夏至",idioms:"夏日可畏::夏天的太阳很可怕|冬暖夏凉::冬天暖和夏天凉爽",riddles:"一自加夂::拆字",synonyms:"",antonyms:"冬" },
+  { id:"秋",name:"秋",nameTrad:"秋",pinyin:"qiu",category:"normal",oracle:"禾+火，庄稼成熟如火烧",origin:"秋天，秋季",hints:"收获的季节|__天|__风|深__",groupWords:"秋天|秋风|秋季|秋收|中秋",idioms:"秋高气爽::秋天天气晴朗|明察秋毫::比喻目光敏锐",riddles:"禾加火::会意",synonyms:"",antonyms:"春" },
+  { id:"冬",name:"冬",nameTrad:"冬",pinyin:"dong",category:"normal",oracle:"夂+冫，结冰的季节",origin:"冬天，冬季",hints:"最冷的季节|__天|寒__|隆__",groupWords:"冬天|冬季|寒冬|冬瓜|冬眠",idioms:"寒冬腊月::指冬季最冷的时候",riddles:"夂加两点::会意",synonyms:"",antonyms:"夏" },
+  { id:"东",name:"东",nameTrad:"東",pinyin:"dong",category:"normal",oracle:"太阳从树林中升起的方向",origin:"东方，东边",hints:"太阳升起的方向|__方|__边|山__",groupWords:"东方|东边|东西|东北|东风",idioms:"东张西望::到处张望|东山再起::失败后重新崛起",riddles:"太阳在木中::会意",synonyms:"",antonyms:"西" },
+  { id:"西",name:"西",nameTrad:"西",pinyin:"xi",category:"normal",oracle:"鸟归巢，太阳落下的方向",origin:"西方，西边",hints:"太阳落下的方向|__方|__边|东__",groupWords:"西方|西边|东西|西北|夕阳",idioms:"夕阳西下::傍晚的景象|东拉西扯::说话东一句西一句",riddles:"鸟归巢::象形",synonyms:"",antonyms:"东" },
+  { id:"南",name:"南",nameTrad:"南",pinyin:"nan",category:"normal",oracle:"一个朝南的房屋",origin:"南方，南边",hints:"指南针指的方向|__方|__边|江__",groupWords:"南方|南边|江南|南北|南瓜",idioms:"南辕北辙::行动与目标相反|天南地北::距离极远",riddles:"指南针的方向::会意",synonyms:"",antonyms:"北" },
+  { id:"北",name:"北",nameTrad:"北",pinyin:"bei",category:"normal",oracle:"两个人背对背",origin:"北方，北边",hints:"和南相对|__方|__京|东__",groupWords:"北方|北边|北京|南北|北极",idioms:"南辕北辙::方向相反|走南闯北::去过很多地方",riddles:"两个人背对背::会意",synonyms:"",antonyms:"南" },
+
+  // ── 颜色形状 ──
+  { id:"红",name:"红",nameTrad:"紅",pinyin:"hong",category:"normal",oracle:"纟+工，丝线染红色",origin:"红色",hints:"火和血的颜色|__色|__花|__灯",groupWords:"红色|红花|红火|红旗|通红",idioms:"红红火火::兴旺热闹|面红耳赤::激动或害羞",riddles:"绞丝旁加工::形声",synonyms:"赤",antonyms:"绿" },
+  { id:"绿",name:"绿",nameTrad:"綠",pinyin:"lv",category:"normal",oracle:"纟+录，丝线染绿色",origin:"绿色",hints:"草和树叶的颜色|__色|__叶|青__",groupWords:"绿色|绿叶|绿化|绿茶|碧绿",idioms:"绿水青山::美丽的自然景色|绿树成荫::树木茂密",riddles:"绞丝旁加录::形声",synonyms:"青",antonyms:"红" },
+  { id:"黄",name:"黄",nameTrad:"黃",pinyin:"huang",category:"normal",oracle:"田+光，土地的颜色",origin:"黄色",hints:"金子是__的|__色|__金|金__",groupWords:"黄色|金黄|黄河|黄金|黄山",idioms:"一枕黄粱::一场空梦|黄道吉日::吉利的日子",riddles:"田加光::会意",synonyms:"金",antonyms:"" },
+  { id:"圆",name:"圆",nameTrad:"圓",pinyin:"yuan",category:"normal",oracle:"囗+员，圆形",origin:"圆形，圆圈",hints:"没有角的形状|__形|__圈|团__",groupWords:"圆形|圆圈|团圆|圆桌|圆满",idioms:"花好月圆::美好圆满|自圆其说::把自己的说法讲通",riddles:"口加员::形声",synonyms:"环",antonyms:"方" },
+  { id:"方",name:"方",nameTrad:"方",pinyin:"fang",category:"normal",oracle:"一个四方形的样子",origin:"方形，方向",hints:"四个角的形状|正__|__向|地__",groupWords:"方形|方向|地方|方法|方面",idioms:"四面八方::各个方向|来日方长::未来还有很多时间",riddles:"四四方方一块地::象形",synonyms:"",antonyms:"圆" },
+
+  // ── 动物 ──
+  { id:"马",name:"马",nameTrad:"馬",pinyin:"ma",category:"normal",oracle:"一匹马的形状",origin:"马，大型家畜",hints:"可以骑的动物|骑__|__车|斑__",groupWords:"马上|马车|骑马|白马|马路",idioms:"马到成功::立即成功|一马当先::走在最前面",riddles:"一匹奔跑的马::象形",synonyms:"",antonyms:"" },
+  { id:"牛",name:"牛",nameTrad:"牛",pinyin:"niu",category:"normal",oracle:"一个牛头的形状",origin:"牛，大型家畜",hints:"头上长角的动物|黄__|水__|奶__",groupWords:"牛头|黄牛|水牛|牛奶|牛排",idioms:"九牛一毛::极微小|对牛弹琴::对不懂的人讲道理",riddles:"一个牛头的形状::象形",synonyms:"",antonyms:"" },
+  { id:"羊",name:"羊",nameTrad:"羊",pinyin:"yang",category:"normal",oracle:"一个羊头的形状",origin:"羊，温和的家畜",hints:"毛白白的动物|山__|绵__|小__",groupWords:"山羊|绵羊|羊毛|羊群|羊奶",idioms:"亡羊补牢::出了问题及时补救|顺手牵羊::趁机拿别人东西",riddles:"一个羊头的形状::象形",synonyms:"",antonyms:"" },
+  { id:"鱼",name:"鱼",nameTrad:"魚",pinyin:"yu",category:"normal",oracle:"一条鱼的形状",origin:"鱼，水生动物",hints:"生活在水里的|金__|__池|钓__",groupWords:"金鱼|钓鱼|鱼池|鱼缸|鲤鱼",idioms:"如鱼得水::环境非常适合|鱼目混珠::以假乱真",riddles:"一条鱼的样子::象形",synonyms:"",antonyms:"" },
+  { id:"鸟",name:"鸟",nameTrad:"鳥",pinyin:"niao",category:"normal",oracle:"一只鸟的形状",origin:"鸟，飞禽",hints:"天上飞的|小__|__窝|飞__",groupWords:"小鸟|飞鸟|鸟窝|鸟笼|候鸟",idioms:"鸟语花香::形容春天美景|惊弓之鸟::受到惊吓后很胆小",riddles:"一只鸟的样子::象形",synonyms:"雀",antonyms:"" },
+  { id:"虫",name:"虫",nameTrad:"蟲",pinyin:"chong",category:"normal",oracle:"一条虫子的形状",origin:"虫子，昆虫",hints:"很小的动物|昆__|毛__|益__",groupWords:"虫子|昆虫|毛虫|益虫|害虫",idioms:"雕虫小技::微不足道的技能|物腐虫生::内部先有问题",riddles:"一条虫子的样子::象形",synonyms:"",antonyms:"" },
+  { id:"犬",name:"犬",nameTrad:"犬",pinyin:"quan",category:"normal",oracle:"一只狗的形状",origin:"狗，犬科动物",hints:"汪汪叫的动物|猎__|警__|小__",groupWords:"猎犬|警犬|犬吠|犬牙|牧犬",idioms:"犬马之劳::像犬马一样效力|鸡犬升天::一人得势全家沾光",riddles:"一只狗的样子::象形",synonyms:"狗",antonyms:"" },
+  { id:"虎",name:"虎",nameTrad:"虎",pinyin:"hu",category:"normal",oracle:"一只老虎的形状",origin:"老虎，猛兽",hints:"森林之王|老__|__口|猛__",groupWords:"老虎|虎口|猛虎|虎皮|虎牙",idioms:"虎头蛇尾::有始无终|如虎添翼::强者更强",riddles:"森林之王的形状::象形",synonyms:"",antonyms:"" },
+  { id:"龙",name:"龙",nameTrad:"龍",pinyin:"long",category:"normal",oracle:"一条龙的形状",origin:"龙，传说中的神兽",hints:"传说中的动物|巨__|__舟|飞__",groupWords:"巨龙|龙舟|飞龙|龙王|恐龙",idioms:"龙飞凤舞::气势奔放|画龙点睛::关键之笔",riddles:"长着鳞片的神兽::象形",synonyms:"",antonyms:"" },
+
+  // ── 家庭社会 ──
+  { id:"家",name:"家",nameTrad:"家",pinyin:"jia",category:"normal",oracle:"宀+豕，房子里有猪就是家",origin:"家庭，家园",hints:"住的地方|回__|__庭|国__",groupWords:"家庭|家人|回家|国家|家乡",idioms:"家喻户晓::人人皆知|四海为家::到处都可以安身",riddles:"宀加豕::会意",synonyms:"庭",antonyms:"" },
+  { id:"父",name:"父",nameTrad:"父",pinyin:"fu",category:"normal",oracle:"一只手拿着石斧",origin:"父亲",hints:"爸爸|__亲|__母|师__",groupWords:"父亲|父母|父子|父爱|师父",idioms:"父慈子孝::家庭和睦|认贼作父::把敌人当亲人",riddles:"一只手拿斧头::象形",synonyms:"爸",antonyms:"母" },
+  { id:"母",name:"母",nameTrad:"母",pinyin:"mu",category:"normal",oracle:"一个女人跪坐哺乳",origin:"母亲",hints:"妈妈|__亲|__爱|慈__",groupWords:"母亲|母爱|父母|母女|母校",idioms:"母慈子孝::家庭和睦|再生父母::救命恩人",riddles:"女人哺乳的样子::象形",synonyms:"妈",antonyms:"父" },
+  { id:"老",name:"老",nameTrad:"老",pinyin:"lao",category:"normal",oracle:"一个老人拄着拐杖",origin:"老人，年老",hints:"年纪大的|__人|__师|年__",groupWords:"老人|老师|古老|老虎|老年",idioms:"老当益壮::年纪虽大干劲更足|老生常谈::老话常说的话",riddles:"一个拄拐杖的老人::象形",synonyms:"年",antonyms:"少" },
+  { id:"师",name:"师",nameTrad:"師",pinyin:"shi",category:"normal",oracle:"军队编制，后来指老师",origin:"老师，师傅",hints:"教知识的人|老__|__傅|教__",groupWords:"老师|师傅|教师|大师|师范",idioms:"良师益友::好的老师和朋友|好为人师::喜欢当别人的老师",riddles:"教知识的人::会意",synonyms:"教",antonyms:"生" },
+  { id:"生",name:"生",nameTrad:"生",pinyin:"sheng",category:"normal",oracle:"一棵小草从土里长出来",origin:"生命，生长",hints:"活着|生__|__长|学__",groupWords:"生命|生活|生长|学生|出生",idioms:"生生不息::生命力旺盛|出生入死::冒着生命危险",riddles:"小草从土里出来::会意",synonyms:"活",antonyms:"死" },
+
+  // ── 其他 ──
+  { id:"上",name:"上",nameTrad:"上",pinyin:"shang",category:"normal",oracle:"一根横线上面有一短横",origin:"上方、高处",hints:"从地平线往高处去|和下相反|抬头看就是__面|__去",groupWords:"上面|上学|上下|马上|以上",idioms:"七上八下::形容心里不安",riddles:"一根横线上面一点::指事法",synonyms:"高",antonyms:"下" },
+  { id:"下",name:"下",nameTrad:"下",pinyin:"xia",category:"normal",oracle:"一根横线下面有一短横",origin:"下方、低处",hints:"从地平线往低处去|和上相反|低头看就是__面|__来",groupWords:"下面|下去|上下|下午|天下",idioms:"不耻下问::形容虚心请教",riddles:"一根横线下面一点::指事法",synonyms:"低",antonyms:"上" },
+  { id:"中",name:"中",nameTrad:"中",pinyin:"zhong",category:"normal",oracle:"一根旗杆穿过一面旗帜的中间",origin:"中间，中心",hints:"不在左边也不在右边|正__|__间|__国",groupWords:"中间|中心|中国|其中|中午",idioms:"中流砥柱::比喻能担当重任的人|中庸之道::不偏不倚",riddles:"一根杆子穿过一面旗::指事",synonyms:"央",antonyms:"" },
+  { id:"丰",name:"丰",nameTrad:"豐",pinyin:"feng",category:"normal",oracle:"三横一竖像草木丰盛",origin:"丰盛，丰收",hints:"三横是大地一竖是生长|根基稳固蓬勃发展|__收|__富",groupWords:"丰收|丰盛|丰富|丰满|丰年",idioms:"五谷丰登::形容粮食大丰收",riddles:"三横一竖::象形",synonyms:"盛",antonyms:"歉" },
+  { id:"艳",name:"艳",nameTrad:"艷",pinyin:"yan",category:"normal",oracle:"丰加色丰盛的颜色",origin:"鲜艳，艳丽",hints:"丰盛的颜色|很好看很亮眼|鲜__|__丽",groupWords:"鲜艳|艳丽|艳阳|惊艳|妖艳",idioms:"艳丽夺目::形容非常美丽耀眼",riddles:"丰色组合::会意",synonyms:"鲜",antonyms:"" },
+  { id:"学",name:"学",nameTrad:"學",pinyin:"xue",category:"normal",oracle:"双手构木为屋+孩子在其中",origin:"学习，效仿",hints:"在学校做的事|读书写字的|__习|上__",groupWords:"学习|学校|学生|上学|同学",idioms:"学以致用::学到的知识要能应用|学富五车::形容读了很多书",riddles:"孩子在屋子里::会意",synonyms:"习",antonyms:"" },
+  { id:"习",name:"习",nameTrad:"習",pinyin:"xi",category:"normal",oracle:"小鸟反复练习飞翔",origin:"练习，反复做",hints:"小鸟学飞|反复做一件事|学__|练__",groupWords:"学习|练习|习惯|习作|补习",idioms:"学以致用|习以为常::习惯了就觉得平常",riddles:"小鸟反复飞::象形",synonyms:"练",antonyms:"" },
+  { id:"草",name:"草",nameTrad:"草",pinyin:"cao",category:"normal",oracle:"艹加早",origin:"草本植物",hints:"地上长出来的绿色植物|早字藏在里面|小__|青__",groupWords:"小草|青草|草地|草原|花草",idioms:"风吹草动::形容轻微的动静",riddles:"艹字头加早::形声",synonyms:"",antonyms:"" },
+  { id:"花",name:"花",nameTrad:"花",pinyin:"hua",category:"normal",oracle:"艹+化（声旁），花朵",origin:"花朵，花儿",hints:"春天开的，很漂亮|有各种颜色|开__|__朵",groupWords:"花朵|花草|鲜花|花园|花生",idioms:"花好月圆::形容美好|百花齐放::各种花同时开放",riddles:"草字头加化::形声",synonyms:"卉",antonyms:"" },
+  { id:"晶",name:"晶",nameTrad:"晶",pinyin:"jing",category:"normal",oracle:"三个日叠在一起",origin:"光亮，晶莹",hints:"比星星还亮|很多光在一起|亮__|__莹",groupWords:"晶莹|水晶|晶亮|结晶",idioms:"晶莹剔透::形容光亮透明",riddles:"三个日::会意",synonyms:"亮",antonyms:"" },
+
+  // ── 门字族 ──
+  { id:"门",name:"门",nameTrad:"門",pinyin:"men",category:"normal",oracle:"两扇门的形状",origin:"门，出入口",hints:"进房子要经过的|大__|开__|关__",groupWords:"大门|开门|门口|关门|门铃",idioms:"门庭若市::形容来人很多|开门见山::说话直接",riddles:"两扇对开的板::象形",synonyms:"户",antonyms:"" },
+  { id:"间",name:"间",nameTrad:"間",pinyin:"jian",category:"normal",oracle:"门+日，门缝里透进日光",origin:"中间，间隙",hints:"门缝里看到太阳|中__|房__|时__",groupWords:"中间|房间|时间|空间|间隔",idioms:"间不容发::形势紧迫|字里行间::文章的字句之间",riddles:"门里有个日::会意",synonyms:"隙",antonyms:"" },
+  { id:"问",name:"问",nameTrad:"問",pinyin:"wen",category:"normal",oracle:"门+口，在门口用口问",origin:"询问，提问",hints:"不知道就要__|提__|__题|疑__",groupWords:"问题|提问|请问|问答|访问",idioms:"问心无愧::对得起良心|不耻下问::虚心请教",riddles:"门里一张口::会意",synonyms:"询",antonyms:"答" },
+  { id:"闻",name:"闻",nameTrad:"聞",pinyin:"wen",category:"normal",oracle:"门+耳，在门里用耳听",origin:"听闻，用鼻子闻",hints:"用耳朵听或用鼻子嗅|听__|新__|耳__",groupWords:"新闻|听闻|闻名|闻香|耳闻",idioms:"闻鸡起舞::听到鸡叫就起来练武|闻所未闻::从来没听说过",riddles:"门里有只耳朵::会意",synonyms:"听",antonyms:"" },
+  { id:"闭",name:"闭",nameTrad:"閉",pinyin:"bi",category:"normal",oracle:"门+才，把门关上",origin:"关闭，闭合",hints:"把门关上|关__|__眼|封__",groupWords:"关闭|闭上|闭关|闭眼|封闭",idioms:"闭门造车::只凭主观办事|闭目养神::闭上眼睛休息",riddles:"门里加才::会意",synonyms:"关",antonyms:"开" },
+  { id:"开",name:"开",nameTrad:"開",pinyin:"kai",category:"normal",oracle:"双手打开门闩",origin:"打开，开始",hints:"和关相反|打__|__始|离__",groupWords:"打开|开始|开心|离开|开放",idioms:"开门见山::说话直接|开天辟地::前所未有的创举",riddles:"双手打开门闩::会意",synonyms:"启",antonyms:"关" },
+  { id:"关",name:"关",nameTrad:"關",pinyin:"guan",category:"normal",oracle:"门+关，把门关上",origin:"关闭，关心",hints:"和开相反|__门|__心|有__",groupWords:"关心|关闭|关门|关系|关键",idioms:"息息相关::关系密切|漠不关心::态度冷淡毫不关心",riddles:"门加关::形声",synonyms:"闭",antonyms:"开" },
+
+  // ── 车字族 ──
+  { id:"车",name:"车",nameTrad:"車",pinyin:"che",category:"normal",oracle:"一辆古代马车的形状",origin:"车辆，车子",hints:"四个轮子的交通工具|汽__|火__|自__",groupWords:"汽车|火车|自行车|车辆|车站",idioms:"车水马龙::形容来往车辆很多|杯水车薪::力量太小无济于事",riddles:"一辆马车的形状::象形",synonyms:"",antonyms:"" },
+  { id:"轮",name:"轮",nameTrad:"輪",pinyin:"lun",category:"normal",oracle:"车+仑，车轮",origin:"车轮，轮子",hints:"车下面的圆东西|车__|圆__|齿__",groupWords:"车轮|轮子|轮胎|轮流|齿轮",idioms:"轮扁斫轮::形容技艺精湛|美轮美奂::形容房屋高大华丽",riddles:"车字旁加仑::形声",synonyms:"",antonyms:"" },
+  { id:"轻",name:"轻",nameTrad:"輕",pinyin:"qing",category:"normal",oracle:"车+圣，车子轻便",origin:"轻重，轻便",hints:"和重相反|很__|年__|放__",groupWords:"轻重|轻松|年轻|轻快|轻易",idioms:"轻而易举::非常容易|轻描淡写::不重要的描述",riddles:"车字旁加圣::形声",synonyms:"",antonyms:"重" },
+  { id:"重",name:"重",nameTrad:"重",pinyin:"zhong",category:"normal",oracle:"一个人背着很重的东西",origin:"重量，重要",hints:"和轻相反|沉__|要__|体__",groupWords:"重要|重量|沉重|重心|体重",idioms:"重于泰山::形容意义重大|举足轻重::地位十分重要",riddles:"一个人背着沉甸甸的东西::会意",synonyms:"沉",antonyms:"轻" },
+
+  // ── 舟字族 ──
+  { id:"舟",name:"舟",nameTrad:"舟",pinyin:"zhou",category:"normal",oracle:"一条小木船的形状",origin:"舟，小船",hints:"在水上漂的|小__|龙__|扁__",groupWords:"小舟|龙舟|扁舟|舟车|舟楫",idioms:"逆水行舟::不进则退|同舟共济::共同渡过困难",riddles:"一条小船的形状::象形",synonyms:"船",antonyms:"" },
+  { id:"船",name:"船",nameTrad:"船",pinyin:"chuan",category:"normal",oracle:"舟+八+口，大船",origin:"船只，大船",hints:"比舟大|轮__|帆__|渡__",groupWords:"轮船|帆船|船只|飞船|渡船",idioms:"水涨船高::事物随着基础提高|脚踏两只船::两边都占着",riddles:"舟加八口::形声",synonyms:"舟",antonyms:"" },
+
+  // ── 竹字族 ──
+  { id:"竹",name:"竹",nameTrad:"竹",pinyin:"zhu",category:"normal",oracle:"两根竹子的形状",origin:"竹子",hints:"大熊猫爱吃的|毛__|__子|青__",groupWords:"竹子|竹林|竹笋|竹竿|竹叶",idioms:"胸有成竹::做事前已有充分准备|青梅竹马::从小一起长大",riddles:"两根并排的竹子::象形",synonyms:"",antonyms:"" },
+  { id:"笔",name:"笔",nameTrad:"筆",pinyin:"bi",category:"normal",oracle:"竹+毛，毛笔",origin:"笔，书写工具",hints:"写字用的|毛__|铅__|钢__",groupWords:"毛笔|铅笔|钢笔|笔记|笔画",idioms:"一笔勾销::全部取消|神来之笔::形容文采出众",riddles:"竹字头加毛::会意",synonyms:"",antonyms:"" },
+  { id:"笑",name:"笑",nameTrad:"笑",pinyin:"xiao",category:"normal",oracle:"竹+夭，风吹竹子弯了腰像在笑",origin:"笑，欢笑",hints:"开心的时候|微__|欢__|嘲__",groupWords:"微笑|大笑|笑容|笑话|玩笑",idioms:"笑口常开::经常微笑|眉开眼笑::非常高兴",riddles:"竹字头加夭::会意",synonyms:"乐",antonyms:"哭" },
+  { id:"算",name:"算",nameTrad:"算",pinyin:"suan",category:"normal",oracle:"竹+具，用竹筹计算",origin:"计算，算术",hints:"做数学题|计__|打__|预__",groupWords:"计算|算术|打算|预算|算是",idioms:"精打细算::仔细计算|神机妙算::非常聪明的计策",riddles:"竹字头加具::会意",synonyms:"计",antonyms:"" },
+
+  // ── 页字族（头部相关） ──
+  { id:"页",name:"页",nameTrad:"頁",pinyin:"ye",category:"normal",oracle:"一个人突出头部的样子",origin:"头，书页",hints:"书的一__|网__|__面|首__",groupWords:"书页|页面|网页|页码|首页",idioms:"活页文选::可拆卸的书页",riddles:"一个人突出大头::象形",synonyms:"",antonyms:"" },
+  { id:"顶",name:"顶",nameTrad:"頂",pinyin:"ding",category:"normal",oracle:"页+丁，头顶",origin:"头顶，顶端",hints:"最高的地方|山__|屋__|__点",groupWords:"山顶|屋顶|顶楼|顶点|头顶",idioms:"顶天立地::形容气势豪迈|冒名顶替::冒充别人",riddles:"页加丁::形声",synonyms:"巅",antonyms:"底" },
+  { id:"领",name:"领",nameTrad:"領",pinyin:"ling",category:"normal",oracle:"页+令，头颈，引申为带领",origin:"头领，带领",hints:"带头的|带__|首__|衣__",groupWords:"领导|带领|领袖|领带|本领",idioms:"提纲挈领::抓住重点|心领神会::不用明说就明白",riddles:"页加令::形声",synonyms:"带",antonyms:"" },
+  { id:"颜",name:"颜",nameTrad:"顏",pinyin:"yan",category:"normal",oracle:"页+彦，面容",origin:"颜色，面容",hints:"脸上的表情|笑__|容__|__色",groupWords:"颜色|容颜|笑颜|颜料|颜面",idioms:"和颜悦色::态度温和|笑逐颜开::满脸笑容",riddles:"页加彦::形声",synonyms:"色",antonyms:"" },
+  { id:"顾",name:"顾",nameTrad:"顧",pinyin:"gu",category:"normal",oracle:"页+雇，回头看",origin:"回头看，照顾",hints:"回头看|照__|__客|回__",groupWords:"照顾|回顾|顾客|顾问|顾忌",idioms:"顾此失彼::顾了这个丢了那个|义无反顾::勇往直前不回头",riddles:"页加雇::形声",synonyms:"看",antonyms:"" },
+
+  // ── 生活常用 ──
+  { id:"米",name:"米",nameTrad:"米",pinyin:"mi",category:"normal",oracle:"几粒米的形状",origin:"米，谷物",hints:"煮饭用的|大__|__饭|白__",groupWords:"米饭|大米|玉米|白米|米粉",idioms:"巧妇难为无米之炊::没有材料做不成事|鱼米之乡::盛产鱼和米的富饶地方",riddles:"一粒粒的小颗粒::象形",synonyms:"谷",antonyms:"" },
+  { id:"来",name:"来",nameTrad:"來",pinyin:"lai",category:"normal",oracle:"一株小麦的形状，本义是麦子",origin:"来到，到来",hints:"和去相反|过__|__到|回__",groupWords:"回来|过来|来到|未来|原来",idioms:"来龙去脉::事情的前因后果|来日方长::未来的日子还很长",riddles:"一株小麦的形状::象形",synonyms:"到",antonyms:"去" },
+  { id:"去",name:"去",nameTrad:"去",pinyin:"qu",category:"normal",oracle:"一个人离开住所",origin:"离开，过去",hints:"和来相反|离__|过__|出__",groupWords:"出去|过去|去年|去掉|回去",idioms:"去伪存真::去掉假的留下真的|扬长而去::大模大样地离开",riddles:"一个人离开住所::会意",synonyms:"离",antonyms:"来" },
+  { id:"出",name:"出",nameTrad:"出",pinyin:"chu",category:"normal",oracle:"一只脚从洞穴中迈出",origin:"出去，出现",hints:"从里面到外面|__去|外__|演__",groupWords:"出去|出现|出发|出口|演出",idioms:"出生入死::冒着生命危险|脱口而出::不假思索地说出来",riddles:"一只脚迈出洞口::会意",synonyms:"",antonyms:"入" },
+  { id:"入",name:"入",nameTrad:"入",pinyin:"ru",category:"normal",oracle:"一个箭头指向里面",origin:"进入",hints:"从外面到里面|进__|__口|加__",groupWords:"进入|入口|加入|出入|入睡",idioms:"入乡随俗::到了一个地方就遵从当地习俗|出神入化::技艺达到了极高的境界",riddles:"一个箭头指向里面::指事",synonyms:"进",antonyms:"出" },
+  { id:"坐",name:"坐",nameTrad:"坐",pinyin:"zuo",category:"normal",oracle:"两个人坐在土堆上",origin:"坐下",hints:"和站相反|请__|__下|乘__",groupWords:"坐下|请坐|乘坐|坐落|坐车",idioms:"坐井观天::眼界狭窄|坐享其成::不劳而获",riddles:"两个人坐在土上::会意",synonyms:"",antonyms:"站" },
+  { id:"飞",name:"飞",nameTrad:"飛",pinyin:"fei",category:"normal",oracle:"一只鸟展翅飞翔的样子",origin:"飞行",hints:"鸟儿在天上|__行|起__|放__",groupWords:"飞行|飞机|起飞|飞翔|飞鸟",idioms:"飞黄腾达::仕途顺利升迁快|不翼而飞::东西突然不见了",riddles:"一只鸟展翅的样子::象形",synonyms:"翔",antonyms:"落" },
+  { id:"回",name:"回",nameTrad:"回",pinyin:"hui",category:"normal",oracle:"一个螺旋形的漩涡",origin:"回去，回来",hints:"从来处来，往来处去|__家|__答|来__",groupWords:"回家|回来|回去|回答|回忆",idioms:"回头是岸::改邪归正|回味无穷::事后越想越有意味",riddles:"一个大圈套小圈::象形",synonyms:"归",antonyms:"去" },
+
+  // ── 口字族（继续深入） ──
+  { id:"叫",name:"叫",nameTrad:"叫",pinyin:"jiao",category:"normal",oracle:"口+丩，张嘴呼叫",origin:"叫喊，称呼",hints:"大声喊|呼__|哭__|大__",groupWords:"叫喊|呼叫|叫作|叫声|大叫",idioms:"拍案叫绝::极其赞赏|大喊大叫::大声叫嚷",riddles:"口字旁加丩::形声",synonyms:"喊",antonyms:"" },
+  { id:"吹",name:"吹",nameTrad:"吹",pinyin:"chui",category:"normal",oracle:"口+欠，张口吹气",origin:"吹气，吹奏",hints:"用嘴巴出气|__气|__牛|风__",groupWords:"吹气|吹牛|吹风|吹奏|吹干",idioms:"吹毛求疵::故意挑剔|风吹草动::轻微的动静",riddles:"口字旁加欠::会意",synonyms:"",antonyms:"吸" },
+  { id:"吸",name:"吸",nameTrad:"吸",pinyin:"xi",category:"normal",oracle:"口+及，用嘴吸入",origin:"吸气，吸收",hints:"和吹相反|呼__|__气|__收",groupWords:"吸气|呼吸|吸收|吸烟|吸引",idioms:"吸风饮露::形容不食人间烟火|敲骨吸髓::残酷剥削",riddles:"口字旁加及::形声",synonyms:"",antonyms:"吹" },
+  { id:"味",name:"味",nameTrad:"味",pinyin:"wei",category:"normal",oracle:"口+未，用口尝味道",origin:"味道，滋味",hints:"舌头尝到的|口__|美__|滋__",groupWords:"味道|口味|美味|香味|趣味",idioms:"回味无穷::越想越有意味|食之无味::吃东西没有滋味",riddles:"口字旁加未::形声",synonyms:"滋",antonyms:"" },
+  { id:"呀",name:"呀",nameTrad:"呀",pinyin:"ya",category:"normal",oracle:"口+牙，张嘴惊讶",origin:"叹词，惊讶声",hints:"表示惊讶|哎__|天__|啊__",groupWords:"哎呀|天呀|啊呀|呀然|呀呀",idioms:"呀呀学语::婴儿学说话的样子",riddles:"口字旁加牙::形声",synonyms:"啊",antonyms:"" },
+
+  // ── 欠字族 ──
+  { id:"欠",name:"欠",nameTrad:"欠",pinyin:"qian",category:"normal",oracle:"一个人张大嘴打哈欠",origin:"打哈欠，缺少",hints:"打哈__|缺__|__债|亏__",groupWords:"哈欠|欠债|欠缺|欠款|亏欠",idioms:"万事俱备只欠东风::一切都准备好了只差最关键的条件",riddles:"一个人张嘴打哈欠::象形",synonyms:"缺",antonyms:"" },
+  { id:"欢",name:"欢",nameTrad:"歡",pinyin:"huan",category:"normal",oracle:"欠+又，高兴得拍手",origin:"欢乐，欢喜",hints:"高兴的样子|喜__|__乐|狂__",groupWords:"欢乐|欢喜|喜欢|欢迎|欢呼",idioms:"欢天喜地::非常高兴|欢声笑语::愉快的笑声",riddles:"欠加又::会意",synonyms:"喜",antonyms:"悲" },
+  { id:"歌",name:"歌",nameTrad:"歌",pinyin:"ge",category:"normal",oracle:"欠+哥，张大嘴唱歌",origin:"歌曲，唱歌",hints:"用嘴巴唱的|唱__|__曲|民__",groupWords:"唱歌|歌曲|歌声|民歌|歌手",idioms:"歌舞升平::太平盛世欢乐景象|可歌可泣::值得歌颂和流泪的事迹",riddles:"欠加哥::形声",synonyms:"曲",antonyms:"" },
+
+  // ── 力字族（补充） ──
+  { id:"动",name:"动",nameTrad:"動",pinyin:"dong",category:"normal",oracle:"力+重（省略），用力移动",origin:"运动，活动",hints:"和静相反|运__|活__|行__",groupWords:"运动|活动|动作|动物|动力",idioms:"惊天动地::影响巨大|纹丝不动::一点也不动",riddles:"力字旁加云::形声",synonyms:"移",antonyms:"静" },
+  { id:"助",name:"助",nameTrad:"助",pinyin:"zhu",category:"normal",oracle:"力+且，出力帮助",origin:"帮助，协助",hints:"帮别人做事|帮__|协__|救__",groupWords:"帮助|助手|协助|救助|援助",idioms:"助人为乐::以帮助别人为快乐|拔苗助长::急于求成反而坏事",riddles:"力字旁加且::形声",synonyms:"帮",antonyms:"" },
+
+  // ── 女字族（深入） ──
+  { id:"妈",name:"妈",nameTrad:"媽",pinyin:"ma",category:"normal",oracle:"女+马，妈妈",origin:"妈妈，母亲",hints:"和爸爸一样亲的人|__妈|阿__|姑__",groupWords:"妈妈|老妈|姑妈|奶妈|姨妈",idioms:"婆婆妈妈::形容人啰嗦",riddles:"女字旁加马::形声",synonyms:"母",antonyms:"爸" },
+  { id:"姐",name:"姐",nameTrad:"姐",pinyin:"jie",category:"normal",oracle:"女+且，姐姐",origin:"姐姐",hints:"比妹妹大的女孩|__姐|小__|表__",groupWords:"姐姐|大姐|姐妹|表姐|姐夫",idioms:"姐妹情深::姐妹感情很好",riddles:"女字旁加且::形声",synonyms:"",antonyms:"妹" },
+  { id:"妹",name:"妹",nameTrad:"妹",pinyin:"mei",category:"normal",oracle:"女+未，妹妹",origin:"妹妹",hints:"比姐姐小的女孩|__妹|小__|姐__",groupWords:"妹妹|小妹|姐妹|表妹|妹子",idioms:"兄弟姐妹::指哥哥姐姐弟弟妹妹",riddles:"女字旁加未::形声",synonyms:"",antonyms:"姐" },
+
+  // ── 宀字族（补充） ──
+  { id:"安",name:"安",nameTrad:"安",pinyin:"an",category:"normal",oracle:"宀+女，房子里有女人就安心",origin:"安全，安心",hints:"安全|__心|平__|晚__",groupWords:"安全|安心|平安|安静|晚安",idioms:"安然无恙::平安无事|安居乐业::安定地生活工作",riddles:"宀加女::会意",synonyms:"宁",antonyms:"危" },
+  { id:"宁",name:"宁",nameTrad:"寧",pinyin:"ning",category:"normal",oracle:"宀+心+皿，屋里有食器心安",origin:"安宁，宁静",hints:"和安意思差不多|安__|__静|平__",groupWords:"安宁|宁静|宁可|宁波|宁肯",idioms:"宁死不屈::宁肯死也不屈服|息事宁人::调解纠纷使人和睦",riddles:"宀加心加皿::会意",synonyms:"安",antonyms:"乱" },
+
+  // ── 广字族 ──
+  { id:"广",name:"广",nameTrad:"廣",pinyin:"guang",category:"normal",oracle:"一个宽敞的房屋",origin:"广大，宽广",hints:"很大的|宽__|__大|推__",groupWords:"广大|广场|广告|宽广|推广",idioms:"广开言路::广泛听取意见|集思广益::集中大家的智慧",riddles:"一个宽大的房屋::象形",synonyms:"宽",antonyms:"窄" },
+  { id:"店",name:"店",nameTrad:"店",pinyin:"dian",category:"normal",oracle:"广+占，广大的房子做店铺",origin:"商店，店铺",hints:"买东西的地方|商__|饭__|书__",groupWords:"商店|店铺|书店|饭店|酒店",idioms:"只此一家别无分店::独一无二",riddles:"广字旁加占::形声",synonyms:"铺",antonyms:"" },
+  { id:"座",name:"座",nameTrad:"座",pinyin:"zuo",category:"normal",oracle:"广+坐，广厦下坐人",origin:"座位，底座",hints:"坐的地方|__位|让__|满__",groupWords:"座位|让座|满座|讲座|座右铭",idioms:"座无虚席::座位都坐满了|对号入座::按规定的位置坐",riddles:"广字旁加坐::形声",synonyms:"位",antonyms:"" },
+
+  // ── 彳字族（双人旁，行走） ──
+  { id:"彳",name:"彳",nameTrad:"彳",pinyin:"chi",category:"normal",oracle:"一只脚的形状，表示行走",origin:"双人旁，表示行走",hints:"和走路有关的偏旁|行__|__步|道__",groupWords:"",idioms:"",riddles:"一只脚的形状::象形",synonyms:"行",antonyms:"" },
+  { id:"行",name:"行",nameTrad:"行",pinyin:"xing",category:"normal",oracle:"一个十字路口的样子",origin:"行走，行动",hints:"用脚走路|走__|__动|旅__",groupWords:"行走|行动|旅行|行为|自行车",idioms:"行云流水::形容流畅自然|言行一致::说的和做的一样",riddles:"十字路口::象形",synonyms:"走",antonyms:"停" },
+  { id:"往",name:"往",nameTrad:"往",pinyin:"wang",category:"normal",oracle:"彳+主，向某处走去",origin:"前往，过往",hints:"向前走|前__|__来|过__",groupWords:"前往|往来|以往|往常|交往",idioms:"既往不咎::对过去的错误不再追究|一往无前::勇敢向前",riddles:"双人旁加主::形声",synonyms:"去",antonyms:"来" },
+  { id:"得",name:"得",nameTrad:"得",pinyin:"de",category:"normal",oracle:"彳+㝵，行有所获",origin:"得到，获得",hints:"拿到了|获__|__到|懂__",groupWords:"得到|获得|得意|值得|得分",idioms:"得意洋洋::非常满足的样子|得不偿失::得到的抵不上失去的",riddles:"双人旁加㝵::会意",synonyms:"获",antonyms:"失" },
+  { id:"很",name:"很",nameTrad:"很",pinyin:"hen",category:"normal",oracle:"彳+艮，本义是不听指挥，引申为很、非常",origin:"程度深，非常",hints:"非常的意思|__好|__多|__大",groupWords:"很好|很多|很大|很快|很忙",idioms:"很多很多::非常多",riddles:"双人旁加艮::形声",synonyms:"非常",antonyms:"" },
+
+  // ── 禾字族（谷物与农业） ──
+  { id:"禾",name:"禾",nameTrad:"禾",pinyin:"he",category:"normal",oracle:"一株垂着穗子的谷子",origin:"禾苗，谷物",hints:"田里长的庄稼|__苗|锄__|嘉__",groupWords:"禾苗|禾场|禾谷|嘉禾|禾田",idioms:"风禾尽起::形容风吹禾苗的景象",riddles:"一株垂穗的庄稼::象形",synonyms:"谷",antonyms:"" },
+  { id:"种",name:"种",nameTrad:"種",pinyin:"zhong",category:"normal",oracle:"禾+中，播种谷物",origin:"种子，种植",hints:"把种子埋进土里|播__|__子|耕__",groupWords:"种子|种地|种植|播种|种类",idioms:"种瓜得瓜::做了什么事就有什么结果|火种刀耕::原始的耕作方法",riddles:"禾字旁加中::形声",synonyms:"播",antonyms:"收" },
+  { id:"科",name:"科",nameTrad:"科",pinyin:"ke",category:"normal",oracle:"禾+斗，用斗量谷物分类",origin:"科目，科学",hints:"学校里分的|__学|文__|理__",groupWords:"科学|科目|文科|理科|科技",idioms:"照本宣科::照书本死板讲解|金科玉律::不可变更的条规",riddles:"禾加斗::会意",synonyms:"",antonyms:"" },
+  { id:"香",name:"香",nameTrad:"香",pinyin:"xiang",category:"normal",oracle:"禾+日，禾谷在日光下散发香气",origin:"香气，香味",hints:"好闻的味道|花__|__甜|清__",groupWords:"香气|香味|香甜|香水|清香",idioms:"鸟语花香::形容春天美景|国色天香::形容牡丹极其美丽",riddles:"禾在日上晒出香::会意",synonyms:"芳",antonyms:"臭" },
+
+  // ── 米字族（食物与粮食） ──
+  { id:"饭",name:"饭",nameTrad:"飯",pinyin:"fan",category:"normal",oracle:"食+反，吃的东西",origin:"饭菜，食物",hints:"每天吃的|吃__|米__|晚__",groupWords:"吃饭|米饭|饭菜|饭店|晚饭",idioms:"饭来张口::坐享其成|粗茶淡饭::简单朴素的生活",riddles:"食字旁加反::形声",synonyms:"餐",antonyms:"" },
+  { id:"粒",name:"粒",nameTrad:"粒",pinyin:"li",category:"normal",oracle:"米+立，一粒米",origin:"颗粒，米粒",hints:"一颗一颗的|米__|颗__|一__",groupWords:"米粒|颗粒|一粒|沙粒|饭粒",idioms:"颗粒无收::一点收成也没有|米粒之珠::比喻微小",riddles:"米字旁加立::形声",synonyms:"颗",antonyms:"" },
+  { id:"粮",name:"粮",nameTrad:"糧",pinyin:"liang",category:"normal",oracle:"米+良，好的米就是粮食",origin:"粮食，谷物",hints:"吃的东西的总称|__食|口__|干__",groupWords:"粮食|粮草|干粮|口粮|粮仓",idioms:"兵马未动粮草先行::做事要先做好准备|寅吃卯粮::入不敷出",riddles:"米字旁加良::形声",synonyms:"食",antonyms:"" },
+
+  // ── 王字族（玉石与珍贵） ──
+  { id:"王",name:"王",nameTrad:"王",pinyin:"wang",category:"normal",oracle:"一把大斧头，象征权力",origin:"国王，王者",hints:"古代最大的官|国__|帝__|大__",groupWords:"国王|大王|王者|王牌|王子",idioms:"称王称霸::凭借势力横行一方|成王败寇::成功者为王失败者为寇",riddles:"三横一竖贯通::会意",synonyms:"帝",antonyms:"臣" },
+  { id:"玉",name:"玉",nameTrad:"玉",pinyin:"yu",category:"normal",oracle:"一根绳子串着三块玉",origin:"玉石，美玉",hints:"很珍贵的石头|__石|白__|美__",groupWords:"玉石|宝玉|玉米|美玉|金玉",idioms:"金玉良言::非常宝贵的劝告|抛砖引玉::用不成熟的意见引出高见",riddles:"王字加一点::指事",synonyms:"宝",antonyms:"石" },
+  { id:"国",name:"国",nameTrad:"國",pinyin:"guo",category:"normal",oracle:"囗+玉，疆域中有玉",origin:"国家，国土",hints:"我们住的地方|__家|祖__|中__",groupWords:"国家|祖国|中国|国旗|国王",idioms:"国泰民安::国家太平人民安康|精忠报国::尽忠报效国家",riddles:"口里有个玉::会意",synonyms:"邦",antonyms:"" },
+  { id:"全",name:"全",nameTrad:"全",pinyin:"quan",category:"normal",oracle:"入+玉，完好的玉入藏",origin:"齐全，完整",hints:"都包括|完__|齐__|安__",groupWords:"全部|完全|齐全|安全|全体",idioms:"十全十美::完美无缺|全力以赴::用全部力量去做",riddles:"入加王::会意",synonyms:"完",antonyms:"缺" },
+
+  // ── 土字族补充（地形与建筑） ──
+  { id:"城",name:"城",nameTrad:"城",pinyin:"cheng",category:"normal",oracle:"土+成，土筑的城墙",origin:"城市，城墙",hints:"很多人住的地方|__市|长__|围__",groupWords:"城市|长城|城墙|城里|城堡",idioms:"众志成城::大家齐心力量大|金城汤池::防守坚固的城池",riddles:"土字旁加成::形声",synonyms:"市",antonyms:"乡" },
+  { id:"墙",name:"墙",nameTrad:"牆",pinyin:"qiang",category:"normal",oracle:"土+啬，土筑的墙壁",origin:"墙壁",hints:"房子四周的|围__|__壁|城__",groupWords:"墙壁|围墙|墙角|城墙|隔墙",idioms:"铜墙铁壁::非常坚固|隔墙有耳::说话要小心被人偷听",riddles:"土字旁加啬::形声",synonyms:"壁",antonyms:"" },
+
+  // ── 虫字族（昆虫与爬行动物） ──
+  { id:"蛇",name:"蛇",nameTrad:"蛇",pinyin:"she",category:"normal",oracle:"虫+它，一条蛇",origin:"蛇，爬行动物",hints:"没有脚爬着走的|毒__|大__|小__",groupWords:"毒蛇|大蛇|蛇皮|蛇行|蛇胆",idioms:"画蛇添足::多此一举|杯弓蛇影::疑神疑鬼",riddles:"虫字旁加它::形声",synonyms:"",antonyms:"" },
+  { id:"蜂",name:"蜂",nameTrad:"蜂",pinyin:"feng",category:"normal",oracle:"虫+夆，采蜜的蜂",origin:"蜜蜂",hints:"采蜜的小昆虫|蜜__|黄__|马__",groupWords:"蜜蜂|蜂蜜|黄蜂|蜂巢|蜂王",idioms:"蜂拥而至::成群地涌过来|一窝蜂::形容很多人同时行动",riddles:"虫字旁加夆::形声",synonyms:"",antonyms:"" },
+  { id:"蝶",name:"蝶",nameTrad:"蝶",pinyin:"die",category:"normal",oracle:"虫+枼，蝴蝶",origin:"蝴蝶",hints:"翅膀很漂亮的飞虫|蝴__|彩__|飞__",groupWords:"蝴蝶|彩蝶|飞蝶|蝶泳|蝶衣",idioms:"蝶恋蜂狂::形容春天生机勃勃的景象",riddles:"虫字旁加枼::形声",synonyms:"",antonyms:"" },
+
+  // ── 鸟字族补充 ──
+  { id:"鸭",name:"鸭",nameTrad:"鴨",pinyin:"ya",category:"normal",oracle:"鸟+甲，鸭子",origin:"鸭子，家禽",hints:"会游泳的家禽|__子|小__|烤__",groupWords:"鸭子|小鸭|烤鸭|鸭蛋|鸭肉",idioms:"赶鸭子上架::强人所难|春江水暖鸭先知::比喻对事物变化敏感",riddles:"鸟字旁加甲::形声",synonyms:"",antonyms:"" },
+  { id:"鸡",name:"鸡",nameTrad:"雞",pinyin:"ji",category:"normal",oracle:"鸟+奚，鸡",origin:"鸡，家禽",hints:"会打鸣的家禽|公__|母__|小__",groupWords:"公鸡|母鸡|小鸡|鸡蛋|鸡肉",idioms:"鸡飞蛋打::两头落空|闻鸡起舞::听到鸡叫就起来练武",riddles:"鸟字旁加奚::形声",synonyms:"",antonyms:"" },
+
+  // ── 雨字族补充 ──
+  { id:"雾",name:"雾",nameTrad:"霧",pinyin:"wu",category:"normal",oracle:"雨+务，水汽形成的雾",origin:"雾，雾气",hints:"早上白茫茫的|__气|迷__|大__",groupWords:"大雾|雾气|迷雾|雾霾|浓雾",idioms:"云里雾里::形容迷惑不解|雾里看花::看不清楚",riddles:"雨字头加务::形声",synonyms:"霾",antonyms:"" },
+  { id:"露",name:"露",nameTrad:"露",pinyin:"lu",category:"normal",oracle:"雨+路，夜里凝结的水珠",origin:"露水，显露",hints:"早上草叶上的水珠|__水|暴__|流__",groupWords:"露水|露珠|暴露|流露|露营",idioms:"不露声色::不把感情表露出来|锋芒毕露::锐气才干完全显露",riddles:"雨字头加路::形声",synonyms:"",antonyms:"" },
+  { id:"霜",name:"霜",nameTrad:"霜",pinyin:"shuang",category:"normal",oracle:"雨+相，寒冷凝结的白霜",origin:"霜，冰霜",hints:"冬天早上的白色冰晶|冰__|寒__|秋__",groupWords:"霜冻|冰霜|秋霜|霜降|霜雪",idioms:"雪上加霜::灾祸接连而来|冷若冰霜::态度冷淡",riddles:"雨字头加相::形声",synonyms:"",antonyms:"" },
+
+  // 补充节点：耳、食
+  { id:"耳",name:"耳",nameTrad:"耳",pinyin:"er",category:"normal",oracle:"一只耳朵的形状",origin:"耳朵，听觉器官",hints:"用来听的器官|__朵|木__|悦__",groupWords:"耳朵|木耳|耳闻|耳机|悦耳",idioms:"耳目一新::所见所闻完全不同|交头接耳::凑近低声交谈",riddles:"一个耳廓的形状::象形",synonyms:"",antonyms:"" },
+  { id:"食",name:"食",nameTrad:"食",pinyin:"shi",category:"normal",oracle:"一个装满食物的器皿",origin:"食物，吃的东西",hints:"吃的东西|粮__|饮__|美__",groupWords:"食物|粮食|饮食|食品|美食",idioms:"食之无味::吃着没滋味|废寝忘食::形容非常专心",riddles:"一个装满食物的器皿::象形",synonyms:"饭",antonyms:"" },
+
+  // ── 刀字族 ──
+  { id:"刀",name:"刀",nameTrad:"刀",pinyin:"dao",category:"normal",oracle:"一把刀的形状",origin:"刀子，刀具",hints:"用来切东西的|小__|菜__|剪__",groupWords:"小刀|菜刀|剪刀|刀片|刀锋",idioms:"刀山火海::极其危险的地方|一刀两断::彻底断绝关系",riddles:"一把锋利工具的轮廓::象形",synonyms:"刃",antonyms:"" },
+  { id:"刃",name:"刃",nameTrad:"刃",pinyin:"ren",category:"normal",oracle:"刀上加一点，指刀刃",origin:"刀刃，刀锋",hints:"刀最锋利的地方|刀__|锋__|迎__而解",groupWords:"刀刃|锋刃|刃口|利刃|迎刃而解",idioms:"迎刃而解::问题很容易解决|兵不血刃::不战而胜",riddles:"刀字加一点::指事",synonyms:"锋",antonyms:"" },
+  { id:"分",name:"分",nameTrad:"分",pinyin:"fen",category:"normal",oracle:"八+刀，用刀把东西分开",origin:"分开，分离",hints:"把一个东西变成两半|__开|划__|区__",groupWords:"分开|分别|区分|分钟|分数",idioms:"分秒必争::一点时间也不放过|难舍难分::感情很好不愿分离",riddles:"八加刀::会意",synonyms:"拆",antonyms:"合" },
+  { id:"切",name:"切",nameTrad:"切",pinyin:"qie",category:"normal",oracle:"刀+七，用刀切东西",origin:"切割，急切",hints:"用刀割开|__菜|亲__|一__",groupWords:"切菜|亲切|一切|密切|关切",idioms:"切肤之痛::亲身感受的痛苦|咬牙切齿::非常愤怒",riddles:"刀加七::形声",synonyms:"割",antonyms:"" },
+
+  // ── 力字族（再次补充） ──
+  { id:"功",name:"功",nameTrad:"功",pinyin:"gong",category:"normal",oracle:"工+力，用力量做工",origin:"功劳，功夫",hints:"做好了事情|成__|__课|用__",groupWords:"功劳|功夫|功课|成功|功力",idioms:"功夫不负有心人::只要努力就会有收获|事半功倍::费力小收效大",riddles:"工加力::会意",synonyms:"劳",antonyms:"过" },
+  { id:"加",name:"加",nameTrad:"加",pinyin:"jia",category:"normal",oracle:"力+口，力量上再加话语",origin:"增加，加上",hints:"和减相反|增__|__法|参__",groupWords:"增加|加法|加油|参加|加工",idioms:"添砖加瓦::为更大的事业贡献小力量|快马加鞭::快上加快",riddles:"力加口::会意",synonyms:"增",antonyms:"减" },
+  { id:"劳",name:"劳",nameTrad:"勞",pinyin:"lao",category:"normal",oracle:"力+劳，出力劳作",origin:"劳动，疲劳",hints:"干活|__动|勤__|疲__",groupWords:"劳动|功劳|勤劳|疲劳|劳作",idioms:"劳苦功高::付出了很多辛苦有了很大成果|以逸待劳::以休息好的状态对待疲劳的敌人",riddles:"力字头加劳::会意",synonyms:"勤",antonyms:"逸" },
+
+  // ── 欠字族（再次补充） ──
+  { id:"饮",name:"饮",nameTrad:"飲",pinyin:"yin",category:"normal",oracle:"食+欠，张大嘴饮用",origin:"饮用，喝酒",hints:"喝东西|__水|__料|冷__",groupWords:"饮水|饮料|饮用|饮酒|饮食",idioms:"饮水思源::不忘本|饮鸩止渴::只顾眼前不顾后果",riddles:"食字旁加欠::会意",synonyms:"喝",antonyms:"" },
+
+  // ── 又字族（手部动作） ──
+  { id:"又",name:"又",nameTrad:"又",pinyin:"you",category:"normal",oracle:"一只右手的形状",origin:"又，右手，再次",hints:"再次的意思|__来|__要|__见",groupWords:"又一次|又要|又来了|又说|又见",idioms:"一波未平一波又起::事情接连不断",riddles:"一只右手的形状::象形",synonyms:"再",antonyms:"" },
+  { id:"友",name:"友",nameTrad:"友",pinyin:"you",category:"normal",oracle:"两只右手握在一起",origin:"朋友，友谊",hints:"好朋__|朋__|战__|校__",groupWords:"朋友|友好|友谊|校友|友情",idioms:"良师益友::好的老师和朋友|化敌为友::把敌人变成朋友",riddles:"两只右手握在一起::会意",synonyms:"朋",antonyms:"敌" },
+  { id:"取",name:"取",nameTrad:"取",pinyin:"qu",category:"normal",oracle:"又+耳，用手割取耳朵",origin:"获取，采取",hints:"拿到手|获__|争__|领__",groupWords:"取得|获取|采取|领取|争取",idioms:"取长补短::吸取优点弥补不足|断章取义::只取一部分而歪曲原意",riddles:"又加耳::会意",synonyms:"得",antonyms:"舍" },
+  { id:"受",name:"受",nameTrad:"受",pinyin:"shou",category:"normal",oracle:"爪+冖+又，一只手把东西交给另一只手",origin:"接受，承受",hints:"和授相反|接__|感__|忍__",groupWords:"接受|感受|难受|受害|享受",idioms:"受益匪浅::得到很大的好处|逆来顺受::对不好的事顺从忍受",riddles:"一只手递一只手接::会意",synonyms:"接",antonyms:"授" },
+
+  // ── 寸字族（手部动作与法度） ──
+  { id:"寸",name:"寸",nameTrad:"寸",pinyin:"cun",category:"normal",oracle:"手上一寸的位置",origin:"寸，长度单位",hints:"很短的长度|一__|尺__|分__",groupWords:"一寸|尺寸|分寸|寸步|寸心",idioms:"寸步不离::跟得很紧|鼠目寸光::目光短浅",riddles:"手上一寸的地方::指事",synonyms:"",antonyms:"" },
+  { id:"对",name:"对",nameTrad:"對",pinyin:"dui",category:"normal",oracle:"寸+又，用手对答",origin:"正确，对待",hints:"正确的|__错|面__|答__",groupWords:"对错|面对|回答|对手|绝对",idioms:"对症下药::针对问题采取措施|对答如流::回答得很流利",riddles:"寸加又::会意",synonyms:"正",antonyms:"错" },
+  { id:"时",name:"时",nameTrad:"時",pinyin:"shi",category:"normal",oracle:"日+寸，日光移动一寸就是时间",origin:"时间，时候",hints:"光阴|__间|小__|及__",groupWords:"时间|时候|小时|及时|时光",idioms:"时不再来::时间过了就不会回来|风靡一时::在一个时期非常流行",riddles:"日加寸::会意",synonyms:"光",antonyms:"" },
+
+  // ── 反义词补充 ──
+  { id:"真",name:"真",nameTrad:"真",pinyin:"zhen",category:"normal",oracle:"一个人端坐的样子",origin:"真实，真诚",hints:"和假相反|认__|天__|__实",groupWords:"真实|认真|天真|真心|真诚",idioms:"真相大白::真相完全清楚了|真心实意::真实的心意",riddles:"一个人端坐的样子::会意",synonyms:"实",antonyms:"假" },
+  { id:"假",name:"假",nameTrad:"假",pinyin:"jia",category:"normal",oracle:"人+叚，不真实的",origin:"虚假，假装",hints:"和真相反|虚__|__装|放__",groupWords:"假装|虚假|假如|放假|假话",idioms:"弄虚作假::搞虚假的一套|假公济私::借公家的名义谋私利",riddles:"人加叚::形声",synonyms:"伪",antonyms:"真" },
+  { id:"深",name:"深",nameTrad:"深",pinyin:"shen",category:"normal",oracle:"氵+罙，水深",origin:"深浅，深奥",hints:"和浅相反|很__|__夜|高__",groupWords:"深浅|深入|深夜|深刻|深情",idioms:"深入人心::被大家深刻理解接受|意味深长::含意深远值得回味",riddles:"三点水加罙::形声",synonyms:"厚",antonyms:"浅" },
+  { id:"浅",name:"浅",nameTrad:"淺",pinyin:"qian",category:"normal",oracle:"氵+戋，水浅",origin:"水浅，浅显",hints:"和深相反|很__|__水|深__",groupWords:"浅水|浅色|深浅|浅显|浅薄",idioms:"深入浅出::用浅显的语言表达深刻的道理|才疏学浅::才能不足学问不深",riddles:"三点水加戋::形声",synonyms:"薄",antonyms:"深" },
+  { id:"厚",name:"厚",nameTrad:"厚",pinyin:"hou",category:"normal",oracle:"厂+曰+子，墙壁厚实",origin:"厚实，深厚",hints:"和薄相反|很__|深__|宽__",groupWords:"厚实|深厚|宽厚|厚度|厚道",idioms:"厚积薄发::积累深厚然后慢慢释放|得天独厚::具有特殊的优越条件",riddles:"厂加曰加子::会意",synonyms:"深",antonyms:"薄" },
+  { id:"薄",name:"薄",nameTrad:"薄",pinyin:"bao",category:"normal",oracle:"艹+溥，草木稀疏",origin:"薄弱，刻薄",hints:"和厚相反|很__|单__|刻__",groupWords:"薄弱|单薄|刻薄|薄雾|薄饼",idioms:"如履薄冰::像走在薄冰上一样小心|广种薄收::广泛播种但收获不多",riddles:"草字头加溥::形声",synonyms:"单",antonyms:"厚" },
+
+  // ── 厂字族（山崖、房屋） ──
+  { id:"厂",name:"厂",nameTrad:"廠",pinyin:"chang",category:"normal",oracle:"山崖下面可以住人的地方",origin:"山崖，后来指工厂",hints:"山崖下面|工__|__房|出__",groupWords:"工厂|厂房|厂家|出厂|厂商",idioms:"",riddles:"山崖的形状::象形",synonyms:"",antonyms:"" },
+  { id:"厅",name:"厅",nameTrad:"廳",pinyin:"ting",category:"normal",oracle:"厂+丁，宽敞的屋子",origin:"厅堂，大厅",hints:"家里的大房间|客__|餐__|大__",groupWords:"客厅|大厅|餐厅|厅堂|厅房",idioms:"",riddles:"厂字头加丁::形声",synonyms:"堂",antonyms:"" },
+  { id:"历",name:"历",nameTrad:"歷",pinyin:"li",category:"normal",oracle:"厂+力，经历",origin:"历史，经历",hints:"过去的事情|经__|__史|日__",groupWords:"历史|经历|日历|历程|历来",idioms:"历历在目::过去的事情清晰地出现在眼前|历尽艰辛::经历了很多艰难困苦",riddles:"厂加力::形声",synonyms:"经",antonyms:"" },
+  { id:"压",name:"压",nameTrad:"壓",pinyin:"ya",category:"normal",oracle:"厂+土+丶，山崖压下来",origin:"压力，压迫",hints:"用力往下按|__力|高血__|积__",groupWords:"压力|血压|压迫|积压|镇压",idioms:"泰山压顶::压力极大|压轴好戏::最后最精彩的节目",riddles:"厂加土加一点::会意",synonyms:"按",antonyms:"抬" },
+
+
+// ==================== 注意：这是第1份，到这里结束 ====================
+// 接下来请拼接第2份（从尸字族开始）
+  // ── 尸字族（身体、居住） ──
+  { id:"尸",name:"尸",nameTrad:"尸",pinyin:"shi",category:"normal",oracle:"一个屈膝而坐的人形",origin:"尸体，也指祭祀时代表死者的人",hints:"死后的身体|死__|僵__|验__",groupWords:"尸体|死尸|僵尸|尸骨|验尸",idioms:"行尸走肉::没有灵魂地活着|尸位素餐::占着位置不做事",riddles:"一个屈膝的人形::象形",synonyms:"",antonyms:"" },
+  { id:"屋",name:"屋",nameTrad:"屋",pinyin:"wu",category:"normal",oracle:"尸+至，人住的地方",origin:"房屋，屋子",hints:"住的地方|房__|__子|里__",groupWords:"房屋|屋子|屋顶|屋内|屋檐",idioms:"屋漏偏逢连夜雨::倒霉事接连发生|金屋藏娇::比喻对妻妾的宠爱",riddles:"尸加至::形声",synonyms:"房",antonyms:"" },
+  { id:"层",name:"层",nameTrad:"層",pinyin:"ceng",category:"normal",oracle:"尸+云，房屋的层次",origin:"层次，楼层",hints:"一层两层|楼__|高__|云__",groupWords:"层次|楼层|高层|基层|一层",idioms:"层出不穷::接连不断地出现|层峦叠嶂::山峰连绵重叠",riddles:"尸加云::形声",synonyms:"级",antonyms:"" },
+  { id:"居",name:"居",nameTrad:"居",pinyin:"ju",category:"normal",oracle:"尸+古，蹲坐，引申为居住",origin:"居住，居所",hints:"住的地方|民__|邻__|故__",groupWords:"居住|居民|邻居|故居|居家",idioms:"安居乐业::安定地生活工作|居安思危::在安定的时候想到危险",riddles:"尸加古::形声",synonyms:"住",antonyms:"" },
+
+  // ── 户字族（门、家庭） ──
+  { id:"户",name:"户",nameTrad:"户",pinyin:"hu",category:"normal",oracle:"一扇门的形状",origin:"门户，家庭",hints:"和门差不多|门__|窗__|用__",groupWords:"门户|窗户|用户|户口|家家户户",idioms:"门当户对::两家社会地位相当|家喻户晓::人人皆知",riddles:"一扇门的形状::象形",synonyms:"门",antonyms:"" },
+  { id:"房",name:"房",nameTrad:"房",pinyin:"fang",category:"normal",oracle:"户+方，有门的屋子",origin:"房屋，房间",hints:"住的地方|__间|书__|厨__",groupWords:"房间|房屋|书房|厨房|楼房",idioms:"洞房花烛::形容新婚之喜|文房四宝::笔墨纸砚",riddles:"户加方::形声",synonyms:"屋",antonyms:"" },
+  { id:"所",name:"所",nameTrad:"所",pinyin:"suo",category:"normal",oracle:"户+斤，用斧头做门的地方",origin:"处所，所以",hints:"地方|场__|住__|__以",groupWords:"所以|住所|场所|所有|所谓",idioms:"各得其所::每人都得到适当的安置|闻所未闻::从来没听说过",riddles:"户加斤::形声",synonyms:"处",antonyms:"" },
+
+  // ── 疒字族（疾病） ──
+  { id:"疒",name:"疒",nameTrad:"疒",pinyin:"ne",category:"normal",oracle:"一个人躺在床上的样子",origin:"病字头，表示疾病",hints:"和生病有关的偏旁|疾__|病__|__痛",groupWords:"",idioms:"",riddles:"一个人躺在床上的样子::象形",synonyms:"",antonyms:"" },
+  { id:"病",name:"病",nameTrad:"病",pinyin:"bing",category:"normal",oracle:"疒+丙，生病",origin:"疾病，病症",hints:"身体不舒服|生__|疾__|看__",groupWords:"生病|疾病|病人|看病|病房",idioms:"病从口入::饮食不慎导致疾病|久病成医::病久了也成了医生",riddles:"病字头加丙::形声",synonyms:"疾",antonyms:"健" },
+  { id:"疼",name:"疼",nameTrad:"疼",pinyin:"teng",category:"normal",oracle:"疒+冬，身体疼痛",origin:"疼痛",hints:"身体不舒服的感觉|头__|心__|酸__",groupWords:"疼痛|头疼|心疼|酸疼|疼爱",idioms:"头痛医头::治标不治本|心疼如绞::非常痛心",riddles:"病字头加冬::形声",synonyms:"痛",antonyms:"" },
+  { id:"痛",name:"痛",nameTrad:"痛",pinyin:"tong",category:"normal",oracle:"疒+甬，身体剧痛",origin:"痛苦，疼痛",hints:"比疼更厉害|苦__|悲__|伤__",groupWords:"痛苦|疼痛|悲痛|伤痛|痛快",idioms:"痛改前非::彻底改正以前的错误|痛心疾首::非常痛恨",riddles:"病字头加甬::形声",synonyms:"疼",antonyms:"快" },
+
+  // ── 巾字族（布帛） ──
+  { id:"巾",name:"巾",nameTrad:"巾",pinyin:"jin",category:"normal",oracle:"一块下垂的布",origin:"毛巾，布巾",hints:"用来擦东西的布|毛__|手__|围__",groupWords:"毛巾|手巾|围巾|纸巾|红领巾",idioms:"巾帼英雄::女英雄|巾短情长::书信虽短信中情意深长",riddles:"一块下垂的布::象形",synonyms:"帕",antonyms:"" },
+  { id:"布",name:"布",nameTrad:"布",pinyin:"bu",category:"normal",oracle:"巾+父，织物",origin:"布料，分布",hints:"做衣服用的|__料|抹__|宣__",groupWords:"布料|抹布|宣布|分布|布置",idioms:"星罗棋布::像星星和棋子一样分布着|开诚布公::坦白无私",riddles:"巾字底加父::形声",synonyms:"",antonyms:"" },
+  { id:"市",name:"市",nameTrad:"市",pinyin:"shi",category:"normal",oracle:"巾+丶，市场",origin:"市场，城市",hints:"买卖东西的地方|城__|集__|超__",groupWords:"城市|市场|集市|超市|市区",idioms:"门庭若市::形容来人很多|大隐于市::在闹市中隐居",riddles:"巾加一点::会意",synonyms:"城",antonyms:"" },
+  { id:"带",name:"带",nameTrad:"帶",pinyin:"dai",category:"normal",oracle:"巾+卅，腰带",origin:"带子，带领",hints:"像绳子一样的东西|领__|腰__|__路",groupWords:"带领|带头|腰带|带路|海带",idioms:"拖泥带水::做事不干脆|以点带面::用一个点带动整个面",riddles:"巾字头加卅::会意",synonyms:"领",antonyms:"" },
+
+  // ── 常用副词、连接词 ──
+  { id:"也",name:"也",nameTrad:"也",pinyin:"ye",category:"normal",oracle:"一个古代器皿的形状",origin:"也，同样",hints:"表示同样|__是|__许|__好",groupWords:"也是|也许|也好|也罢|再也",idioms:"空空如也::什么也没有",riddles:"一个器皿的形状::象形",synonyms:"亦",antonyms:"" },
+  { id:"可",name:"可",nameTrad:"可",pinyin:"ke",category:"normal",oracle:"口+丂，口中发出的许可声",origin:"可以，许可",hints:"表示同意|认__|许__|__是",groupWords:"可以|可是|可能|认可|许可",idioms:"可歌可泣::值得歌颂和流泪|不可思议::无法想象",riddles:"口加丂::会意",synonyms:"能",antonyms:"否" },
+  { id:"但",name:"但",nameTrad:"但",pinyin:"dan",category:"normal",oracle:"人+旦，但是",origin:"但是，不过",hints:"表示转折|__是|不__|__愿",groupWords:"但是|不但|但愿|但求|但凡",idioms:"但愿如此::希望是这样|不求有功但求无过::不追求功劳只求没有过错",riddles:"人加旦::形声",synonyms:"只",antonyms:"" },
+
+
+// ==================== 注意：这是第2份，到这里结束 ====================
+// 接下来请拼接第3份（从犬字族开始）
+  // ── 犬字族（犭旁） ──
+  { id:"狗",name:"狗",nameTrad:"狗",pinyin:"gou",category:"normal",oracle:"犬+句，狗",origin:"狗，犬科动物",hints:"汪汪叫的宠物|小__|猫__|猎__",groupWords:"小狗|狗叫|猎狗|猫狗|狗熊",idioms:"狗急跳墙::被逼急了什么事都做得出来|狐朋狗友::不正经的朋友",riddles:"犬字旁加句::形声",synonyms:"犬",antonyms:"猫" },
+  { id:"猫",name:"猫",nameTrad:"貓",pinyin:"mao",category:"normal",oracle:"犬+苗，猫",origin:"猫，猫科动物",hints:"喵喵叫的宠物|小__|花__|熊__",groupWords:"小猫|花猫|猫咪|熊猫|猫头鹰",idioms:"猫鼠同眠::上下勾结做坏事|照猫画虎::照着样子模仿",riddles:"犬字旁加苗::形声",synonyms:"",antonyms:"狗" },
+  { id:"猪",name:"猪",nameTrad:"豬",pinyin:"zhu",category:"normal",oracle:"犬+者，猪",origin:"猪，家畜",hints:"哼哼叫的动物|小__|养__|肥__",groupWords:"小猪|养猪|猪肉|肥猪|猪圈",idioms:"猪八戒照镜子里外不是人::怎么做都不讨好",riddles:"犬字旁加者::形声",synonyms:"豕",antonyms:"" },
+  { id:"狼",name:"狼",nameTrad:"狼",pinyin:"lang",category:"normal",oracle:"犬+良，狼",origin:"狼，野兽",hints:"像狗但很凶的动物|野__|__群|豺__",groupWords:"野狼|狼群|豺狼|狼狈|灰狼",idioms:"狼狈为奸::合伙做坏事|狼吞虎咽::吃东西又急又多",riddles:"犬字旁加良::形声",synonyms:"",antonyms:"" },
+  { id:"狐",name:"狐",nameTrad:"狐",pinyin:"hu",category:"normal",oracle:"犬+瓜，狐狸",origin:"狐狸",hints:"很狡猾的动物|__狸|__疑|白__",groupWords:"狐狸|狐疑|白狐|狐臭|狐仙",idioms:"狐假虎威::借别人的势力吓人|满腹狐疑::心里充满疑虑",riddles:"犬字旁加瓜::形声",synonyms:"狸",antonyms:"" },
+
+  // ── 马字族（补充） ──
+  { id:"驴",name:"驴",nameTrad:"驢",pinyin:"lv",category:"normal",oracle:"马+户，驴",origin:"驴，家畜",hints:"比马小的动物|毛__|蠢__|叫__",groupWords:"毛驴|驴子|驴叫|蠢驴|驴车",idioms:"黔驴技穷::本领有限已经用完|好心当成驴肝肺::好意被误解",riddles:"马字旁加户::形声",synonyms:"",antonyms:"" },
+  { id:"骆",name:"骆",nameTrad:"駱",pinyin:"luo",category:"normal",oracle:"马+各，骆驼",origin:"骆驼",hints:"沙漠里的动物|__驼|大__|单__",groupWords:"骆驼|大骆|骆马|骆背",idioms:"",riddles:"马字旁加各::形声",synonyms:"",antonyms:"" },
+
+  // ── 鱼字族（补充） ──
+  { id:"鲜",name:"鲜",nameTrad:"鮮",pinyin:"xian",category:"normal",oracle:"鱼+羊，鱼肉和羊肉都是美味",origin:"鲜美，新鲜",hints:"味道好的|新__|美__|海__",groupWords:"新鲜|鲜美|海鲜|鲜嫩|鲜明",idioms:"屡见不鲜::见过很多次不觉得新鲜|旗帜鲜明::立场明确",riddles:"鱼加羊::会意",synonyms:"新",antonyms:"陈" },
+  { id:"鲸",name:"鲸",nameTrad:"鯨",pinyin:"jing",category:"normal",oracle:"鱼+京，巨大的鱼",origin:"鲸鱼",hints:"海里最大的动物|__鱼|蓝__|巨__",groupWords:"鲸鱼|蓝鲸|巨鲸|鲸吞|鲸波",idioms:"蚕食鲸吞::用各种方式侵占吞并",riddles:"鱼字旁加京::形声",synonyms:"",antonyms:"" },
+
+  // ── 火字族（补充） ──
+  { id:"烧",name:"烧",nameTrad:"燒",pinyin:"shao",category:"normal",oracle:"火+尧，用火烧",origin:"燃烧，烧毁",hints:"用火点着|燃__|__火|焚__",groupWords:"燃烧|烧火|烧毁|发烧|烧烤",idioms:"火烧眉毛::非常紧急|引火烧身::自招灾祸",riddles:"火字旁加尧::形声",synonyms:"燃",antonyms:"灭" },
+  { id:"烤",name:"烤",nameTrad:"烤",pinyin:"kao",category:"normal",oracle:"火+考，用火烤",origin:"烘烤，烧烤",hints:"放在火上加热|__肉|烧__|烘__",groupWords:"烤肉|烧烤|烤鸭|烤火|烘烤",idioms:"",riddles:"火字旁加考::形声",synonyms:"烘",antonyms:"" },
+  { id:"烟",name:"烟",nameTrad:"煙",pinyin:"yan",category:"normal",oracle:"火+因，火产生的烟气",origin:"烟雾，烟气",hints:"火烧出来的气体|冒__|香__|油__",groupWords:"烟火|烟雾|香烟|油烟|烟花",idioms:"烟消云散::事物消失得干干净净|过眼云烟::很快消失的事物",riddles:"火字旁加因::形声",synonyms:"雾",antonyms:"" },
+
+  // ── 食字族（补充） ──
+  { id:"饱",name:"饱",nameTrad:"飽",pinyin:"bao",category:"normal",oracle:"食+包，吃饱",origin:"吃饱，饱满",hints:"和饿相反|吃__|__满|温__",groupWords:"吃饱|饱满|饱和|温饱|饱餐",idioms:"饱食终日::整天吃饱了不干事|饱经风霜::经历了很多艰难困苦",riddles:"食字旁加包::形声",synonyms:"足",antonyms:"饿" },
+  { id:"饿",name:"饿",nameTrad:"餓",pinyin:"e",category:"normal",oracle:"食+我，饥饿",origin:"饥饿",hints:"肚子空了想吃饭|饥__|肚__|挨__",groupWords:"饥饿|饿肚子|挨饿|饿狼|饿极了",idioms:"饿虎扑食::像饿虎一样扑向食物|饥寒交迫::又冷又饿",riddles:"食字旁加我::形声",synonyms:"饥",antonyms:"饱" },
+  { id:"饺",name:"饺",nameTrad:"餃",pinyin:"jiao",category:"normal",oracle:"食+交，饺子",origin:"饺子",hints:"过年吃的面食|__子|水__|蒸__",groupWords:"饺子|水饺|蒸饺|饺皮|包饺子",idioms:"",riddles:"食字旁加交::形声",synonyms:"",antonyms:"" },
+  { id:"饼",name:"饼",nameTrad:"餅",pinyin:"bing",category:"normal",oracle:"食+并，面饼",origin:"饼干，面饼",hints:"面粉做的食物|月__|烧__|__干",groupWords:"饼干|月饼|烧饼|大饼|烙饼",idioms:"画饼充饥::用空想安慰自己|天上掉馅饼::比喻意外的收获",riddles:"食字旁加并::形声",synonyms:"",antonyms:"" },
+
+  // ── 止字族（脚趾、行动） ──
+  { id:"止",name:"止",nameTrad:"止",pinyin:"zhi",category:"normal",oracle:"一只脚的形状",origin:"脚趾，停止",hints:"脚趾|停__|__步|禁__",groupWords:"停止|止步|禁止|为止|静止",idioms:"止步不前::停下来不前进|适可而止::到了适当的程度就停止",riddles:"一只脚的形状::象形",synonyms:"停",antonyms:"行" },
+  { id:"步",name:"步",nameTrad:"步",pinyin:"bu",category:"normal",oracle:"一左一右两只脚",origin:"步子，行走",hints:"走路时迈的|脚__|散__|跑__",groupWords:"步子|脚步|散步|跑步|进步",idioms:"步步为营::每走一步都设下营垒|百步穿杨::射箭技术高超",riddles:"一左一右两只脚::会意",synonyms:"行",antonyms:"停" },
+  { id:"此",name:"此",nameTrad:"此",pinyin:"ci",category:"normal",oracle:"止+匕，脚踩的地方",origin:"这里，这个",hints:"这里|这__|从__|彼__",groupWords:"此刻|此地|此时|此后|如此",idioms:"因此::因为这样|由此可见::从这一点可以看出",riddles:"止加匕::会意",synonyms:"这",antonyms:"彼" },
+  { id:"武",name:"武",nameTrad:"武",pinyin:"wu",category:"normal",oracle:"止+戈，扛着兵器去打仗",origin:"武力，武术",hints:"和打仗有关|__术|英__|比__",groupWords:"武术|武器|武力|英武|比武",idioms:"文武双全::文才和武艺都很出色|穷兵黩武::滥用武力发动战争",riddles:"止加戈::会意",synonyms:"",antonyms:"文" },
+
+  // ── 瓦字族 ──
+  { id:"瓦",name:"瓦",nameTrad:"瓦",pinyin:"wa",category:"normal",oracle:"两块瓦片叠在一起",origin:"瓦片，瓦器",hints:"盖房子用的|砖__|__片|缸__",groupWords:"瓦片|砖瓦|瓦房|瓦罐|瓦解",idioms:"瓦釜雷鸣::庸才占据高位|土崩瓦解::完全崩溃",riddles:"两块瓦片叠在一起::象形",synonyms:"砖",antonyms:"" },
+  { id:"瓶",name:"瓶",nameTrad:"瓶",pinyin:"ping",category:"normal",oracle:"瓦+并，瓦器瓶子",origin:"瓶子",hints:"装水用的器皿|花__|水__|酒__",groupWords:"瓶子|花瓶|水瓶|酒瓶|瓶盖",idioms:"守口如瓶::说话谨慎保密|一瓶子不满半瓶子晃荡::一知半解的人最爱炫耀",riddles:"瓦字旁加并::形声",synonyms:"罐",antonyms:"" },
+  { id:"瓷",name:"瓷",nameTrad:"瓷",pinyin:"ci",category:"normal",oracle:"瓦+次，瓷器",origin:"瓷器",hints:"比陶器更精细的|__器|陶__|青__",groupWords:"瓷器|陶瓷|瓷碗|瓷砖|瓷瓶",idioms:"碰瓷::故意制造事故讹诈",riddles:"瓦字旁加次::形声",synonyms:"陶",antonyms:"" },
+
+  // ── 皿字族 ──
+  { id:"皿",name:"皿",nameTrad:"皿",pinyin:"min",category:"normal",oracle:"一个盘子的形状",origin:"器皿，容器",hints:"装东西用的器具|器__|杯__|盘__",groupWords:"器皿|杯皿|盘皿|皿器",idioms:"器皿狼藉::杯子盘子乱七八糟",riddles:"一个盘子的形状::象形",synonyms:"器",antonyms:"" },
+  { id:"盆",name:"盆",nameTrad:"盆",pinyin:"pen",category:"normal",oracle:"皿+分，分开的器皿",origin:"盆子",hints:"装水的大碗|花__|脸__|澡__",groupWords:"花盆|脸盆|澡盆|盆地|倾盆",idioms:"倾盆大雨::雨下得很大|盆满钵满::赚了很多钱",riddles:"皿字底加分::形声",synonyms:"盘",antonyms:"" },
+  { id:"盘",name:"盘",nameTrad:"盤",pinyin:"pan",category:"normal",oracle:"皿+般，盘子",origin:"盘子，盘旋",hints:"装菜用的浅器皿|菜__|托__|算__",groupWords:"盘子|托盘|算盘|光盘|盘旋",idioms:"盘根错节::事情复杂难处理|如意算盘::一厢情愿的打算",riddles:"皿字底加般::形声",synonyms:"碟",antonyms:"" },
+  { id:"盛",name:"盛",nameTrad:"盛",pinyin:"sheng",category:"normal",oracle:"皿+成，器皿中装满东西",origin:"盛放，兴旺",hints:"装很多东西|茂__|丰__|__大",groupWords:"盛开|茂盛|丰盛|盛大|盛放",idioms:"繁荣昌盛::兴旺发达|盛气凌人::傲慢的气势逼人",riddles:"皿加成::会意",synonyms:"旺",antonyms:"衰" },
+
+  // ── 穴字族 ──
+  { id:"穴",name:"穴",nameTrad:"穴",pinyin:"xue",category:"normal",oracle:"一个洞穴的形状",origin:"洞穴，窟窿",hints:"山洞|洞__|巢__|空__",groupWords:"洞穴|巢穴|穴位|墓穴|虎穴",idioms:"不入虎穴焉得虎子::不冒险就不会成功|龙潭虎穴::极其危险的地方",riddles:"一个洞穴的形状::象形",synonyms:"洞",antonyms:"" },
+  { id:"空",name:"空",nameTrad:"空",pinyin:"kong",category:"normal",oracle:"穴+工，洞穴里是空的",origin:"天空，空虚",hints:"什么都没有|天__|虚__|__气",groupWords:"天空|空间|空气|空虚|空旷",idioms:"空穴来风::比喻消息不是完全没有原因的|天马行空::想象力丰富",riddles:"穴加工::会意",synonyms:"虚",antonyms:"满" },
+  { id:"穿",name:"穿",nameTrad:"穿",pinyin:"chuan",category:"normal",oracle:"穴+牙，用牙齿咬穿洞穴",origin:"穿透，穿戴",hints:"把东西弄个洞|__透|__衣|揭__",groupWords:"穿透|穿戴|穿过|穿衣|贯穿",idioms:"穿针引线::从中联系撮合|水滴石穿::坚持不懈终会成功",riddles:"穴加牙::会意",synonyms:"透",antonyms:"脱" },
+  { id:"窗",name:"窗",nameTrad:"窗",pinyin:"chuang",category:"normal",oracle:"穴+囱，洞穴上的窗户",origin:"窗户",hints:"房子上透光通风的|门__|天__|同__",groupWords:"窗户|门窗|天窗|同窗|窗帘",idioms:"窗明几净::房间明亮整洁|十年寒窗::长期刻苦读书",riddles:"穴加囱::会意",synonyms:"户",antonyms:"" },
+
+  // ── 示字族（补充） ──
+  { id:"票",name:"票",nameTrad:"票",pinyin:"piao",category:"normal",oracle:"示+西，祭祀的凭证",origin:"票证，票据",hints:"纸做的凭证|门__|钞__|车__",groupWords:"门票|钞票|车票|发票|投票",idioms:"空头支票::不能兑现的承诺",riddles:"示加西::会意",synonyms:"券",antonyms:"" },
+  { id:"禁",name:"禁",nameTrad:"禁",pinyin:"jin",category:"normal",oracle:"示+林，在林中设坛禁止入内",origin:"禁止，禁令",hints:"不允许做的事|__止|严__|违__",groupWords:"禁止|严禁|禁令|禁区|禁忌",idioms:"令行禁止::有令即行有禁即止|百无禁忌::什么都不忌讳",riddles:"示加林::会意",synonyms:"止",antonyms:"允" },
+
+  // ── 刀字族（补充） ──
+  { id:"剪",name:"剪",nameTrad:"剪",pinyin:"jian",category:"normal",oracle:"刀+前，用刀裁剪",origin:"剪刀，裁剪",hints:"用来裁东西的工具|__刀|裁__|修__",groupWords:"剪刀|裁剪|修剪|剪纸|剪发",idioms:"剪不断理还乱::形容愁绪难以排解",riddles:"刀加前::形声",synonyms:"裁",antonyms:"" },
+  { id:"划",name:"划",nameTrad:"劃",pinyin:"hua",category:"normal",oracle:"刀+戈，用刀划开",origin:"划分，计划",hints:"用刀分开|计__|__船|筹__",groupWords:"计划|划分|划船|筹划|规划",idioms:"划一不二::非常一致|出谋划策::想办法出主意",riddles:"刀加戈::会意",synonyms:"分",antonyms:"" },
+
+  // ── 丝织补充 ──
+  { id:"线",name:"线",nameTrad:"線",pinyin:"xian",category:"normal",oracle:"纟+戋，丝线",origin:"丝线，线条",hints:"细细长长的|丝__|毛__|电__",groupWords:"丝线|毛线|电线|线条|光线",idioms:"一线希望::一点点希望|穿针引线::从中联系撮合",riddles:"绞丝旁加戋::形声",synonyms:"丝",antonyms:"" },
+  { id:"绳",name:"绳",nameTrad:"繩",pinyin:"sheng",category:"normal",oracle:"纟+黾，绳子",origin:"绳子",hints:"比线粗|麻__|跳__|缆__",groupWords:"绳子|麻绳|跳绳|缆绳|准绳",idioms:"绳之以法::用法律来制裁|规矩绳墨::比喻标准法度",riddles:"绞丝旁加黾::形声",synonyms:"索",antonyms:"" },
+  { id:"纟",name:"纟",nameTrad:"纟",pinyin:"si",category:"normal",oracle:"一束丝线的形状",origin:"绞丝旁，表示丝线",hints:"和丝线有关的偏旁|丝__|__线|棉__",groupWords:"",idioms:"",riddles:"一束丝线的形状::象形",synonyms:"丝",antonyms:"" },
+  { id:"文",name:"文",nameTrad:"文",pinyin:"wen",category:"normal",oracle:"一个人胸前有花纹",origin:"文字，文化",hints:"字|__章|语__|课__",groupWords:"文字|文章|语文|文化|课文",idioms:"文武双全::文才和武艺都出色|文不加点::文章写得快不用修改",riddles:"一个人胸前有花纹::象形",synonyms:"字",antonyms:"武" },
+
+  // ── 贝字族（深入，财富与交易） ──
+  { id:"购",name:"购",nameTrad:"購",pinyin:"gou",category:"normal",oracle:"贝+勾，用钱买东西",origin:"购买，采购",hints:"用钱买东西|__买|采__|抢__",groupWords:"购买|采购|购物|抢购|收购",idioms:"",riddles:"贝字旁加勾::形声",synonyms:"买",antonyms:"卖" },
+  { id:"卖",name:"卖",nameTrad:"賣",pinyin:"mai",category:"normal",oracle:"出+买，把东西换成钱",origin:"卖出，出售",hints:"和买相反|__东西|出__|拍__",groupWords:"卖东西|出卖|拍卖|卖力|卖弄",idioms:"卖弄风骚::故意炫耀自己|挂羊头卖狗肉::用假招牌骗人",riddles:"出加买::会意",synonyms:"售",antonyms:"买" },
+  { id:"贵",name:"贵",nameTrad:"貴",pinyin:"gui",category:"normal",oracle:"贝+臾，贝很贵重",origin:"贵重，昂贵",hints:"和贱相反|昂__|珍__|富__",groupWords:"贵重|昂贵|珍贵|富贵|贵客",idioms:"难能可贵::做到了很难做到的事很值得珍惜|兵贵神速::用兵以行动迅速为贵",riddles:"贝字底加臾::形声",synonyms:"昂",antonyms:"贱" },
+  { id:"贱",name:"贱",nameTrad:"賤",pinyin:"jian",category:"normal",oracle:"贝+戋，贝不值钱",origin:"低贱，便宜",hints:"和贵相反|低__|卑__|贫__",groupWords:"低贱|卑贱|贫贱|贱卖|贱价",idioms:"自轻自贱::自己看不起自己|谷贱伤农::粮价太低会伤害农民",riddles:"贝字旁加戋::形声",synonyms:"卑",antonyms:"贵" },
+  { id:"贫",name:"贫",nameTrad:"貧",pinyin:"pin",category:"normal",oracle:"分+贝，把贝分掉就穷了",origin:"贫穷",hints:"和富相反|__穷|清__|扶__",groupWords:"贫穷|清贫|扶贫|贫困|贫苦",idioms:"一贫如洗::穷得像被水洗过一样|贫贱不能移::贫穷低贱也不能改变志向",riddles:"分加贝::会意",synonyms:"穷",antonyms:"富" },
+  { id:"货",name:"货",nameTrad:"貨",pinyin:"huo",category:"normal",oracle:"化+贝，可以换钱的物品",origin:"货物，商品",hints:"买卖的东西|商__|__物|百__",groupWords:"货物|商品|百货|售货|货架",idioms:"货真价实::东西是真的价钱也实在|奇货可居::把稀有的货物囤积起来等高价",riddles:"化加贝::形声",synonyms:"物",antonyms:"" },
+
+  // ── 月（肉）字族 ──
+  { id:"肝",name:"肝",nameTrad:"肝",pinyin:"gan",category:"normal",oracle:"肉+干，肝脏",origin:"肝脏，器官",hints:"身体里的器官|__脏|心__|猪__",groupWords:"肝脏|心肝|猪肝|肝炎|肝胆",idioms:"肝胆相照::真心相见|肝肠寸断::非常悲痛",riddles:"月字旁加干::形声",synonyms:"",antonyms:"" },
+  { id:"肚",name:"肚",nameTrad:"肚",pinyin:"du",category:"normal",oracle:"肉+土，腹部",origin:"肚子，腹部",hints:"身体中间的部位|__子|腹__|泻__",groupWords:"肚子|腹部|腹泻|肚量|肚脐",idioms:"牵肠挂肚::非常挂念|小肚鸡肠::气量狭小",riddles:"月字旁加土::形声",synonyms:"腹",antonyms:"" },
+  { id:"背",name:"背",nameTrad:"背",pinyin:"bei",category:"normal",oracle:"肉+北，脊背",origin:"背部，违背",hints:"身体后面的部位|后__|__包|驼__",groupWords:"背后|背部|背包|背诵|违背",idioms:"背井离乡::离开家乡|背水一战::决一死战",riddles:"月字底加北::形声",synonyms:"脊",antonyms:"胸" },
+  { id:"胖",name:"胖",nameTrad:"胖",pinyin:"pang",category:"normal",oracle:"肉+半，身体丰满",origin:"肥胖",hints:"和瘦相反|肥__|__子|虚__",groupWords:"肥胖|胖子|虚胖|胖乎乎|心宽体胖",idioms:"心宽体胖::心情舒畅身体也健康",riddles:"月字旁加半::形声",synonyms:"肥",antonyms:"瘦" },
+
+  // ── 山字族（补充） ──
+  { id:"岛",name:"岛",nameTrad:"島",pinyin:"dao",category:"normal",oracle:"山+鸟，水中的山",origin:"岛屿",hints:"海里的陆地|__屿|半__|群__",groupWords:"岛屿|半岛|群岛|海岛|岛国",idioms:"",riddles:"山加鸟::会意",synonyms:"屿",antonyms:"" },
+  { id:"岸",name:"岸",nameTrad:"岸",pinyin:"an",category:"normal",oracle:"山+厈，水边的陆地",origin:"岸边，河岸",hints:"水边的陆地|河__|海__|靠__",groupWords:"岸边|河岸|海岸|靠岸|对岸",idioms:"回头是岸::改邪归正|隔岸观火::看热闹不帮忙",riddles:"山加厈::形声",synonyms:"",antonyms:"" },
+  { id:"峰",name:"峰",nameTrad:"峰",pinyin:"feng",category:"normal",oracle:"山+夆，山的顶端",origin:"山峰，顶峰",hints:"山的最高处|山__|顶__|高__",groupWords:"山峰|顶峰|高峰|峰顶|峰峦",idioms:"登峰造极::达到了最高境界|峰回路转::情况出现转机",riddles:"山字旁加夆::形声",synonyms:"顶",antonyms:"谷" },
+
+  // ── 反义词成对（补充） ──
+  { id:"古",name:"古",nameTrad:"古",pinyin:"gu",category:"normal",oracle:"十+口，古代的事情口口相传",origin:"古代，古老",hints:"很久以前|__代|远__|千__",groupWords:"古代|古老|远古|千古|古人",idioms:"古往今来::从古到今|食古不化::学了古代的东西不会运用",riddles:"十加口::会意",synonyms:"远",antonyms:"今" },
+  { id:"今",name:"今",nameTrad:"今",pinyin:"jin",category:"normal",oracle:"一个口含物的形状",origin:"今天，现在",hints:"现在|__天|当__|如__",groupWords:"今天|如今|当今|今后|今昔",idioms:"今非昔比::现在和过去大不相同|古今中外::从古到今从内到外",riddles:"一个口含物的形状::象形",synonyms:"现",antonyms:"古" },
+  { id:"内",name:"内",nameTrad:"内",pinyin:"nei",category:"normal",oracle:"冂+入，进入里面",origin:"内部，里面",hints:"和外相反|__部|国__|屋__",groupWords:"内部|里面|国内|室内|内容",idioms:"内忧外患::内部有忧患外部有祸患|内外夹攻::从内外两方面攻击",riddles:"冂加入::会意",synonyms:"里",antonyms:"外" },
+  { id:"外",name:"外",nameTrad:"外",pinyin:"wai",category:"normal",oracle:"夕+卜，夜晚在外面占卜",origin:"外面，外部",hints:"和内相反|__面|国__|出__",groupWords:"外面|外国|外出|窗外|除外",idioms:"喜出望外::意想不到的惊喜|里应外合::内外配合",riddles:"夕加卜::会意",synonyms:"",antonyms:"内" },
+
+  // ── 工具器物 ──
+  { id:"弓",name:"弓",nameTrad:"弓",pinyin:"gong",category:"normal",oracle:"一张弓的形状",origin:"弓箭，弓形",hints:"射箭用的|__箭|弹__|弯__",groupWords:"弓箭|弹弓|弓弦|弓形|杯弓蛇影",idioms:"杯弓蛇影::疑神疑鬼|惊弓之鸟::受过惊吓后很胆小",riddles:"一张弓的形状::象形",synonyms:"",antonyms:"" },
+  { id:"甲",name:"甲",nameTrad:"甲",pinyin:"jia",category:"normal",oracle:"乌龟壳上裂纹的形状",origin:"铠甲，甲壳",hints:"乌龟的壳|铠__|盔__|指__",groupWords:"铠甲|盔甲|指甲|甲壳|甲虫",idioms:"丢盔弃甲::打了败仗的狼狈样子|花甲之年::六十岁",riddles:"乌龟壳裂纹的形状::象形",synonyms:"壳",antonyms:"" },
+
+  // ── 常用字补充 ──
+  { id:"更",name:"更",nameTrad:"更",pinyin:"geng",category:"normal",oracle:"一只手拿着棍子敲击",origin:"更改，更加",hints:"比以前还|__加|变__|五__",groupWords:"更加|更改|更正|更衣|五更",idioms:"更上一层楼::再提高一步|万象更新::一切事物都焕然一新",riddles:"一只手拿棍子::会意",synonyms:"改",antonyms:"" },
+  { id:"才",name:"才",nameTrad:"才",pinyin:"cai",category:"normal",oracle:"一棵小苗刚冒出地面",origin:"才能，刚刚",hints:"能力|天__|刚__|人__",groupWords:"才能|天才|刚才|人才|才艺",idioms:"才华横溢::非常有才华|量才录用::根据才能来任用",riddles:"一棵小苗冒出地面::象形",synonyms:"刚",antonyms:"" },
+  { id:"已",name:"已",nameTrad:"已",pinyin:"yi",category:"normal",oracle:"一个停止的符号",origin:"已经，停止",hints:"事情做完了|__经|而__|早__",groupWords:"已经|早已|而已|已然|已知",idioms:"大势已去::大局已经无法挽回|迫不得已::被逼得不得不这样做",riddles:"一个停止的符号::象形",synonyms:"经",antonyms:"未" },
+
+
+// ==================== 注意：这是第3份，到这里结束 ====================
+// 接下来请拼接第4份（从补充节点开始到文件末尾）
+  // ── 补充节点 ──
+  { id:"肉",name:"肉",nameTrad:"肉",pinyin:"rou",category:"normal",oracle:"一块肉的形状",origin:"肉，肌肉",hints:"身体上的|肌__|吃__|猪__",groupWords:"肌肉|吃肉|猪肉|牛肉|肉体",idioms:"肉眼凡胎::普通人的眼力|皮开肉绽::伤势严重",riddles:"一块肉的形状::象形",synonyms:"肌",antonyms:"" },
+  { id:"瘦",name:"瘦",nameTrad:"瘦",pinyin:"shou",category:"normal",oracle:"疒+叟，身体瘦弱",origin:"瘦弱，消瘦",hints:"和胖相反|很__|消__|骨__",groupWords:"瘦弱|消瘦|骨瘦如柴|瘦小|瘦长",idioms:"瘦骨嶙峋::瘦得皮包骨头|挑肥拣瘦::非常挑剔",riddles:"病字头加叟::形声",synonyms:"",antonyms:"胖" },
+  { id:"富",name:"富",nameTrad:"富",pinyin:"fu",category:"normal",oracle:"宀+畐，屋里有很多财物",origin:"富裕，富有",hints:"和贫相反|财__|丰__|致__",groupWords:"富裕|富有|财富|丰富|致富",idioms:"富丽堂皇::华丽盛大|学富五车::形容读书很多",riddles:"宀加畐::会意",synonyms:"裕",antonyms:"贫" },
+  { id:"箭",name:"箭",nameTrad:"箭",pinyin:"jian",category:"normal",oracle:"竹+前，竹制的箭",origin:"箭矢",hints:"用弓射出去的|弓__|射__|火__",groupWords:"弓箭|射箭|火箭|箭头|箭步",idioms:"一箭双雕::做一件事达到两个目的|光阴似箭::时间过得很快",riddles:"竹字头加前::形声",synonyms:"矢",antonyms:"" },
+  { id:"龟",name:"龟",nameTrad:"龜",pinyin:"gui",category:"normal",oracle:"一只乌龟的形状",origin:"乌龟",hints:"背着壳的动物|乌__|海__|__壳",groupWords:"乌龟|海龟|龟壳|龟甲|龟速",idioms:"龟兔赛跑::比喻坚持不懈就能胜利|缩头乌龟::胆小怕事的人",riddles:"一只乌龟的形状::象形",synonyms:"",antonyms:"" },
+  { id:"改",name:"改",nameTrad:"改",pinyin:"gai",category:"normal",oracle:"攵+己，用鞭子驱使改变",origin:"改变，改正",hints:"变了|__变|更__|修__",groupWords:"改变|改正|修改|更改|改造",idioms:"改过自新::改正错误重新做人|改头换面::彻底改变面貌",riddles:"己加攵::会意",synonyms:"变",antonyms:"" },
+  { id:"刚",name:"刚",nameTrad:"剛",pinyin:"gang",category:"normal",oracle:"冈+刀，刀锋利刚硬",origin:"刚才，刚强",hints:"才的意思|__才|__强|金__",groupWords:"刚才|刚刚|刚强|刚硬|金刚",idioms:"刚正不阿::为人正直不逢迎|以柔克刚::用柔和的方法制服刚强的",riddles:"冈加刀::形声",synonyms:"才",antonyms:"柔" },
+
+  // ── 殳字族（手部敲击动作） ──
+  { id:"殳",name:"殳",nameTrad:"殳",pinyin:"shu",category:"normal",oracle:"一只手拿着棍棒",origin:"一种长柄兵器，也表示敲击",hints:"古代的一种兵器|和手有关的偏旁|__杖|敲__",groupWords:"",idioms:"",riddles:"一只手拿着棍棒::象形",synonyms:"",antonyms:"" },
+  { id:"段",name:"段",nameTrad:"段",pinyin:"duan",category:"normal",oracle:"殳+耑，用工具捶打分段",origin:"段落，片段",hints:"一段一段的|__落|片__|手__",groupWords:"段落|一段|片段|手段|阶段",idioms:"不择手段::为了达到目的什么手段都用",riddles:"殳加耑::形声",synonyms:"截",antonyms:"" },
+  { id:"锻",name:"锻",nameTrad:"鍛",pinyin:"duan",category:"normal",oracle:"金+段，用锤子打铁",origin:"锻造，锻炼",hints:"把金属烧红后用锤子打|__炼|__造|锤__",groupWords:"锻炼|锻造|锻铁|锻锤|锻冶",idioms:"锻炼身体::通过运动强健体魄",riddles:"金字旁加段::形声",synonyms:"炼",antonyms:"" },
+  { id:"发",name:"发",nameTrad:"發",pinyin:"fa",category:"normal",oracle:"弓+殳，把箭射出去",origin:"发射，出发",hints:"射出去|出__|头__|理__",groupWords:"出发|发现|头发|发展|发明",idioms:"发人深省::启发人深刻思考|一触即发::事态非常紧张",riddles:"弓加殳::会意",synonyms:"出",antonyms:"收" },
+
+  // ── 酉字族（酒与酿造） ──
+  { id:"酉",name:"酉",nameTrad:"酉",pinyin:"you",category:"normal",oracle:"一个酒坛的形状",origin:"酒器，地支第十位",hints:"和酒有关的偏旁|__时|__酒|酿__",groupWords:"酉时|酉酒|酉鸡|酿酉",idioms:"",riddles:"一个酒坛的形状::象形",synonyms:"酒",antonyms:"" },
+  { id:"酒",name:"酒",nameTrad:"酒",pinyin:"jiu",category:"normal",oracle:"酉+氵，坛子里的液体",origin:"酒，酒精饮料",hints:"大人喝的一种饮料|喝__|白__|啤__",groupWords:"喝酒|白酒|啤酒|酒店|酒精",idioms:"酒逢知己千杯少::和好朋友喝酒喝多少都不够|借酒消愁::用喝酒来消除烦恼",riddles:"三点水加酉::会意",synonyms:"",antonyms:"" },
+  { id:"醉",name:"醉",nameTrad:"醉",pinyin:"zui",category:"normal",oracle:"酉+卒，酒喝多了",origin:"醉酒，陶醉",hints:"酒喝多了|喝__|陶__|沉__",groupWords:"醉酒|喝醉|陶醉|沉醉|醉汉",idioms:"醉翁之意不在酒::本意不在此而在别的方面|纸醉金迷::沉迷于奢华的生活",riddles:"酉字旁加卒::会意",synonyms:"",antonyms:"醒" },
+  { id:"醒",name:"醒",nameTrad:"醒",pinyin:"xing",category:"normal",oracle:"酉+星，酒醒了",origin:"清醒，睡醒",hints:"和醉相反|清__|睡__|苏__",groupWords:"清醒|睡醒|醒目|提醒|苏醒",idioms:"大梦初醒::刚从睡梦中醒来|醒聩震聋::使人震惊醒悟",riddles:"酉字旁加星::形声",synonyms:"苏",antonyms:"醉" },
+  { id:"酸",name:"酸",nameTrad:"酸",pinyin:"suan",category:"normal",oracle:"酉+夋，酒变酸了",origin:"酸味，酸楚",hints:"醋的味道|__甜|辛__|腰__",groupWords:"酸甜|酸味|辛酸|酸痛|酸楚",idioms:"酸甜苦辣::人生各种滋味|穷酸秀才::贫穷的读书人",riddles:"酉字旁加夋::形声",synonyms:"",antonyms:"甜" },
+
+  // ── 里字族（内部与衣物） ──
+  { id:"里",name:"里",nameTrad:"裏",pinyin:"li",category:"normal",oracle:"田+土，田地和住处",origin:"里面，家乡",hints:"和外相反|__面|家__|故__",groupWords:"里面|家里|故里|邻里|心里",idioms:"里应外合::内外配合|字里行间::文章的字句之间",riddles:"田加土::会意",synonyms:"内",antonyms:"外" },
+  { id:"理",name:"理",nameTrad:"理",pinyin:"li",category:"normal",oracle:"王+里，加工玉石的纹理",origin:"道理，纹理",hints:"事情的规律|道__|__由|整__",groupWords:"道理|理由|整理|理论|物理",idioms:"理直气壮::理由充分说话有气势|合情合理::合乎情理",riddles:"王字旁加里::形声",synonyms:"道",antonyms:"" },
+  { id:"埋",name:"埋",nameTrad:"埋",pinyin:"mai",category:"normal",oracle:"土+里，把东西埋进土里",origin:"埋藏，掩埋",hints:"把东西藏在土里|__藏|掩__|葬__",groupWords:"埋藏|掩埋|埋葬|埋头|埋怨",idioms:"埋头苦干::专心致志地苦干|隐姓埋名::隐藏自己的真实姓名",riddles:"土加里::会意",synonyms:"藏",antonyms:"挖" },
+
+  // ── 攵字族（反文旁，手部动作） ──
+  { id:"攵",name:"攵",nameTrad:"攵",pinyin:"pu",category:"normal",oracle:"一只手拿着棍棒",origin:"反文旁，表示敲击",hints:"和手有关的偏旁|敲__|__打|攻__",groupWords:"",idioms:"",riddles:"一只手拿着棍棒::象形",synonyms:"殳",antonyms:"" },
+  { id:"收",name:"收",nameTrad:"收",pinyin:"shou",category:"normal",oracle:"攵+丩，用手收取",origin:"收获，收集",hints:"和发相反|回__|丰__|接__",groupWords:"收获|收回|丰收|收集|收拾",idioms:"美不胜收::美好的东西太多来不及欣赏|覆水难收::说出的话或做过的事无法收回",riddles:"反文旁加丩::会意",synonyms:"获",antonyms:"发" },
+  { id:"教",name:"教",nameTrad:"教",pinyin:"jiao",category:"normal",oracle:"孝+攵，手持教鞭教导",origin:"教育，教导",hints:"老师做的事|__书|请__|指__",groupWords:"教育|教师|教学|教导|教材",idioms:"因材施教::针对不同的人用不同的方法教育|教学相长::教和学互相促进",riddles:"孝加攵::会意",synonyms:"授",antonyms:"学" },
+  { id:"数",name:"数",nameTrad:"數",pinyin:"shu",category:"normal",oracle:"攵+娄，用手计算",origin:"数目，数学",hints:"用来计算的|__学|__字|无__",groupWords:"数字|数学|数量|无数|算数",idioms:"数一数二::非常突出|心中有数::心里有底",riddles:"反文旁加娄::形声",synonyms:"计",antonyms:"" },
+  { id:"放",name:"放",nameTrad:"放",pinyin:"fang",category:"normal",oracle:"方+攵，用手放开",origin:"放下，解放",hints:"和收相反|解__|开__|释__",groupWords:"放下|放开|解放|放心|放学",idioms:"放任自流::不加约束任其发展|百花齐放::各种花同时开放",riddles:"方加攵::形声",synonyms:"释",antonyms:"收" },
+
+  // ── 雨字族（进一步深入） ──
+  { id:"雹",name:"雹",nameTrad:"雹",pinyin:"bao",category:"normal",oracle:"雨+包，天上掉下的冰粒",origin:"冰雹",hints:"天上掉下来的冰疙瘩|冰__|下__|__子",groupWords:"冰雹|雹子|下雹|雹灾|雹粒",idioms:"",riddles:"雨字头加包::形声",synonyms:"",antonyms:"" },
+  { id:"霞",name:"霞",nameTrad:"霞",pinyin:"xia",category:"normal",oracle:"雨+叚，雨后云彩",origin:"霞光，彩霞",hints:"早晚彩色的云|彩__|晚__|云__",groupWords:"彩霞|晚霞|朝霞|云霞|霞光",idioms:"霞光万道::日出日落时美丽的景象|凤冠霞帔::古代贵族妇女的礼服",riddles:"雨字头加叚::形声",synonyms:"",antonyms:"" },
+  { id:"甜",name:"甜",nameTrad:"甜",pinyin:"tian",category:"normal",oracle:"舌+甘，舌头尝到甜味",origin:"甘甜",hints:"糖的味道|甘__|__蜜|香__",groupWords:"甜美|甘甜|甜蜜|甜味|香甜",idioms:"甜言蜜语::甜蜜动听的话|酸甜苦辣::人生各种滋味",riddles:"舌加甘::会意",synonyms:"甘",antonyms:"苦" },
+
+
+// ==================== 注意：这是第4份，到这里结束 ====================
+// 接下来请拼接第5份（从皿字族补充开始）
+  // ── 皿字族（补充） ──
+  { id:"盖",name:"盖",nameTrad:"蓋",pinyin:"gai",category:"normal",oracle:"皿+盍，器皿的盖子",origin:"盖子，覆盖",hints:"盖在上面的东西|覆__|锅__|膝__",groupWords:"盖子|覆盖|锅盖|膝盖|盖章",idioms:"盖世无双::当代第一|铺天盖地::形容来势凶猛",riddles:"皿字底加盍::形声",synonyms:"覆",antonyms:"揭" },
+  { id:"尽",name:"尽",nameTrad:"盡",pinyin:"jin",category:"normal",oracle:"皿+尺，器皿中东西吃完了",origin:"尽头，尽力",hints:"到头了|__头|全__|用__",groupWords:"尽头|尽力|尽管|全部|尽心",idioms:"尽力而为::用尽全力去做|山穷水尽::陷入绝境",riddles:"皿加尺::会意",synonyms:"完",antonyms:"" },
+
+  // ── 豆字族（食器与豆类） ──
+  { id:"豆",name:"豆",nameTrad:"豆",pinyin:"dou",category:"normal",oracle:"一个高脚盘子的形状",origin:"食器，后来指豆类",hints:"吃的豆子|黄__|绿__|土__",groupWords:"豆子|黄豆|绿豆|土豆|豆腐",idioms:"目光如豆::眼光短浅|豆蔻年华::少女十三四岁的年纪",riddles:"一个高脚盘子的形状::象形",synonyms:"",antonyms:"" },
+  { id:"登",name:"登",nameTrad:"登",pinyin:"deng",category:"normal",oracle:"豆+癶，踩在食器上登高",origin:"登上，登记",hints:"往上走|__山|__记|攀__",groupWords:"登山|登记|登录|登场|攀登",idioms:"登峰造极::达到最高境界|一步登天::一下子达到极高的地位",riddles:"豆加癶::会意",synonyms:"上",antonyms:"下" },
+
+  // ── 角字族 ──
+  { id:"角",name:"角",nameTrad:"角",pinyin:"jiao",category:"normal",oracle:"一只兽角的形状",origin:"兽角，角度",hints:"牛头上长的|牛__|三__|__度",groupWords:"牛角|三角|角度|角落|角色",idioms:"崭露头角::显示出才能|天涯海角::非常遥远的地方",riddles:"一只兽角的形状::象形",synonyms:"",antonyms:"" },
+  { id:"解",name:"解",nameTrad:"解",pinyin:"jie",category:"normal",oracle:"角+刀+牛，用刀把牛角解下来",origin:"解开，解决",hints:"把东西弄开|__开|理__|了__",groupWords:"解开|解决|了解|解释|解放",idioms:"迎刃而解::问题很容易解决|难解难分::纠缠在一起分不开",riddles:"角加刀加牛::会意",synonyms:"分",antonyms:"系" },
+
+  // ── 言字族（进一步深入） ──
+  { id:"谢",name:"谢",nameTrad:"謝",pinyin:"xie",category:"normal",oracle:"言+射，用言语感谢",origin:"感谢，答谢",hints:"说谢谢|感__|多__|道__",groupWords:"感谢|谢谢|多谢|道谢|谢意",idioms:"谢天谢地::表示庆幸|闭门谢客::不接待客人",riddles:"言字旁加射::形声",synonyms:"感",antonyms:"" },
+  { id:"该",name:"该",nameTrad:"該",pinyin:"gai",category:"normal",oracle:"言+亥，应该说的话",origin:"应该，该当",hints:"应__|活__|__死|不__",groupWords:"应该|活该|该死|不该|该当",idioms:"该当何罪::应该判什么罪",riddles:"言字旁加亥::形声",synonyms:"应",antonyms:"" },
+
+  // ── 土字族（进一步深入） ──
+  { id:"块",name:"块",nameTrad:"塊",pinyin:"kuai",category:"normal",oracle:"土+夬，土块",origin:"土块，块状",hints:"一块一块的|土__|石__|一__",groupWords:"土块|石块|一块|块头|块茎",idioms:"铁板一块::完全一致没有分歧",riddles:"土字旁加夬::形声",synonyms:"",antonyms:"" },
+  { id:"坏",name:"坏",nameTrad:"壞",pinyin:"huai",category:"normal",oracle:"土+不，土墙崩塌",origin:"破坏，不好",hints:"和好相反|破__|__人|损__",groupWords:"破坏|坏人|损坏|坏事|好坏",idioms:"坏人心术::使人学坏|气急败坏::非常慌张恼怒",riddles:"土加不::形声",synonyms:"恶",antonyms:"好" },
+
+  // ── 反义词补充 ──
+  { id:"弱",name:"弱",nameTrad:"弱",pinyin:"ruo",category:"normal",oracle:"两张弓靠在一起但无力",origin:"弱小，软弱",hints:"和强相反|软__|脆__|削__",groupWords:"弱小|软弱|脆弱|弱点|削弱",idioms:"弱不禁风::身体非常虚弱|恃强凌弱::仗着自己强大欺负弱小",riddles:"两张弓靠在一起::会意",synonyms:"软",antonyms:"强" },
+  { id:"强",name:"强",nameTrad:"強",pinyin:"qiang",category:"normal",oracle:"虫+弘，强壮的虫子",origin:"强大，强壮",hints:"和弱相反|坚__|富__|要__",groupWords:"强大|强壮|坚强|富强|强硬",idioms:"身强体壮::身体强壮|强词夺理::无理硬说有理",riddles:"虫加弘::形声",synonyms:"壮",antonyms:"弱" },
+
+  // ── 白字族 ──
+  { id:"的",name:"的",nameTrad:"的",pinyin:"de",category:"normal",oracle:"白+勺，白色鲜明",origin:"鲜明，目标；后来用作助词",hints:"白色的靶心|目__|有__放矢|__确",groupWords:"目的|的确|有的|是的|好的",idioms:"有的放矢::说话做事有针对性|一语中的::一句话就说中了要害",riddles:"白加勺::形声",synonyms:"确",antonyms:"" },
+  { id:"皇",name:"皇",nameTrad:"皇",pinyin:"huang",category:"normal",oracle:"白+王，白色是帝王之色",origin:"皇帝，辉煌",hints:"古代最大的官|__帝|教__|堂__",groupWords:"皇帝|皇后|皇家|堂皇|辉煌",idioms:"富丽堂皇::华丽盛大|冠冕堂皇::表面上非常体面",riddles:"白加王::会意",synonyms:"帝",antonyms:"" },
+  { id:"泉",name:"泉",nameTrad:"泉",pinyin:"quan",category:"normal",oracle:"白+水，白色的水从地下涌出",origin:"泉水，水源",hints:"地下冒出来的水|__水|温__|源__",groupWords:"泉水|温泉|源泉|清泉|泉眼",idioms:"泪如泉涌::眼泪像泉水一样涌出|文思泉涌::文思像泉水一样涌出",riddles:"白加水::会意",synonyms:"源",antonyms:"" },
+
+  // ── 立字族 ──
+  { id:"站",name:"站",nameTrad:"站",pinyin:"zhan",category:"normal",oracle:"立+占，站立",origin:"站立，车站",hints:"和立差不多|__立|车__|起__",groupWords:"站立|车站|站台|站岗|站住",idioms:"站稳脚跟::站得稳比喻基础牢固",riddles:"立加占::形声",synonyms:"立",antonyms:"坐" },
+  { id:"章",name:"章",nameTrad:"章",pinyin:"zhang",category:"normal",oracle:"音+十，音乐的一章",origin:"文章，章节",hints:"文章的一部分|文__|篇__|乐__",groupWords:"文章|篇章|章节|乐章|公章",idioms:"顺理成章::顺着条理自然形成|出口成章::脱口而出就像文章一样",riddles:"音加十::会意",synonyms:"篇",antonyms:"" },
+  { id:"竞",name:"竞",nameTrad:"競",pinyin:"jing",category:"normal",oracle:"立+兄，两个人并肩站立比赛",origin:"竞赛，竞争",hints:"比赛|__争|__赛|__走",groupWords:"竞赛|竞争|竞选|竞走|竞技",idioms:"物竞天择::万物竞争自然选择|千帆竞发::很多船争相出发",riddles:"立加兄::会意",synonyms:"争",antonyms:"" },
+
+  // ── 疒字族补充 ──
+  { id:"疗",name:"疗",nameTrad:"療",pinyin:"liao",category:"normal",oracle:"疒+了，治疗疾病",origin:"治疗，疗养",hints:"把病治好|治__|医__|诊__",groupWords:"治疗|医疗|疗养|诊疗|疗效",idioms:"对症下药治疗::针对病情用药",riddles:"病字头加了::形声",synonyms:"治",antonyms:"" },
+  { id:"疲",name:"疲",nameTrad:"疲",pinyin:"pi",category:"normal",oracle:"疒+皮，身体疲劳",origin:"疲劳，疲惫",hints:"很累|劳__|__倦|筋__力尽",groupWords:"疲劳|疲倦|疲惫|筋疲力尽|疲乏",idioms:"筋疲力尽::非常疲劳|乐此不疲::喜欢做某事而不觉得累",riddles:"病字头加皮::形声",synonyms:"倦",antonyms:"" },
+  { id:"疯",name:"疯",nameTrad:"瘋",pinyin:"feng",category:"normal",oracle:"疒+风，像风一样不可控制",origin:"疯狂，疯癫",hints:"精神不正常|发__|__狂|装__",groupWords:"疯狂|发疯|疯癫|装疯|疯狗",idioms:"装疯卖傻::假装疯癫|疯疯癫癫::举止异常",riddles:"病字头加风::形声",synonyms:"狂",antonyms:"" },
+
+  // ── 田字族补充 ──
+  { id:"界",name:"界",nameTrad:"界",pinyin:"jie",category:"normal",oracle:"田+介，田地的边界",origin:"边界，世界",hints:"田地的边缘|世__|边__|眼__",groupWords:"世界|边界|眼界|界限|国界",idioms:"大开眼界::开阔视野|一望无际::看不到边",riddles:"田加介::形声",synonyms:"边",antonyms:"" },
+  { id:"留",name:"留",nameTrad:"留",pinyin:"liu",category:"normal",oracle:"田+卯，在田里停留",origin:"停留，留下",hints:"停下来不走|停__|__下|保__",groupWords:"留下|停留|留心|保留|留学",idioms:"留有余地::说话做事留下回旋的空间|寸草不留::一点东西也不留下",riddles:"田加卯::形声",synonyms:"停",antonyms:"走" },
+  { id:"略",name:"略",nameTrad:"略",pinyin:"lve",category:"normal",oracle:"田+各，管理田地要规划",origin:"谋略，简略",hints:"大概的|策__|省__|忽__",groupWords:"策略|简略|忽略|略微|大略",idioms:"略知一二::知道一点点|雄才大略::非常杰出的才能和谋略",riddles:"田加各::形声",synonyms:"简",antonyms:"详" },
+
+  // ── 反义词补充 ──
+  { id:"苦",name:"苦",nameTrad:"苦",pinyin:"ku",category:"normal",oracle:"艹+古，一种苦味的草药",origin:"苦涩，辛苦",hints:"和甜相反|辛__|__难|痛__",groupWords:"辛苦|苦难|痛苦|苦涩|苦味",idioms:"苦尽甘来::苦难过完甘甜来了|同甘共苦::共同分享幸福分担困难",riddles:"草字头加古::形声",synonyms:"辛",antonyms:"甜" },
+  { id:"湿",name:"湿",nameTrad:"濕",pinyin:"shi",category:"normal",oracle:"氵+显，水分多",origin:"潮湿",hints:"和干相反|潮__|__润|淋__",groupWords:"潮湿|湿润|淋湿|湿度|湿气",idioms:"泪眼汪汪::眼泪湿润了眼眶",riddles:"三点水加显::形声",synonyms:"潮",antonyms:"干" },
+  { id:"干",name:"干",nameTrad:"干",pinyin:"gan",category:"normal",oracle:"一个树杈的样子",origin:"干燥，树干",hints:"和湿相反|__燥|晾__|树__",groupWords:"干燥|树干|干净|晾干|干涸",idioms:"干净利落::做事干脆|口干舌燥::非常口渴",riddles:"一个树杈的形状::象形",synonyms:"燥",antonyms:"湿" },
+  { id:"始",name:"始",nameTrad:"始",pinyin:"shi",category:"normal",oracle:"女+台，女人生育是生命的开始",origin:"开始，起始",hints:"和终相反|开__|原__|起__",groupWords:"开始|原始|始终|起始|始发",idioms:"始终如一::从头到尾都一样|周而复始::循环往复",riddles:"女加台::形声",synonyms:"初",antonyms:"终" },
+
+  // ── 身体部位 ──
+  { id:"齿",name:"齿",nameTrad:"齒",pinyin:"chi",category:"normal",oracle:"一排牙齿的形状",origin:"牙齿",hints:"嘴巴里的|牙__|门__|臼__",groupWords:"牙齿|门齿|臼齿|齿龈|唇齿",idioms:"唇亡齿寒::利害关系密切|咬牙切齿::非常愤怒",riddles:"一排牙齿的形状::象形",synonyms:"牙",antonyms:"" },
+  { id:"鼻",name:"鼻",nameTrad:"鼻",pinyin:"bi",category:"normal",oracle:"自+畀，鼻子",origin:"鼻子",hints:"脸上用来闻的|__子|__孔|嗤之以__",groupWords:"鼻子|鼻孔|鼻梁|鼻息|嗤之以鼻",idioms:"嗤之以鼻::看不起|仰人鼻息::看别人的脸色行事",riddles:"自加畀::形声",synonyms:"",antonyms:"" },
+  { id:"面",name:"面",nameTrad:"面",pinyin:"mian",category:"normal",oracle:"一只眼睛外面一个框",origin:"脸面，表面",hints:"脸上的|__子|表__|四__",groupWords:"面孔|面子|表面|四面|面对",idioms:"面面俱到::各方面都照顾到|改头换面::彻底改变面貌",riddles:"目外面一个框::象形",synonyms:"脸",antonyms:"里" },
+  { id:"身",name:"身",nameTrad:"身",pinyin:"shen",category:"normal",oracle:"一个大肚子的人形",origin:"身体",hints:"整个人|__体|健__|全__",groupWords:"身体|身份|身材|健身|身边",idioms:"身先士卒::领导带头冲在前面|身临其境::亲身到了那个环境",riddles:"一个大肚子的人形::象形",synonyms:"体",antonyms:"" },
+
+  // ── 自然补充 ──
+  { id:"沙",name:"沙",nameTrad:"沙",pinyin:"sha",category:"normal",oracle:"水+少，水流中的细小石粒",origin:"沙子",hints:"海滩上的|__子|泥__|风__",groupWords:"沙子|泥沙|风沙|沙滩|沙漠",idioms:"聚沙成塔::积少成多|沙里淘金::从大量东西中挑选精华",riddles:"三点水加少::会意",synonyms:"",antonyms:"" },
+  { id:"尘",name:"尘",nameTrad:"塵",pinyin:"chen",category:"normal",oracle:"小+土，细小的土",origin:"灰尘",hints:"空气中的小土粒|灰__|__土|粉__",groupWords:"灰尘|尘土|尘埃|粉尘|一尘不染",idioms:"一尘不染::非常干净|风尘仆仆::旅途辛苦",riddles:"小加土::会意",synonyms:"灰",antonyms:"" },
+  { id:"泥",name:"泥",nameTrad:"泥",pinyin:"ni",category:"normal",oracle:"氵+尼，水和土混合",origin:"泥土",hints:"水加土就成了|__土|烂__|水__",groupWords:"泥土|泥沙|烂泥|水泥|泥巴",idioms:"泥牛入海::一去不复返|拖泥带水::做事不干脆",riddles:"三点水加尼::形声",synonyms:"",antonyms:"" },
+  { id:"浪",name:"浪",nameTrad:"浪",pinyin:"lang",category:"normal",oracle:"氵+良，大的波浪",origin:"波浪，浪花",hints:"水面的波纹|波__|海__|风__",groupWords:"波浪|海浪|浪花|风浪|流浪",idioms:"惊涛骇浪::非常凶险的波浪|乘风破浪::勇往直前",riddles:"三点水加良::形声",synonyms:"波",antonyms:"" },
+
+  // ── 建筑补充 ──
+  { id:"桥",name:"桥",nameTrad:"橋",pinyin:"qiao",category:"normal",oracle:"木+乔，木制的桥梁",origin:"桥梁",hints:"搭在水上的路|天__|木__|小__",groupWords:"桥梁|天桥|木桥|小桥|桥墩",idioms:"过河拆桥::利用完就抛弃|搭桥牵线::从中撮合联系",riddles:"木字旁加乔::形声",synonyms:"梁",antonyms:"" },
+  { id:"塔",name:"塔",nameTrad:"塔",pinyin:"ta",category:"normal",oracle:"土+荅，土石垒成的建筑",origin:"塔，宝塔",hints:"尖尖的高建筑|宝__|灯__|水__",groupWords:"宝塔|灯塔|水塔|塔楼|铁塔",idioms:"聚沙成塔::积少成多|象牙之塔::脱离现实的文学艺术",riddles:"土字旁加荅::形声",synonyms:"",antonyms:"" },
+  { id:"亭",name:"亭",nameTrad:"亭",pinyin:"ting",category:"normal",oracle:"高+丁，高耸的亭子",origin:"亭子",hints:"路边的小房子|凉__|长__|书__",groupWords:"亭子|凉亭|长亭|书亭|亭亭玉立",idioms:"亭亭玉立::形容女子身材修长|十里长亭::古代送别的地方",riddles:"高加丁::形声",synonyms:"",antonyms:"" },
+
+  // ── 动物补充 ──
+  { id:"象",name:"象",nameTrad:"象",pinyin:"xiang",category:"normal",oracle:"一头大象的形状",origin:"大象，形象",hints:"长鼻子的大动物|大__|景__|印__",groupWords:"大象|景象|形象|象棋|象征",idioms:"盲人摸象::看问题片面|万象更新::一切事物都焕然一新",riddles:"一头长鼻子动物的形状::象形",synonyms:"",antonyms:"" },
+  { id:"鹿",name:"鹿",nameTrad:"鹿",pinyin:"lu",category:"normal",oracle:"一头鹿的形状",origin:"鹿，梅花鹿",hints:"头上长角的动物|梅__|长颈__|指__为马",groupWords:"梅花鹿|长颈鹿|鹿角|鹿茸|指鹿为马",idioms:"指鹿为马::故意颠倒黑白|鹿死谁手::胜负未定",riddles:"一头鹿的形状::象形",synonyms:"",antonyms:"" },
+  { id:"蛙",name:"蛙",nameTrad:"蛙",pinyin:"wa",category:"normal",oracle:"虫+圭，青蛙",origin:"青蛙",hints:"会跳的小动物|青__|井底之__|牛__",groupWords:"青蛙|牛蛙|蛙泳|井底之蛙|蛙声",idioms:"井底之蛙::眼界狭窄|蛙声一片::青蛙叫声此起彼伏",riddles:"虫字旁加圭::形声",synonyms:"",antonyms:"" },
+
+  // ── 常用副词连接词 ──
+  { id:"就",name:"就",nameTrad:"就",pinyin:"jiu",category:"normal",oracle:"京+尤，靠近",origin:"就近，就是",hints:"表示马上|__要|成__|__是",groupWords:"就是|就要|成就|就近|就业",idioms:"一挥而就::很快就完成|功成名就::功业建立了名声也有了",riddles:"京加尤::形声",synonyms:"便",antonyms:"" },
+  { id:"都",name:"都",nameTrad:"都",pinyin:"dou",category:"normal",oracle:"者+邑，大城市",origin:"都市，全都",hints:"大城市|首__|__市|__是",groupWords:"首都|都市|都是|全都|都城",idioms:"面面俱到::各方面都照顾到",riddles:"者加邑::形声",synonyms:"全",antonyms:"" },
+  { id:"只",name:"只",nameTrad:"只",pinyin:"zhi",category:"normal",oracle:"口+八，只有",origin:"仅仅，只有",hints:"仅仅|__有|__是|一__",groupWords:"只有|只是|一只|只能|只身",idioms:"只争朝夕::抓紧时间|形单影只::形容孤独",riddles:"口加八::会意",synonyms:"仅",antonyms:"都" },
+  { id:"把",name:"把",nameTrad:"把",pinyin:"ba",category:"normal",oracle:"扌+巴，用手握住",origin:"把握，把持",hints:"用手拿住|__握|火__|一__",groupWords:"把握|一把|火把|把手|把持",idioms:"一把钥匙开一把锁::用不同方法解决不同问题|稳操胜券::牢牢把握着胜利",riddles:"手字旁加巴::形声",synonyms:"握",antonyms:"放" },
+  { id:"以",name:"以",nameTrad:"以",pinyin:"yi",category:"normal",oracle:"人用工具的形状",origin:"用来，因为",hints:"用来|可__|所__|__前",groupWords:"可以|所以|以前|以为|以来",idioms:"以理服人::用道理来说服别人|以身作则::用自己的行动作为榜样",riddles:"人用工具的形状::会意",synonyms:"用",antonyms:"" },
+  { id:"终",name:"终",nameTrad:"終",pinyin:"zhong",category:"normal",oracle:"纟+冬，丝线的尽头",origin:"终点，结束",hints:"和始相反|最__|__点|年__",groupWords:"终点|终于|最终|始终|年终",idioms:"始料未及::开始的时候没有料到最后|善始善终::从开始到结束都很好",riddles:"绞丝旁加冬::形声",synonyms:"末",antonyms:"始" },
+  { id:"自",name:"自",nameTrad:"自",pinyin:"zi",category:"normal",oracle:"一个鼻子的形状",origin:"鼻子，自己",hints:"鼻子|自__|__己|来__",groupWords:"自己|自然|自从|自信|自由",idioms:"自力更生::依靠自己的力量|自给自足::自己满足自己的需要",riddles:"一个鼻子的形状::象形",synonyms:"己",antonyms:"他" },
+  { id:"帝",name:"帝",nameTrad:"帝",pinyin:"di",category:"normal",oracle:"花蒂的形状，引申为天帝",origin:"天帝，皇帝",hints:"天上的统治者|上__|皇__|玉__",groupWords:"皇帝|上帝|帝王|玉帝|帝国",idioms:"帝王将相::泛指封建统治阶级|三皇五帝::上古传说中的帝王",riddles:"花蒂的形状::象形",synonyms:"王",antonyms:"" },
+
+  // ── 禾字族补充 ──
+  { id:"和",name:"和",nameTrad:"和",pinyin:"he",category:"normal",oracle:"禾+口，禾谷入口，和谐",origin:"和谐，和平",hints:"大家一起不吵架|__平|__气|温__",groupWords:"和平|和谐|和气|温和|和好",idioms:"和风细雨::温和的批评|心平气和::心里平静态度温和",riddles:"禾加口::形声",synonyms:"谐",antonyms:"战" },
+  { id:"委",name:"委",nameTrad:"委",pinyin:"wei",category:"normal",oracle:"禾+女，禾谷像女子一样弯曲",origin:"委托，委屈",hints:"把事情交给别人|__托|__屈|原__",groupWords:"委托|委屈|委员|原委|委婉",idioms:"委曲求全::勉强迁就以保全|虚与委蛇::敷衍应付",riddles:"禾加女::会意",synonyms:"托",antonyms:"" },
+  { id:"季",name:"季",nameTrad:"季",pinyin:"ji",category:"normal",oracle:"禾+子，禾谷成熟的季节",origin:"季节",hints:"一年四季|春__|秋__|雨__",groupWords:"季节|四季|春季|秋季|雨季",idioms:"四季如春::一年四季都像春天一样|雨季来临::下雨的季节到了",riddles:"禾加子::会意",synonyms:"",antonyms:"" },
+
+  // ── 寸字族补充 ──
+  { id:"守",name:"守",nameTrad:"守",pinyin:"shou",category:"normal",oracle:"宀+寸，在屋里用手守护",origin:"守护，遵守",hints:"保护|保__|__护|遵__",groupWords:"守护|保守|遵守|防守|守卫",idioms:"守株待兔::死守经验不知变通|安分守己::老实本分",riddles:"宀加寸::会意",synonyms:"护",antonyms:"攻" },
+  { id:"付",name:"付",nameTrad:"付",pinyin:"fu",category:"normal",oracle:"人+寸，用手交付",origin:"交付，支付",hints:"把钱给别人|支__|__钱|对__",groupWords:"支付|付出|交付|对付|付款",idioms:"应付自如::处理事情很从容|付之一笑::一笑置之不在意",riddles:"人加寸::会意",synonyms:"交",antonyms:"收" },
+
+  // ── 土石字族补充 ──
+  { id:"坚",name:"坚",nameTrad:"堅",pinyin:"jian",category:"normal",oracle:"土+臤，土坚固",origin:"坚固，坚强",hints:"很硬很牢固|__固|__强|中__",groupWords:"坚固|坚强|坚持|坚定|坚硬",idioms:"坚持不懈::坚持不松懈|坚不可摧::非常坚固无法摧毁",riddles:"土加臤::形声",synonyms:"硬",antonyms:"软" },
+
+  // ── 反义词补充 ──
+  { id:"旧",name:"旧",nameTrad:"舊",pinyin:"jiu",category:"normal",oracle:"萑+臼，旧的鸟巢",origin:"陈旧，过去",hints:"和新相反|__的|破__|仍__",groupWords:"旧的|破旧|仍旧|依旧|陈旧",idioms:"旧地重游::再次来到曾经到过的地方|喜新厌旧::喜欢新的讨厌旧的",riddles:"萑加臼::形声",synonyms:"陈",antonyms:"新" },
+  { id:"新",name:"新",nameTrad:"新",pinyin:"xin",category:"normal",oracle:"亲+斤，用斧头砍出新木",origin:"新旧，新鲜",hints:"和旧相反|__的|全__|创__",groupWords:"新的|新鲜|全新|创新|新闻",idioms:"焕然一新::完全变新了|推陈出新::淘汰旧的创造新的",riddles:"亲加斤::形声",synonyms:"鲜",antonyms:"旧" },
+
+  // ── 常用字补充 ──
+  { id:"在",name:"在",nameTrad:"在",pinyin:"zai",category:"normal",oracle:"才+土，草木才从土里长出来",origin:"存在，正在",hints:"表示位置|存__|现__|正__",groupWords:"存在|现在|正在|在家|在乎",idioms:"事在人为::事情的成功在于人的努力|成竹在胸::做事前已有充分准备",riddles:"才加土::形声",synonyms:"存",antonyms:"亡" },
+  { id:"我",name:"我",nameTrad:"我",pinyin:"wo",category:"normal",oracle:"一把长柄兵器的形状",origin:"第一人称，自己",hints:"自己|__们|自__|忘__",groupWords:"我们|自我|忘我|我国|我家",idioms:"自我陶醉::沉醉在自我欣赏中|尔虞我诈::互相欺骗",riddles:"一把长柄兵器的形状::象形",synonyms:"己",antonyms:"你" },
+  { id:"你",name:"你",nameTrad:"你",pinyin:"ni",category:"normal",oracle:"人+尔，第二人称",origin:"第二人称，对方",hints:"和我相对|__们|爱__|等__",groupWords:"你们|你好|爱你|等你|你我",idioms:"你死我活::斗争非常激烈|你来我往::互相交往频繁",riddles:"人加尔::形声",synonyms:"尔",antonyms:"我" },
+  { id:"他",name:"他",nameTrad:"他",pinyin:"ta",category:"normal",oracle:"人+也，第三人称",origin:"第三人称",hints:"别人|__们|其__|利__",groupWords:"他们|其他|他人|利他|他乡",idioms:"他山之石::别人的经验可以借鉴|别无他法::没有别的办法",riddles:"人加也::形声",synonyms:"",antonyms:"" },
+  { id:"它",name:"它",nameTrad:"它",pinyin:"ta",category:"normal",oracle:"一条蛇的形状",origin:"蛇，后来指动物或事物",hints:"指动物或东西|__们|其__|无__",groupWords:"它们|其他|无它|它物|它处",idioms:"别无它法::没有别的办法",riddles:"一条蛇的形状::象形",synonyms:"",antonyms:"" },
+  { id:"同",name:"同",nameTrad:"同",pinyin:"tong",category:"normal",oracle:"凡+口，大家一起说",origin:"相同，共同",hints:"一样|相__|共__|不__",groupWords:"相同|共同|同学|同一|不同",idioms:"同心协力::团结一致共同努力|异口同声::大家说一样的话",riddles:"凡加口::会意",synonyms:"共",antonyms:"异" },
+  { id:"攻",name:"攻",nameTrad:"攻",pinyin:"gong",category:"normal",oracle:"工+攵，用工具攻击",origin:"攻击，进攻",hints:"和守相反|进__|__击|围__",groupWords:"攻击|进攻|攻打|围攻|攻读",idioms:"攻其不备::趁对方没有准备时进攻|以守为攻::用防守作为进攻的手段",riddles:"工加攵::形声",synonyms:"击",antonyms:"守" },
+
+  // ── 补充节点（补漏所需） ──
+  { id:"晨",name:"晨",nameTrad:"晨",pinyin:"chen",category:"normal",oracle:"日+辰，太阳升起的时候",origin:"早晨，清晨",hints:"早上|清__|早__|凌__",groupWords:"早晨|清晨|凌晨|晨光|晨练",idioms:"晨钟暮鼓::寺庙中早晚报时的钟鼓声|一日之计在于晨::一天的计划要从早晨开始",riddles:"日加辰::形声",synonyms:"早",antonyms:"昏" },
+  { id:"词",name:"词",nameTrad:"詞",pinyin:"ci",category:"normal",oracle:"言+司，言语的组成单位",origin:"词语，词汇",hints:"说话写文章用的|语__|单__|名__",groupWords:"词语|词汇|单词|名词|词句",idioms:"词不达意::词语不能准确表达意思|陈词滥调::陈旧而不切实际的话",riddles:"言字旁加司::形声",synonyms:"语",antonyms:"" },
+  { id:"乐",name:"乐",nameTrad:"樂",pinyin:"le",category:"normal",oracle:"丝+木，弦乐器",origin:"音乐，快乐",hints:"高兴的事|快__|音__|欢__",groupWords:"快乐|音乐|欢乐|乐趣|乐观",idioms:"乐不思蜀::快乐得忘了本|其乐无穷::其中的乐趣没有穷尽",riddles:"丝加木::会意",synonyms:"快",antonyms:"悲" },
+  { id:"答",name:"答",nameTrad:"答",pinyin:"da",category:"normal",oracle:"竹+合，用竹简回复",origin:"回答，答复",hints:"和问相反|回__|__案|解__",groupWords:"回答|答案|解答|答复|答题",idioms:"对答如流::回答得很流利|答非所问::回答的不是问的内容",riddles:"竹字头加合::形声",synonyms:"回",antonyms:"问" },
+  { id:"听",name:"听",nameTrad:"聽",pinyin:"ting",category:"normal",oracle:"耳+斤，用耳朵听",origin:"聆听，听见",hints:"用耳朵接收声音|__见|聆__|打__",groupWords:"听见|听说|听力|听众|打听",idioms:"听其自然::随它自然发展|偏听偏信::只听一面之词就相信",riddles:"耳加斤::形声",synonyms:"闻",antonyms:"说" },
+  { id:"祸",name:"祸",nameTrad:"禍",pinyin:"huo",category:"normal",oracle:"示+呙，神降灾难",origin:"灾祸，祸害",hints:"和福相反|灾__|闯__|车__",groupWords:"灾祸|祸害|闯祸|车祸|祸根",idioms:"祸从天降::灾祸突然降临|因祸得福::坏事变成好事",riddles:"示字旁加呙::形声",synonyms:"灾",antonyms:"福" },
+  { id:"祀",name:"祀",nameTrad:"祀",pinyin:"si",category:"normal",oracle:"示+巳，祭祀",origin:"祭祀，供奉",hints:"和祭差不多|祭__|奉__|__祖",groupWords:"祭祀|奉祀|祀祖|祀神|祀天",idioms:"",riddles:"示字旁加巳::形声",synonyms:"祭",antonyms:"" },
+  { id:"左",name:"左",nameTrad:"左",pinyin:"zuo",category:"normal",oracle:"左手拿工具的形状",origin:"左边",hints:"和右相反|__边|__手|向__",groupWords:"左边|左手|左右|左转|左面",idioms:"左顾右盼::左看右看|左右为难::进退两难",riddles:"一只左手的形状::象形",synonyms:"",antonyms:"右" },
+  { id:"右",name:"右",nameTrad:"右",pinyin:"you",category:"normal",oracle:"右手拿工具的形状",origin:"右边",hints:"和左相反|__边|__手|向__",groupWords:"右边|右手|左右|右转|右面",idioms:"左思右想::反复思考|无出其右::没有能超过它的",riddles:"一只右手的形状::象形",synonyms:"",antonyms:"左" },
+  { id:"前",name:"前",nameTrad:"前",pinyin:"qian",category:"normal",oracle:"止+舟，脚在船上向前",origin:"前面，前进",hints:"和后相反|__面|从__|面__",groupWords:"前面|从前|前进|前方|之前",idioms:"前车之鉴::以前人的失败为教训|前所未有::以前从来没有过",riddles:"止加舟::会意",synonyms:"先",antonyms:"后" },
+  { id:"后",name:"后",nameTrad:"後",pinyin:"hou",category:"normal",oracle:"一只手放在口上发号施令",origin:"后面，后来",hints:"和前相反|__面|以__|然__",groupWords:"后面|以后|后来|后方|之后",idioms:"后来居上::后起的超过先前的|前赴后继::前面的人冲上去后面的人跟上来",riddles:"一只手放在口上::会意",synonyms:"",antonyms:"前" },
+  { id:"是",name:"是",nameTrad:"是",pinyin:"shi",category:"normal",oracle:"日+正，太阳正当时",origin:"正确，判断词",hints:"对的意思|__的|不__|还__",groupWords:"是的|不是|还是|总是|是非",idioms:"实事求是::按照实际情况办事|是非分明::对错清楚",riddles:"日加正::会意",synonyms:"对",antonyms:"非" },
+  { id:"非",name:"非",nameTrad:"非",pinyin:"fei",category:"normal",oracle:"两扇翅膀背对背",origin:"不是，错误",hints:"和是相反|__常|是__|莫__",groupWords:"非常|是非|莫非|非议|无非",idioms:"非亲非故::既不是亲戚也不是故旧|无事生非::没事找事制造是非",riddles:"两扇翅膀背对背::象形",synonyms:"否",antonyms:"是" },
+  { id:"美",name:"美",nameTrad:"美",pinyin:"mei",category:"normal",oracle:"羊+大，大羊肥美",origin:"美丽，美好",hints:"好看的|漂__|完__|优__",groupWords:"美丽|美好|完美|优美|美观",idioms:"美不胜收::美好的东西太多来不及欣赏|尽善尽美::非常完美",riddles:"羊加大::会意",synonyms:"好",antonyms:"丑" },
+  { id:"丑",name:"丑",nameTrad:"醜",pinyin:"chou",category:"normal",oracle:"一只手扭曲的形状",origin:"丑陋，丑角",hints:"不好看的|__陋|出__|小__",groupWords:"丑陋|丑恶|出丑|丑角|丑闻",idioms:"丑态百出::各种丑陋的姿态都表现出来",riddles:"一只手扭曲的形状::象形",synonyms:"",antonyms:"美" },
+  { id:"暖",name:"暖",nameTrad:"暖",pinyin:"nuan",category:"normal",oracle:"日+爰，太阳照得暖和",origin:"温暖",hints:"不冷不热|温__|__和|取__",groupWords:"温暖|暖和|暖流|暖风|春暖",idioms:"春暖花开::春天气候温暖百花盛开|嘘寒问暖::关心别人的冷暖",riddles:"日字旁加爰::形声",synonyms:"温",antonyms:"冷" },
+  { id:"凉",name:"凉",nameTrad:"涼",pinyin:"liang",category:"normal",oracle:"冫+京，微冷",origin:"凉爽，微冷",hints:"不热不冷|__快|清__|冰__",groupWords:"凉爽|清凉|冰凉|凉风|凉意",idioms:"世态炎凉::人情冷暖变化|天凉好个秋::秋天天气凉爽",riddles:"两点水加京::形声",synonyms:"冷",antonyms:"暖" },
+  { id:"书",name:"书",nameTrad:"書",pinyin:"shu",category:"normal",oracle:"一只手拿着笔在写字",origin:"书籍，书写",hints:"用来读的|看__|图__|教__",groupWords:"书籍|看书|图书|书写|书本",idioms:"书香门第::世代读书的人家|博览群书::广泛阅读各种书籍",riddles:"一只手拿笔写字::会意",synonyms:"本",antonyms:"" },
+  { id:"写",name:"写",nameTrad:"寫",pinyin:"xie",category:"normal",oracle:"宀+舄，在屋里写字",origin:"书写，写作",hints:"用笔做的事|__字|书__|抄__",groupWords:"写字|书写|写作|抄写|写生",idioms:"轻描淡写::不重要的描述|写实主义::如实描写的艺术风格",riddles:"宀加舄::形声",synonyms:"书",antonyms:"读" },
+  { id:"纸",name:"纸",nameTrad:"紙",pinyin:"zhi",category:"normal",oracle:"纟+氏，丝制的纸",origin:"纸张",hints:"写字用的|白__|__张|报__",groupWords:"纸张|白纸|报纸|纸巾|纸上",idioms:"纸上谈兵::空谈理论不切实际|一纸空文::一张没有用处的文书",riddles:"绞丝旁加氏::形声",synonyms:"",antonyms:"" },
+  { id:"蓝",name:"蓝",nameTrad:"藍",pinyin:"lan",category:"normal",oracle:"艹+监，一种可染蓝色的草",origin:"蓝色",hints:"天的颜色|__色|天__|蔚__",groupWords:"蓝色|蓝天|蔚蓝|蓝图|湛蓝",idioms:"青出于蓝::学生超过老师|蓝田生玉::名门出贤才",riddles:"草字头加监::形声",synonyms:"青",antonyms:"" },
+  { id:"碗",name:"碗",nameTrad:"碗",pinyin:"wan",category:"normal",oracle:"石+宛，石制的碗",origin:"碗，食器",hints:"吃饭用的|饭__|瓷__|大__",groupWords:"饭碗|瓷碗|大碗|碗筷|碗橱",idioms:"铁饭碗::比喻非常稳固的职业|一碗水端平::比喻公平对待",riddles:"石字旁加宛::形声",synonyms:"盘",antonyms:"" },
+  { id:"杯",name:"杯",nameTrad:"杯",pinyin:"bei",category:"normal",oracle:"木+不，木制的杯子",origin:"杯子",hints:"喝水用的|水__|茶__|酒__",groupWords:"杯子|水杯|茶杯|酒杯|一杯",idioms:"杯水车薪::力量太小无济于事|杯弓蛇影::疑神疑鬼",riddles:"木字旁加不::形声",synonyms:"盏",antonyms:"" },
+  { id:"桌",name:"桌",nameTrad:"桌",pinyin:"zhuo",category:"normal",oracle:"木+卓，木制的桌子",origin:"桌子",hints:"放东西用的家具|__子|书__|饭__",groupWords:"桌子|书桌|饭桌|课桌|桌面",idioms:"拍案而起::拍桌子站起来|桌面上::比喻公开的场合",riddles:"木字旁加卓::形声",synonyms:"台",antonyms:"" },
+  { id:"椅",name:"椅",nameTrad:"椅",pinyin:"yi",category:"normal",oracle:"木+奇，木制的椅子",origin:"椅子",hints:"坐着用的|__子|座__|轮__",groupWords:"椅子|座椅|轮椅|躺椅|椅背",idioms:"",riddles:"木字旁加奇::形声",synonyms:"",antonyms:"" },
+  { id:"床",name:"床",nameTrad:"床",pinyin:"chuang",category:"normal",oracle:"木+广，木制的床",origin:"床铺",hints:"睡觉用的|__铺|起__|河__",groupWords:"床铺|起床|河床|床单|床位",idioms:"同床异梦::同在一起但各有各的打算|叠床架屋::重复累赘",riddles:"木加广::形声",synonyms:"",antonyms:"" },
+  { id:"菜",name:"菜",nameTrad:"菜",pinyin:"cai",category:"normal",oracle:"艹+采，采来的草本植物",origin:"蔬菜，菜肴",hints:"吃饭时配的|蔬__|白__|炒__",groupWords:"蔬菜|白菜|炒菜|菜肴|菜单",idioms:"粗茶淡饭::简单朴素的生活|看人下菜碟::对不同的人用不同的态度",riddles:"草字头加采::形声",synonyms:"蔬",antonyms:"" },
+  { id:"茶",name:"茶",nameTrad:"茶",pinyin:"cha",category:"normal",oracle:"艹+余，一种可以泡水喝的植物",origin:"茶叶，茶",hints:"泡水喝的|喝__|绿__|红__",groupWords:"茶叶|喝茶|绿茶|红茶|茶杯",idioms:"茶余饭后::指闲暇的时间|粗茶淡饭::简单朴素的生活",riddles:"草字头加余::形声",synonyms:"",antonyms:"" },
+  { id:"瓜",name:"瓜",nameTrad:"瓜",pinyin:"gua",category:"normal",oracle:"一个瓜的形状",origin:"瓜果",hints:"长在藤上的果实|西__|冬__|南__",groupWords:"西瓜|冬瓜|南瓜|瓜果|瓜子",idioms:"瓜熟蒂落::时机成熟|顺藤摸瓜::按照线索追查",riddles:"一个瓜的形状::象形",synonyms:"",antonyms:"" },
+  { id:"们",name:"们",nameTrad:"們",pinyin:"men",category:"normal",oracle:"人+门，复数",origin:"们，复数后缀",hints:"表示多个|我__|你__|他__",groupWords:"我们|你们|他们|它们|人们",idioms:"",riddles:"人加门::形声",synonyms:"",antonyms:"" },
+  { id:"这",name:"这",nameTrad:"這",pinyin:"zhe",category:"normal",oracle:"辶+文，指示近处",origin:"这个，这里",hints:"和那相反|__个|__里|__样",groupWords:"这个|这里|这样|这么|这时",idioms:"",riddles:"走之底加文::形声",synonyms:"此",antonyms:"那" },
+  { id:"那",name:"那",nameTrad:"那",pinyin:"na",category:"normal",oracle:"邑+刀，指示远处",origin:"那个，那里",hints:"和这相反|__个|__里|__样",groupWords:"那个|那里|那样|那么|那时",idioms:"",riddles:"邑加刀::形声",synonyms:"彼",antonyms:"这" },
+  { id:"有",name:"有",nameTrad:"有",pinyin:"you",category:"normal",oracle:"手+月（肉），手里有肉",origin:"拥有，存在",hints:"和无相反|拥__|没__|富__",groupWords:"拥有|没有|所有|富有|有趣",idioms:"有备无患::有准备就没有祸患|有口皆碑::大家都称赞",riddles:"手加月::会意",synonyms:"拥",antonyms:"无" },
+  { id:"无",name:"无",nameTrad:"無",pinyin:"wu",category:"normal",oracle:"一个人两手空空",origin:"没有，虚无",hints:"和有相反|没__|__限|虚__",groupWords:"没有|无论|无限|无比|无边",idioms:"无中生有::凭空捏造|无忧无虑::没有任何忧虑",riddles:"一个人两手空空::会意",synonyms:"没",antonyms:"有" },
+  { id:"存",name:"存",nameTrad:"存",pinyin:"cun",category:"normal",oracle:"才+子，存在",origin:"存在，保存",hints:"在的意思|存__|保__|生__",groupWords:"存在|保存|生存|存放|储存",idioms:"名存实亡::名义上存在实际上已不存在|求同存异::寻求共同点保留不同意见",riddles:"才加子::形声",synonyms:"在",antonyms:"亡" },
+  { id:"亡",name:"亡",nameTrad:"亡",pinyin:"wang",category:"normal",oracle:"人躲入隐蔽处",origin:"逃亡，死亡",hints:"和存相反|死__|逃__|灭__",groupWords:"死亡|逃亡|灭亡|消亡|亡命",idioms:"亡羊补牢::出了问题及时补救|唇亡齿寒::利害关系密切",riddles:"人躲入隐蔽处::会意",synonyms:"死",antonyms:"存" },
+  { id:"善",name:"善",nameTrad:"善",pinyin:"shan",category:"normal",oracle:"羊+言，温和的言语",origin:"善良，美好",hints:"好的品行|友__|慈__|完__",groupWords:"善良|友善|慈善|完善|善于",idioms:"善始善终::从开始到结束都很好|与人为善::和别人友好相处",riddles:"羊加言::会意",synonyms:"好",antonyms:"恶" },
+  { id:"恶",name:"恶",nameTrad:"惡",pinyin:"e",category:"normal",oracle:"心+亚，心中不善",origin:"凶恶，不好",hints:"和善相反|凶__|邪__|厌__",groupWords:"凶恶|邪恶|厌恶|恶人|恶化",idioms:"恶贯满盈::坏事做尽|疾恶如仇::恨坏人坏事像恨仇人一样",riddles:"心加亚::形声",synonyms:"坏",antonyms:"善" },
+  { id:"青",name:"青",nameTrad:"青",pinyin:"qing",category:"normal",oracle:"生+丹，草木初生的颜色",origin:"青色，绿色",hints:"草和树叶的颜色|__草|__天|年__",groupWords:"青草|青年|青春|青山|青天",idioms:"青出于蓝::学生超过老师|名垂青史::名声流传于历史",riddles:"生加丹::会意",synonyms:"绿",antonyms:"黄" },
+  { id:"否",name:"否",nameTrad:"否",pinyin:"fou",category:"normal",oracle:"不+口，口中说不",origin:"否定，不是",hints:"和是相反|__认|__则|是__",groupWords:"否定|否认|否则|是否|否决",idioms:"否极泰来::坏事到了尽头好事就来了",riddles:"不加口::会意",synonyms:"不",antonyms:"是" },
+  { id:"伪",name:"伪",nameTrad:"偽",pinyin:"wei",category:"normal",oracle:"人+为，人为的就是假的",origin:"虚伪，伪造",hints:"假的|虚__|__装|真__",groupWords:"虚伪|伪造|伪装|伪善|真伪",idioms:"去伪存真::去掉假的留下真的",riddles:"人加为::会意",synonyms:"假",antonyms:"真" },
+  { id:"彼",name:"彼",nameTrad:"彼",pinyin:"bi",category:"normal",oracle:"彳+皮，走到对岸",origin:"对方，那边",hints:"和此相反|__此|__岸|知__",groupWords:"彼此|彼岸|知己知彼|彼时",idioms:"知己知彼::了解自己也了解对方|此起彼伏::这边起来那边落下",riddles:"双人旁加皮::形声",synonyms:"那",antonyms:"此" },
+  { id:"年",name:"年",nameTrad:"年",pinyin:"nian",category:"normal",oracle:"禾+人，人背着丰收的庄稼",origin:"年份，年龄",hints:"一年又一年|新__|纪__|去__",groupWords:"新年|年龄|年纪|去年|年代",idioms:"年富力强::年纪轻精力旺盛|度日如年::日子难过像过一年",riddles:"禾加人::会意",synonyms:"岁",antonyms:"" },
+  { id:"合",name:"合",nameTrad:"合",pinyin:"he",category:"normal",oracle:"人+一+口，大家同说一句话",origin:"合并，合作",hints:"和分相反|结__|配__|集__",groupWords:"合作|合并|配合|集合|合适",idioms:"合情合理::合乎情理|志同道合::志趣相同意见一致",riddles:"人一口::会意",synonyms:"并",antonyms:"分" },
+  { id:"错",name:"错",nameTrad:"錯",pinyin:"cuo",category:"normal",oracle:"金+昔，用金粉交错镶嵌",origin:"错误，交错",hints:"和对相反|__误|出__|交__",groupWords:"错误|出错|交错|不错|错过",idioms:"错失良机::错过了好机会|纵横交错::交叉在一起",riddles:"金字旁加昔::形声",synonyms:"误",antonyms:"对" },
+
+  // ══════════ 第6批：小学常用字补全 ══════════
+  { id:"爸",name:"爸",nameTrad:"爸",pinyin:"ba",category:"normal",oracle:"父+巴，巴表音",origin:"爸爸，父亲",hints:"爸爸|妈妈的丈夫|__爸|老__",groupWords:"爸爸|老爸|爸妈|阿爸|老爸",idioms:"老爸老妈::对父母的亲切称呼",riddles:"父字头加巴::形声",synonyms:"父",antonyms:"妈" },
+  { id:"哥",name:"哥",nameTrad:"哥",pinyin:"ge",category:"normal",oracle:"两个可字上下叠",origin:"哥哥，兄长",hints:"比弟弟大的男孩|__哥|大__|表__",groupWords:"哥哥|大哥|表哥|帅哥|哥们",idioms:"称兄道弟::朋友间亲密称呼",riddles:"两个可字叠起来::会意",synonyms:"兄",antonyms:"弟" },
+  { id:"兄",name:"兄",nameTrad:"兄",pinyin:"xiong",category:"normal",oracle:"一个人张嘴说话，表示兄长教导",origin:"兄长",hints:"哥哥|__长|师__|弟__",groupWords:"兄弟|兄长|师兄|父兄|弟兄",idioms:"兄弟同心::兄弟一条心",riddles:"口加儿::会意",synonyms:"哥",antonyms:"弟" },
+  { id:"弟",name:"弟",nameTrad:"弟",pinyin:"di",category:"normal",oracle:"绳子绕在箭上，表示次序",origin:"弟弟",hints:"比哥哥小的男孩|__弟|小__|徒__",groupWords:"弟弟|兄弟|弟子|徒弟|小弟",idioms:"难兄难弟::一起受苦的兄弟",riddles:"八字头加弓加丿::形声",synonyms:"",antonyms:"兄" },
+  { id:"爷",name:"爷",nameTrad:"爺",pinyin:"ye",category:"normal",oracle:"父+耶，耶表音",origin:"爷爷，祖父",hints:"爸爸的爸爸|__爷|老__|大__",groupWords:"爷爷|老爷|大爷|少爷|爷孙",idioms:"老爷作风::指摆架子",riddles:"父字头加耶::形声",synonyms:"",antonyms:"奶" },
+  { id:"奶",name:"奶",nameTrad:"奶",pinyin:"nai",category:"normal",oracle:"女+乃，乃表音",origin:"奶奶，乳汁",hints:"妈妈的妈妈|__奶|牛__|酸__",groupWords:"奶奶|牛奶|奶茶|奶瓶|奶牛",idioms:"奶油小生::指长相白净的男孩",riddles:"女字旁加乃::形声",synonyms:"",antonyms:"爷" },
+  { id:"伯",name:"伯",nameTrad:"伯",pinyin:"bo",category:"normal",oracle:"人+白，白表音",origin:"伯父",hints:"爸爸的哥哥|__伯|大__|叔__",groupWords:"伯父|伯伯|大伯|老伯|伯乐",idioms:"伯乐相马::善于发现人才",riddles:"人字旁加白::形声",synonyms:"",antonyms:"" },
+  { id:"叔",name:"叔",nameTrad:"叔",pinyin:"shu",category:"normal",oracle:"又+小+又，手持小豆",origin:"叔叔",hints:"爸爸的弟弟|__叔|大__|__父",groupWords:"叔叔|大叔|叔父|表叔|叔伯",idioms:"伯仲叔季::兄弟排行次序",riddles:"上上小又::形声",synonyms:"",antonyms:"" },
+  { id:"姑",name:"姑",nameTrad:"姑",pinyin:"gu",category:"normal",oracle:"女+古，古表音",origin:"姑姑",hints:"爸爸的姐妹|__姑|__妈|阿__",groupWords:"姑姑|姑娘|姑妈|姑父|尼姑",idioms:"姑息养奸::纵容坏人",riddles:"女字旁加古::形声",synonyms:"",antonyms:"" },
+  { id:"姨",name:"姨",nameTrad:"姨",pinyin:"yi",category:"normal",oracle:"女+夷，夷表音",origin:"姨母",hints:"妈妈的姐妹|__姨|阿__|大__",groupWords:"阿姨|姨妈|姨母|大姨|小姨",idioms:"阿姨妈妈::亲热的称呼",riddles:"女字旁加夷::形声",synonyms:"",antonyms:"" },
+  { id:"小",name:"小",nameTrad:"小",pinyin:"xiao",category:"normal",oracle:"三点表示细小的沙粒",origin:"细小",hints:"和大相反|__朋友|__心|细__",groupWords:"小心|小孩|大小|小学|小鸟",idioms:"小心翼翼::非常小心",riddles:"三小点::象形",synonyms:"微",antonyms:"大" },
+  { id:"尖",name:"尖",nameTrad:"尖",pinyin:"jian",category:"normal",oracle:"上小下大，一头小一头大",origin:"尖的",hints:"一头小一头大|__锐|笔__|针__",groupWords:"尖锐|笔尖|尖端|顶尖|尖刀",idioms:"尖酸刻薄::说话带刺",riddles:"上小下大::会意",synonyms:"锐",antonyms:"钝" },
+  { id:"树",name:"树",nameTrad:"樹",pinyin:"shu",category:"normal",oracle:"木+对+寸，种植树木",origin:"树木",hints:"很多木头在一起|__林|种__|大__",groupWords:"树木|树林|树叶|种树|大树",idioms:"树大招风::名气大容易招来麻烦",riddles:"木字旁加对加寸::形声",synonyms:"木",antonyms:"" },
+  { id:"叶",name:"叶",nameTrad:"葉",pinyin:"ye",category:"normal",oracle:"艹+世+木，树上长的片片",origin:"树叶",hints:"树上的片片|__子|树__|茶__",groupWords:"叶子|树叶|茶叶|落叶|红叶",idioms:"叶落归根::比喻回到故乡",riddles:"口加十::形声简化",synonyms:"",antonyms:"" },
+  { id:"根",name:"根",nameTrad:"根",pinyin:"gen",category:"normal",oracle:"木+艮，艮表音",origin:"树根",hints:"树在地下的部分|__本|树__|草__",groupWords:"树根|根本|根据|根源|根部",idioms:"根深蒂固::基础牢固",riddles:"木字旁加艮::形声",synonyms:"本",antonyms:"" },
+  { id:"枝",name:"枝",nameTrad:"枝",pinyin:"zhi",category:"normal",oracle:"木+支，支表音",origin:"树枝",hints:"树的分叉|__条|树__|柳__",groupWords:"树枝|枝叶|枝条|枝干|柳枝",idioms:"节外生枝::生出多余的事",riddles:"木字旁加支::形声",synonyms:"条",antonyms:"" },
+  { id:"朵",name:"朵",nameTrad:"朵",pinyin:"duo",category:"normal",oracle:"几+木，花在树上",origin:"花朵",hints:"花的量词|花__|一__花|云__",groupWords:"花朵|云朵|一朵花|耳朵|朵朵",idioms:"花枝招展::花朵开得很美",riddles:"几字头加木::会意",synonyms:"",antonyms:"" },
+  { id:"了",name:"了",nameTrad:"了",pinyin:"le",category:"normal",oracle:"一个婴儿没有双臂，表示完结",origin:"完成",hints:"做完了|吃__|走__|好__",groupWords:"好了|完了|走了|吃了|了解",idioms:"一目了然::一眼就看清楚了",riddles:"子字少一横::象形",synonyms:"完",antonyms:"" },
+  { id:"不",name:"不",nameTrad:"不",pinyin:"bu",category:"normal",oracle:"花萼的形状，假借为否定",origin:"否定",hints:"和是相反|__是|__要|__好",groupWords:"不是|不好|不要|不能|不同",idioms:"不约而同::没有约定却一致",riddles:"一横加个卜::象形",synonyms:"否",antonyms:"是" },
+  { id:"要",name:"要",nameTrad:"要",pinyin:"yao",category:"normal",oracle:"西+女，女子叉腰表示需要",origin:"需要",hints:"一定想得到|__求|需__|重__",groupWords:"重要|需要|要求|主要|必要",idioms:"简明扼要::简单抓住重点",riddles:"西字头加女::会意",synonyms:"需",antonyms:"" },
+  { id:"需",name:"需",nameTrad:"需",pinyin:"xu",category:"normal",oracle:"雨+而，下雨时需要等待",origin:"需要",hints:"一定要有|__要|必__|所__",groupWords:"需要|需求|必需|急需|所需",idioms:"各取所需::各自拿各自需要的",riddles:"雨字头加而::会意",synonyms:"要",antonyms:"" },
+  { id:"会",name:"会",nameTrad:"會",pinyin:"hui",category:"normal",oracle:"人+云，人聚在一起说话",origin:"能够",hints:"能做什么|__议|开__|学__",groupWords:"学会|会议|机会|开会|体会",idioms:"融会贯通::把知识融合理解",riddles:"人加云::会意",synonyms:"能",antonyms:"" },
+  { id:"能",name:"能",nameTrad:"能",pinyin:"neng",category:"normal",oracle:"像一只熊的样子",origin:"能力",hints:"可以做到|__力|才__|可__",groupWords:"能够|能力|才能|可能|能手",idioms:"能工巧匠::技术高超的人",riddles:"厶月匕匕::象形",synonyms:"会",antonyms:"" },
+  { id:"还",name:"还",nameTrad:"還",pinyin:"hai",category:"normal",oracle:"辶+不，回来又走",origin:"还有",hints:"没有结束|__有|归__|__是",groupWords:"还有|还是|归还|还书|还原",idioms:"以牙还牙::用同样的方式回击",riddles:"走之底加不::形声",synonyms:"仍",antonyms:"" },
+  { id:"说",name:"说",nameTrad:"說",pinyin:"shuo",category:"normal",oracle:"言+兑，兑表音",origin:"说话",hints:"用嘴巴讲|__话|传__|演__",groupWords:"说话|听说|说明|小说|说法",idioms:"说三道四::议论别人",riddles:"言字旁加兑::形声",synonyms:"讲",antonyms:"" },
+  { id:"画",name:"画",nameTrad:"畫",pinyin:"hua",category:"normal",oracle:"手拿笔画田界",origin:"图画",hints:"用笔涂涂写写|__画|图__|漫__",groupWords:"画画|图画|漫画|画家|笔画",idioms:"画蛇添足::多此一举",riddles:"一田加框::象形",synonyms:"绘",antonyms:"" },
+  { id:"玩",name:"玩",nameTrad:"玩",pinyin:"wan",category:"normal",oracle:"王+元，把玩玉器",origin:"玩耍",hints:"开心地做事情|__耍|游__|好__",groupWords:"玩耍|玩乐|玩具|游玩|好玩",idioms:"玩物丧志::沉迷玩乐失去志向",riddles:"王字旁加元::形声",synonyms:"耍",antonyms:"" },
+  { id:"耍",name:"耍",nameTrad:"耍",pinyin:"shua",category:"normal",oracle:"而+女，女子玩耍",origin:"玩耍",hints:"开心玩|玩__|杂__|__猴",groupWords:"玩耍|耍猴|杂耍|耍赖|戏耍",idioms:"耍小聪明::用小聪明骗人",riddles:"而字头加女::会意",synonyms:"玩",antonyms:"" },
+  { id:"找",name:"找",nameTrad:"找",pinyin:"zhao",category:"normal",oracle:"扌+戈，手拿兵器寻找",origin:"寻找",hints:"到处看看|寻__|__到|查__",groupWords:"寻找|找到|找人|找东西|查找",idioms:"自找麻烦::自己惹来麻烦",riddles:"提手旁加戈::会意",synonyms:"寻",antonyms:"" },
+  { id:"给",name:"给",nameTrad:"給",pinyin:"gei",category:"normal",oracle:"纟+合，把丝线交给别人",origin:"给予",hints:"把东西送人|送__|交__|供__",groupWords:"送给|给力|交给|还给|给钱",idioms:"自给自足::自己满足自己的需要",riddles:"绞丝旁加合::形声",synonyms:"予",antonyms:"取" },
+  { id:"校",name:"校",nameTrad:"校",pinyin:"xiao",category:"normal",oracle:"木+交，交表音",origin:"学校",hints:"上学的地方|学__|__园|母__",groupWords:"学校|校园|校长|校车|母校",idioms:"校短量长::比较长短优劣",riddles:"木字旁加交::形声",synonyms:"",antonyms:"" },
+  { id:"园",name:"园",nameTrad:"園",pinyin:"yuan",category:"normal",oracle:"囗+袁，围起来的种植物的地方",origin:"园子",hints:"种花的地方|花__|公__|幼儿__",groupWords:"花园|公园|幼儿园|校园|果园",idioms:"春色满园::整个园子都是春天的景色",riddles:"口字框加袁::形声",synonyms:"",antonyms:"" },
+  { id:"课",name:"课",nameTrad:"課",pinyin:"ke",category:"normal",oracle:"言+果，果表音",origin:"课程",hints:"学校学习的内容|上__|功__|__本",groupWords:"上课|下课|课文|课本|课程",idioms:"补课充电::补充学习新知识",riddles:"言字旁加果::形声",synonyms:"",antonyms:"" },
+  { id:"朋",name:"朋",nameTrad:"朋",pinyin:"peng",category:"normal",oracle:"两串贝并列",origin:"朋友",hints:"两个月亮|__友|亲__|好__",groupWords:"朋友|亲朋|友好|良朋|小朋友",idioms:"高朋满座::尊贵的客人坐满了",riddles:"两个月并列::会意",synonyms:"友",antonyms:"敌" },
+  { id:"班",name:"班",nameTrad:"班",pinyin:"ban",category:"normal",oracle:"王+刂+王，用刀分玉",origin:"班级",hints:"学校的分组|__级|上__|值__",groupWords:"班级|上班|值班|班长|班车",idioms:"班门弄斧::在行家面前卖弄",riddles:"王字旁加刂加王::会意",synonyms:"",antonyms:"" },
+  { id:"级",name:"级",nameTrad:"級",pinyin:"ji",category:"normal",oracle:"纟+及，及表音",origin:"级别",hints:"高低层次|__别|年__|高__",groupWords:"年级|等级|级别|高级|升级",idioms:"拾级而上::一步步向上攀登",riddles:"绞丝旁加及::形声",synonyms:"等",antonyms:"" },
+  { id:"头",name:"头",nameTrad:"頭",pinyin:"tou",category:"normal",oracle:"頁+豆，豆表音",origin:"头部",hints:"身体最上面的部分|__脑|点__|木__",groupWords:"头上|头脑|头发|点头|开头",idioms:"头头是道::说话很有条理",riddles:"大字加两点::象形",synonyms:"首",antonyms:"" },
+  { id:"脑",name:"脑",nameTrad:"腦",pinyin:"nao",category:"normal",oracle:"月+巛+凶，头里的器官",origin:"大脑",hints:"头里面的东西|__袋|大__|电__",groupWords:"大脑|脑袋|电脑|脑筋|头脑",idioms:"脑满肠肥::养尊处优的样子",riddles:"月字旁加巛加凶::形声",synonyms:"",antonyms:"" },
+  { id:"脚",name:"脚",nameTrad:"腳",pinyin:"jiao",category:"normal",oracle:"月+却，却表音",origin:"脚",hints:"走路用的|__步|双__|山__",groupWords:"脚下|脚步|双脚|山脚|脚趾",idioms:"脚踏实地::做事踏实",riddles:"月字旁加却::形声",synonyms:"足",antonyms:"" },
+  { id:"牙",name:"牙",nameTrad:"牙",pinyin:"ya",category:"normal",oracle:"上下牙齿咬合的形状",origin:"牙齿",hints:"嘴巴里咬东西的|__齿|门__|刷__",groupWords:"牙齿|刷牙|牙膏|门牙|象牙",idioms:"以牙还牙::用同样方式回击",riddles:"象形::画上下牙齿",synonyms:"齿",antonyms:"" },
+  { id:"脸",name:"脸",nameTrad:"臉",pinyin:"lian",category:"normal",oracle:"月+佥，佥表音",origin:"脸面",hints:"头上前面这部分|__蛋|洗__|笑__",groupWords:"脸色|笑脸|洗脸|脸红|脸蛋",idioms:"愁眉苦脸::发愁的样子",riddles:"月字旁加佥::形声",synonyms:"面",antonyms:"" },
+  { id:"昨",name:"昨",nameTrad:"昨",pinyin:"zuo",category:"normal",oracle:"日+乍，乍表音",origin:"昨天",hints:"今天的前一天|__天|__日|__晚",groupWords:"昨天|昨日|昨晚|昨夜|昨年",idioms:"昨是今非::过去对的现在不对了",riddles:"日字旁加乍::形声",synonyms:"",antonyms:"明" },
+  { id:"晚",name:"晚",nameTrad:"晚",pinyin:"wan",category:"normal",oracle:"日+免，免表音",origin:"晚上",hints:"和早相反|__上|夜__|傍__",groupWords:"晚上|夜晚|晚安|晚饭|晚会",idioms:"大器晚成::大才需要时间培养",riddles:"日字旁加免::形声",synonyms:"夜",antonyms:"早" },
+  { id:"鞋",name:"鞋",nameTrad:"鞋",pinyin:"xie",category:"normal",oracle:"革+圭，圭表音",origin:"鞋子",hints:"脚上穿的|__子|皮__|拖__",groupWords:"鞋子|皮鞋|拖鞋|球鞋|布鞋",idioms:"踏破铁鞋::走了很远的路",riddles:"革字旁加圭::形声",synonyms:"履",antonyms:"" },
+  { id:"帽",name:"帽",nameTrad:"帽",pinyin:"mao",category:"normal",oracle:"巾+冒，冒表音",origin:"帽子",hints:"头上戴的|__子|草__|礼__",groupWords:"帽子|草帽|礼帽|笔帽|帽檐",idioms:"戴高帽子::说恭维话",riddles:"巾字旁加冒::形声",synonyms:"冠",antonyms:"" },
+  { id:"伞",name:"伞",nameTrad:"傘",pinyin:"san",category:"normal",oracle:"像一把打开的伞",origin:"雨伞",hints:"下雨天打的|雨__|太阳__|降落__",groupWords:"雨伞|打伞|降落伞|太阳伞|跳伞",idioms:"保护伞::比喻保护的力量",riddles:"人字头加十加两点::象形",synonyms:"",antonyms:"" },
+  { id:"帘",name:"帘",nameTrad:"簾",pinyin:"lian",category:"normal",oracle:"竹+廉，廉表音",origin:"帘子",hints:"挂在门窗上的布|窗__|门__|竹__",groupWords:"窗帘|门帘|竹帘|帘子|卷帘",idioms:"垂帘听政::在帘子后面处理政务",riddles:"竹字头加廉::形声",synonyms:"",antonyms:"" },
+  { id:"旗",name:"旗",nameTrad:"旗",pinyin:"qi",category:"normal",oracle:"㫃+其，其表音",origin:"旗帜",hints:"飘在空中的布|国__|红__|彩__",groupWords:"国旗|红旗|旗帜|彩旗|升旗",idioms:"旗鼓相当::双方势均力敌",riddles:"方字旁加其::形声",synonyms:"帜",antonyms:"" },
+  { id:"戴",name:"戴",nameTrad:"戴",pinyin:"dai",category:"normal",oracle:"異+戈，头上顶东西",origin:"佩戴",hints:"把东西放在头上身上|__帽子|穿__|爱__",groupWords:"穿戴|爱戴|戴帽|佩戴|戴花",idioms:"披星戴月::早出晚归辛苦工作",riddles:"十戈田共::会意",synonyms:"佩",antonyms:"摘" },
+
+  // ══════════ 第7批：小学常用字扩展 ══════════
+  { id:"她",name:"她",nameTrad:"她",pinyin:"ta",category:"normal",oracle:"女+也，也表音",origin:"她（女性）",hints:"女的她|__们|__的|他和__",groupWords:"她们|她的|她俩",idioms:"他山之石::比喻借外力帮助自己",riddles:"女字旁加也::形声",synonyms:"",antonyms:"他" },
+  { id:"游",name:"游",nameTrad:"游",pinyin:"you",category:"normal",oracle:"氵+斿，在水中行动",origin:"游泳",hints:"在水里动|__泳|__戏|旅__",groupWords:"游泳|游戏|旅游|游玩|游动",idioms:"游刃有余::技术熟练轻松应对|鱼游釜中::身处险境",riddles:"三点水加斿::形声",synonyms:"泳",antonyms:"" },
+  { id:"哭",name:"哭",nameTrad:"哭",pinyin:"ku",category:"normal",oracle:"两个口加犬，像大哭的样子",origin:"哭泣",hints:"和笑相反|__泣|大__|痛__",groupWords:"哭泣|大哭|哭声|哭闹|痛哭",idioms:"哭笑不得::不知道是哭还是笑|鬼哭狼嚎::声音凄厉",riddles:"两个口加犬::会意",synonyms:"泣",antonyms:"笑" },
+  { id:"爱",name:"爱",nameTrad:"愛",pinyin:"ai",category:"normal",oracle:"心+旡，心里有感情",origin:"爱",hints:"和恨相反|__心|可__|喜__",groupWords:"爱心|可爱|爱好|爱情|热爱",idioms:"爱不释手::太喜欢舍不得放手|相亲相爱::互相关心爱护",riddles:"爪字头加秃宝盖加友::会意",synonyms:"喜",antonyms:"恨" },
+  { id:"知",name:"知",nameTrad:"知",pinyin:"zhi",category:"normal",oracle:"矢+口，箭射中目标才知道",origin:"知道",hints:"心里明白|__道|通__|认__",groupWords:"知道|知识|通知|知心|认知",idioms:"知己知彼::了解自己和对方|一知半解::知道得不全面",riddles:"矢加口::会意",synonyms:"晓",antonyms:"" },
+  { id:"认",name:"认",nameTrad:"認",pinyin:"ren",category:"normal",oracle:"言+忍，用心辨识语言",origin:"认识",hints:"分得出来|__识|__为|承__",groupWords:"认识|认真|认为|承认|认可",idioms:"认贼作父::把坏人当好人|六亲不认::不认所有亲戚",riddles:"言字旁加人::形声简化",synonyms:"识",antonyms:"" },
+  { id:"用",name:"用",nameTrad:"用",pinyin:"yong",category:"normal",oracle:"像桶的形状，桶是用来装东西的",origin:"使用",hints:"拿来做什么|使__|__处|有__",groupWords:"使用|有用|用心|用品|用途",idioms:"用心良苦::费了很多心思|大材小用::大才做小事",riddles:"月字中间加一竖::象形",synonyms:"使",antonyms:"" },
+  { id:"做",name:"做",nameTrad:"做",pinyin:"zuo",category:"normal",oracle:"亻+故，人做事",origin:"做，干",hints:"干活|__事|__作业|__饭",groupWords:"做事|做法|做饭|做作业|做梦",idioms:"做贼心虚::做了坏事心里不安|小题大做::把小事当大事",riddles:"单人旁加故::形声",synonyms:"干",antonyms:"" },
+  { id:"请",name:"请",nameTrad:"請",pinyin:"qing",category:"normal",oracle:"言+青，青表音",origin:"请求",hints:"客气地说|__问|邀__|申__",groupWords:"请问|请求|请客|邀请|申请",idioms:"请君入瓮::用他的办法对付他自己|不请自来::没被邀请自己来",riddles:"言字旁加青::形声",synonyms:"邀",antonyms:"" },
+  { id:"字",name:"字",nameTrad:"字",pinyin:"zi",category:"normal",oracle:"宀+子，屋里生子取名字",origin:"文字",hints:"写出来的符号|汉__|文__|名__",groupWords:"汉字|文字|名字|字母|写字",idioms:"字斟句酌::仔细推敲用词|一字千金::文字价值极高",riddles:"宝盖头加子::会意",synonyms:"文",antonyms:"" },
+  { id:"句",name:"句",nameTrad:"句",pinyin:"ju",category:"normal",oracle:"勹+口，把话包起来成一句",origin:"句子",hints:"一句话|__子|语__|造__",groupWords:"句子|语句|句号|造句|诗句",idioms:"字斟句酌::仔细推敲用语|寻章摘句::只注意文字不重内容",riddles:"包字头加口::会意",synonyms:"",antonyms:"" },
+  { id:"元",name:"元",nameTrad:"元",pinyin:"yuan",category:"normal",oracle:"二+儿，开始",origin:"元（货币单位）",hints:"钱的单位|一__钱|公__|状__",groupWords:"一元|元旦|公元|状元|元素",idioms:"一元复始::新的一年又开始了|连中三元::连续成功",riddles:"二加儿::会意",synonyms:"",antonyms:"" },
+  { id:"毛",name:"毛",nameTrad:"毛",pinyin:"mao",category:"normal",oracle:"像一根羽毛",origin:"毛发",hints:"细细的软软的|__发|羽__|皮__",groupWords:"毛笔|羽毛|毛巾|毛病|毛发",idioms:"毛遂自荐::自己推荐自己|一毛不拔::极其吝啬",riddles:"象形::像一根羽毛",synonyms:"发",antonyms:"" },
+  { id:"阳",name:"阳",nameTrad:"陽",pinyin:"yang",category:"normal",oracle:"阝+易，山坡朝南阳光多",origin:"太阳",hints:"太阳|__光|太__|朝__",groupWords:"太阳|阳光|阳台|阳历|朝阳",idioms:"阳春白雪::高雅的艺术|阳奉阴违::表面服从暗地反对",riddles:"双耳旁加日::会意简化",synonyms:"日",antonyms:"阴" },
+  { id:"亮",name:"亮",nameTrad:"亮",pinyin:"liang",category:"normal",oracle:"亠+口+儿，高台上说话声音响",origin:"明亮",hints:"光线足|明__|漂__|月__",groupWords:"明亮|漂亮|月亮|亮光|天亮",idioms:"高风亮节::高尚的品格|眼明心亮::眼光敏锐心里明白",riddles:"高字头加几::形声",synonyms:"明",antonyms:"暗" },
+  { id:"湖",name:"湖",nameTrad:"湖",pinyin:"hu",category:"normal",oracle:"氵+胡，胡表音",origin:"湖泊",hints:"很大的水|__泊|江__|太__",groupWords:"湖水|湖泊|江湖|西湖|湖面",idioms:"五湖四海::全国各地|江湖义气::讲义气",riddles:"三点水加胡::形声",synonyms:"泊",antonyms:"" },
+  { id:"颗",name:"颗",nameTrad:"顆",pinyin:"ke",category:"normal",oracle:"果+页，小粒的东西",origin:"颗粒",hints:"一粒一粒|__粒|一__糖|一__星",groupWords:"颗粒|一颗星|一颗糖|一颗心|颗粒",idioms:"颗粒无收::一点收成也没有",riddles:"果字旁加页::形声",synonyms:"粒",antonyms:"" },
+  { id:"条",name:"条",nameTrad:"條",pinyin:"tiao",category:"normal",oracle:"木+攸，树枝",origin:"条状物",hints:"长长的|__件|面__|一__鱼",groupWords:"条件|面条|一条鱼|线条|条理",idioms:"井井有条::整齐有秩序|慢条斯理::说话做事不慌不忙",riddles:"折文头加木::形声简化",synonyms:"",antonyms:"" },
+  { id:"件",name:"件",nameTrad:"件",pinyin:"jian",category:"normal",oracle:"亻+牛，人分牛",origin:"件数",hints:"一个一个|__数|事__|一__事",groupWords:"事件|条件|文件|一件|零件",idioms:"一件不漏::一个也不漏掉",riddles:"单人旁加牛::会意",synonyms:"",antonyms:"" },
+  { id:"片",name:"片",nameTrad:"片",pinyin:"pian",category:"normal",oracle:"像劈开的木片",origin:"片",hints:"薄薄的|__面|一__叶|卡__",groupWords:"卡片|照片|叶片|片面|一片",idioms:"片甲不留::全部被消灭|只言片语::零碎的话语",riddles:"象形::像劈开的木片",synonyms:"",antonyms:"" },
+  { id:"双",name:"双",nameTrad:"雙",pinyin:"shuang",category:"normal",oracle:"又+又，两只手",origin:"一双",hints:"两个|__手|一__鞋|成__",groupWords:"双手|一双|双方|双数|双方",idioms:"双管齐下::两件事同时进行|智勇双全::既有智慧又有勇气",riddles:"又一个又::会意",synonyms:"对",antonyms:"单" },
+  { id:"群",name:"群",nameTrad:"群",pinyin:"qun",category:"normal",oracle:"君+羊，羊群",origin:"群体",hints:"很多在一起|__众|人__|羊__",groupWords:"群众|人群|一群|羊群|群岛",idioms:"群策群力::大家一起想办法出力|鹤立鸡群::特别出众",riddles:"君字旁加羊::形声",synonyms:"众",antonyms:"独" },
+  { id:"声",name:"声",nameTrad:"聲",pinyin:"sheng",category:"normal",oracle:"殸+耳，敲磬耳朵听",origin:"声音",hints:"耳朵听到的|__音|歌__|响__",groupWords:"声音|歌声|响声|声明|大声",idioms:"声东击西::声张打东边实际打西边|异口同声::大家说一样的话",riddles:"士字头加尸加丨::形声简化",synonyms:"音",antonyms:"" },
+  { id:"音",name:"音",nameTrad:"音",pinyin:"yin",category:"normal",oracle:"言+一，口中发出的声音",origin:"音乐",hints:"和声一样|__乐|声__|嗓__",groupWords:"音乐|声音|嗓音|录音|拼音",idioms:"弦外之音::言外之意|音容笑貌::声音和表情",riddles:"立加日::会意",synonyms:"声",antonyms:"" },
+  { id:"舞",name:"舞",nameTrad:"舞",pinyin:"wu",category:"normal",oracle:"舛+無，挥动身体",origin:"舞蹈",hints:"跳来跳去|跳__|__蹈|鼓__",groupWords:"跳舞|舞蹈|舞会|鼓舞|飞舞",idioms:"手舞足蹈::高兴得手和脚都动起来|龙飞凤舞::书法有气势",riddles:"無字头加舛::形声",synonyms:"蹈",antonyms:"" },
+  { id:"梦",name:"梦",nameTrad:"夢",pinyin:"meng",category:"normal",oracle:"艹+罒+夕，夜里闭眼看到的",origin:"梦想",hints:"睡着看到的|__想|做__|美__",groupWords:"梦想|做梦|美梦|噩梦|梦境",idioms:"梦想成真::梦想变为现实|黄粱美梦::空欢喜一场",riddles:"林字头加夕::会意简化",synonyms:"",antonyms:"" },
+  { id:"故",name:"故",nameTrad:"故",pinyin:"gu",category:"normal",oracle:"古+攵，过去的事",origin:"故事",hints:"以前的事|__事|缘__|事__",groupWords:"故事|故意|故乡|缘故|事故",idioms:"明知故犯::明知不对还要做|一见如故::初次见面就像老朋友",riddles:"古字旁加反文::形声",synonyms:"旧",antonyms:"新" },
+  { id:"事",name:"事",nameTrad:"事",pinyin:"shi",category:"normal",oracle:"手持笔记事",origin:"事情",hints:"要做的|__情|故__|做__",groupWords:"事情|故事|做事|事件|事业",idioms:"事在人为::事情靠人去做|事半功倍::花小力得大效果",riddles:"一口加彐加亅::会意",synonyms:"情",antonyms:"" },
+  { id:"物",name:"物",nameTrad:"物",pinyin:"wu",category:"normal",oracle:"牛+勿，牛是重要物品",origin:"东西",hints:"东西|动__|植__|礼__",groupWords:"动物|植物|礼物|物品|物质",idioms:"物以类聚::同类的东西聚在一起|睹物思人::看见东西想起人",riddles:"牛字旁加勿::形声",synonyms:"品",antonyms:"" },
+  { id:"永",name:"永",nameTrad:"永",pinyin:"yong",category:"normal",oracle:"像水流长远",origin:"永远",hints:"很长时间|__远|__久|__恒",groupWords:"永远|永久|永恒|永生|永别",idioms:"永垂不朽::永远流传不会消失|一劳永逸::一次做好永远轻松",riddles:"丶加横折钩加撇捺::象形",synonyms:"恒",antonyms:"暂" },
+  { id:"满",name:"满",nameTrad:"滿",pinyin:"man",category:"normal",oracle:"氵+㒼，水满了",origin:"充满",hints:"装不下了|__意|充__|饱__",groupWords:"满意|满足|充满|满分|饱满",idioms:"满腹经纶::学问很大|心满意足::非常满意",riddles:"三点水加草头加两::形声",synonyms:"充",antonyms:"空" },
+  { id:"闲",name:"闲",nameTrad:"閒",pinyin:"xian",category:"normal",oracle:"门+木，门里放木头表示空闲",origin:"空闲",hints:"和忙相反|空__|休__|__聊",groupWords:"空闲|休闲|闲聊|闲事|闲人",idioms:"闲情逸致::悠闲的心情|游手好闲::游荡不做事",riddles:"门字框加木::会意",synonyms:"空",antonyms:"忙" },
+
+  // ══════════ 第8批：补全链接引用的缺失节点 ══════════
+  { id:"久",name:"久",nameTrad:"久",pinyin:"jiu",category:"normal",oracle:"像一个人背靠着休息",origin:"长久",hints:"很长时间|__远|永__|不__",groupWords:"永久|长久|久远|不久|持久",idioms:"久而久之::经过了很长时间|天长地久::形容时间长久",riddles:"夕加捺::象形",synonyms:"长",antonyms:"暂" },
+  { id:"乡",name:"乡",nameTrad:"鄉",pinyin:"xiang",category:"normal",oracle:"两个面对面坐着吃饭",origin:"家乡",hints:"老家|家__|故__|城__",groupWords:"家乡|故乡|乡村|乡下|乡亲",idioms:"入乡随俗::到什么地放守什么规矩|背井离乡::离开家乡",riddles:"绞丝旁加撇折::形声简化",synonyms:"村",antonyms:"城" },
+  { id:"京",name:"京",nameTrad:"京",pinyin:"jing",category:"normal",oracle:"高台上有楼房",origin:"京城",hints:"首都|北__|__城|东__",groupWords:"北京|京城|京都|京戏|南京",idioms:"京华烟云::形容京城繁华",riddles:"高字头加口加小::象形",synonyms:"都",antonyms:"" },
+  { id:"作",name:"作",nameTrad:"作",pinyin:"zuo",category:"normal",oracle:"亻+乍，人做事",origin:"制作",hints:"干活|工__|写__|__业",groupWords:"工作|作业|写作|作品|作为",idioms:"自作自受::自己做了自己承受|一鼓作气::一口气做完",riddles:"单人旁加乍::形声",synonyms:"做",antonyms:"" },
+  { id:"使",name:"使",nameTrad:"使",pinyin:"shi",category:"normal",oracle:"亻+吏，派人做事",origin:"使用",hints:"用|__用|差__|大__",groupWords:"使用|大使|即使|使命|天使",idioms:"见风使舵::看情况改变态度|鬼使神差::不知不觉做了某事",riddles:"单人旁加吏::形声",synonyms:"用",antonyms:"" },
+  { id:"单",name:"单",nameTrad:"單",pinyin:"dan",category:"normal",oracle:"像捕鸟的网",origin:"单独",hints:"一个|__独|简__|名__",groupWords:"单独|简单|单位|名单|单元",idioms:"单枪匹马::一个人独自行动|形单影只::孤独一个人",riddles:"丷加田加十::象形简化",synonyms:"独",antonyms:"双" },
+  { id:"品",name:"品",nameTrad:"品",pinyin:"pin",category:"normal",oracle:"三个口在一起",origin:"物品",hints:"东西|物__|商__|__质",groupWords:"物品|商品|品质|品牌|品味",idioms:"品学兼优::品德和学问都好|评头品足::对别人指手画脚",riddles:"三个口::会意",synonyms:"物",antonyms:"" },
+  { id:"堂",name:"堂",nameTrad:"堂",pinyin:"tang",category:"normal",oracle:"尚+土，高大的房子",origin:"厅堂",hints:"大房子|课__|礼__|食__",groupWords:"课堂|食堂|礼堂|天堂|堂兄",idioms:"堂堂正正::光明正大|欢聚一堂::快乐地聚集在一起",riddles:"尚字头加土::形声",synonyms:"厅",antonyms:"" },
+  { id:"寻",name:"寻",nameTrad:"尋",pinyin:"xun",category:"normal",oracle:"彐+工+寸，用手找",origin:"寻找",hints:"找|__找|__觅|搜__",groupWords:"寻找|寻求|寻觅|寻常|搜寻",idioms:"寻根问底::追问事情的根源|耐人寻味::值得仔细体会",riddles:"彐加工加寸::会意",synonyms:"找",antonyms:"" },
+  { id:"幻",name:"幻",nameTrad:"幻",pinyin:"huan",category:"normal",oracle:"幺+㇆，丝线缠绕虚幻",origin:"幻想",hints:"不真实的|__想|梦__|虚__",groupWords:"幻想|梦幻|幻觉|虚幻|变幻",idioms:"变幻莫测::变化多端难以预测",riddles:"幺加折::会意",synonyms:"虚",antonyms:"真" },
+  { id:"恨",name:"恨",nameTrad:"恨",pinyin:"hen",category:"normal",oracle:"忄+艮，心里不满",origin:"仇恨",hints:"和爱相反|仇__|__不得|可__",groupWords:"仇恨|可恨|恨意|恨不能|悔恨",idioms:"恨铁不成钢::对期望的人不满意|相见恨晚::遗憾认识得太晚",riddles:"竖心旁加艮::形声",synonyms:"仇",antonyms:"爱" },
+  { id:"情",name:"情",nameTrad:"情",pinyin:"qing",category:"normal",oracle:"忄+青，青表音",origin:"感情",hints:"心里的感受|感__|心__|爱__",groupWords:"感情|心情|爱情|事情|情况",idioms:"情不自禁::控制不住自己的感情|情同手足::感情像兄弟一样",riddles:"竖心旁加青::形声",synonyms:"感",antonyms:"" },
+  { id:"戏",name:"戏",nameTrad:"戲",pinyin:"xi",category:"normal",oracle:"戈+䖒，拿着兵器表演",origin:"游戏",hints:"玩|游__|看__|唱__",groupWords:"游戏|戏剧|唱戏|戏弄|马戏",idioms:"逢场作戏::偶尔凑凑热闹|拿手好戏::最擅长的本事",riddles:"又加戈::形声简化",synonyms:"玩",antonyms:"" },
+  { id:"暗",name:"暗",nameTrad:"暗",pinyin:"an",category:"normal",oracle:"日+音，太阳被遮住",origin:"黑暗",hints:"和明相反|黑__|__淡|阴__",groupWords:"黑暗|暗处|暗号|暗示|阴暗",idioms:"暗箭难防::暗中的攻击最难防备|明察暗访::公开和秘密地调查",riddles:"日字旁加音::形声",synonyms:"黑",antonyms:"明" },
+  { id:"死",name:"死",nameTrad:"死",pinyin:"si",category:"normal",oracle:"歹+匕，生命结束",origin:"死亡",hints:"和生相反|__亡|生__|战__",groupWords:"死亡|生死|死人|死心|死活",idioms:"死里逃生::从危险中逃出来|死心塌地::断了念头下定决心",riddles:"歹字旁加匕::会意",synonyms:"亡",antonyms:"生" },
+  { id:"求",name:"求",nameTrad:"求",pinyin:"qiu",category:"normal",oracle:"像皮衣的形状，假借为请求",origin:"请求",hints:"想要得到|请__|要__|寻__",groupWords:"请求|要求|寻求|求救|追求",idioms:"求之不得::非常渴望得到|精益求精::不断追求更好",riddles:"一横加四点::象形",synonyms:"请",antonyms:"" },
+  { id:"环",name:"环",nameTrad:"環",pinyin:"huan",category:"normal",oracle:"王+睘，圆形的玉",origin:"环形",hints:"圆圈|耳__|__境|循__",groupWords:"环境|耳环|循环|环节|光环",idioms:"环环相扣::每一个环节都紧密相连",riddles:"王字旁加不::形声简化",synonyms:"圈",antonyms:"" },
+  { id:"第",name:"第",nameTrad:"第",pinyin:"di",category:"normal",oracle:"竹+弟，竹简的次序",origin:"次序",hints:"顺序|__一|次__|等__",groupWords:"第一|第二|次第|门第|及第",idioms:"书香门第::读书人的家庭",riddles:"竹字头加弟::形声",synonyms:"",antonyms:"" },
+  { id:"经",name:"经",nameTrad:"經",pinyin:"jing",category:"normal",oracle:"纟+巠，织布的纵线",origin:"经过",hints:"通过|__过|已__|曾__",groupWords:"经过|已经|经验|经常|经理",idioms:"经久不息::长时间不停|天经地义::理所当然",riddles:"绞丝旁加圣::形声简化",synonyms:"过",antonyms:"" },
+  { id:"者",name:"者",nameTrad:"者",pinyin:"zhe",category:"normal",oracle:"老+白，指代人或事物",origin:"的人或物",hints:"做这件事的人|作__|读__|记__",groupWords:"作者|读者|记者|或者|患者",idioms:"来者不拒::对来人一概不拒绝|能者多劳::有能力的人多做事",riddles:"老字头加日::会意",synonyms:"",antonyms:"" },
+  { id:"识",name:"识",nameTrad:"識",pinyin:"shi",category:"normal",oracle:"言+戠，用心辨识",origin:"认识",hints:"分得出来|认__|知__|常__",groupWords:"认识|识别|知识|常识|见识",idioms:"见多识广::见识丰富|远见卓识::眼光远大见解高明",riddles:"言字旁加只::形声简化",synonyms:"认",antonyms:"" },
+  { id:"蹈",name:"蹈",nameTrad:"蹈",pinyin:"dao",category:"normal",oracle:"足+舀，踩踏",origin:"舞蹈",hints:"跳舞|舞__|手舞足__|重__覆辙",groupWords:"舞蹈|蹈海|赴汤蹈火|手舞足蹈",idioms:"赴汤蹈火::不怕危险勇往直前|循规蹈矩::按规矩办事",riddles:"足字旁加舀::形声",synonyms:"踏",antonyms:"" },
+  { id:"边",name:"边",nameTrad:"邊",pinyin:"bian",category:"normal",oracle:"辶+力，走到边界",origin:"旁边",hints:"旁边|旁__|__界|路__",groupWords:"旁边|这边|那边|边界|边缘",idioms:"无边无际::大得没有边际|一望无边::一眼看不到尽头",riddles:"走之底加力::形声",synonyms:"旁",antonyms:"中" },
+  { id:"道",name:"道",nameTrad:"道",pinyin:"dao",category:"normal",oracle:"辶+首，人走的道路",origin:"道路",hints:"路|__路|知__|说__",groupWords:"道路|知道|道理|道德|频道",idioms:"头头是道::说得很在理|志同道合::目标一致意见相合",riddles:"走之底加首::形声",synonyms:"路",antonyms:"" },
+  { id:"阴",name:"阴",nameTrad:"陰",pinyin:"yin",category:"normal",oracle:"阝+侌，山的北面",origin:"阴凉",hints:"和阳相反|__天|光__|树__",groupWords:"阴天|阴暗|阴凉|树阴|阴影",idioms:"阳奉阴违::表面服从暗地反对|光阴似箭::时间过得很快",riddles:"双耳旁加月::形声简化",synonyms:"暗",antonyms:"阳" },
+  { id:"首",name:"首",nameTrad:"首",pinyin:"shou",category:"normal",oracle:"头发和眼睛，代表头",origin:"头部",hints:"头|__先|元__|自__",groupWords:"首先|首都|一首诗|首领|元首",idioms:"首当其冲::最先受到攻击|马首是瞻::听从指挥跟着行动",riddles:"丷加自::会意",synonyms:"头",antonyms:"尾" },
+  { id:"狮",name:"狮",nameTrad:"獅",pinyin:"shi",category:"normal",oracle:"犭+师，师表音",origin:"狮子",hints:"大猫|__子|雄__|舞__",groupWords:"狮子|雄狮|舞狮|石狮|狮吼",idioms:"狮子大开口::要价太高|河东狮吼::比喻凶悍的妻子",riddles:"反犬旁加师::形声",synonyms:"",antonyms:"" },
+];
+
+// ==================== 注意：这是第5份，到这里结束 ====================
+// 接下来请拼接第6份（连线数据）
+// ==================== 连线数据 ====================
+const ALL_LINKS = [
+  // ── 从"一"到各大字族入口 ──
+  { source:"一",target:"天",branchName:"一画开天",linkType:"意义" },
+  { source:"一",target:"人",branchName:"一人",linkType:"构件" },
+  { source:"一",target:"大",branchName:"一人为大",linkType:"构件" },
+  { source:"一",target:"日",branchName:"一日",linkType:"构件" },
+  { source:"一",target:"土",branchName:"一加十为土",linkType:"构件" },
+  { source:"一",target:"山",branchName:"一山",linkType:"构件" },
+  { source:"一",target:"水",branchName:"一水",linkType:"构件" },
+  // ── 数字序列 ──
+  { source:"一",target:"二",branchName:"像一根树枝",linkType:"形似" },
+  { source:"二",target:"三",branchName:"树枝又多了一根",linkType:"形似" },
+  { source:"三",target:"四",branchName:"像一个框",linkType:"形似" },
+  { source:"四",target:"五",branchName:"像一个交叉的结构",linkType:"形似" },
+  { source:"五",target:"六",branchName:"像一个房子",linkType:"形似" },
+  { source:"六",target:"七",branchName:"一横加一个弯",linkType:"形似" },
+  { source:"七",target:"八",branchName:"两个人背对背",linkType:"形似" },
+  { source:"八",target:"九",branchName:"弯曲的样子",linkType:"形似" },
+  { source:"九",target:"十",branchName:"一根绳子打一个结",linkType:"形似" },
+  { source:"十",target:"百",branchName:"十个十",linkType:"意义" },
+  { source:"百",target:"千",branchName:"十个百",linkType:"意义" },
+  { source:"千",target:"万",branchName:"十个千",linkType:"意义" },
+  { source:"万",target:"亿",branchName:"一万个万",linkType:"意义" },
+  { source:"亿",target:"兆",branchName:"亿的万倍",linkType:"意义" },
+
+  // ── 一的多元联想 ──
+  { source:"一",target:"天",branchName:"像天边一线",linkType:"形似" },
+  { source:"一",target:"地",branchName:"像大地地平线",linkType:"形似" },
+  { source:"一",target:"人",branchName:"像一个张开手臂的人",linkType:"形似" },
+  { source:"一",target:"上",branchName:"从地平线往上",linkType:"构件" },
+  { source:"一",target:"下",branchName:"从地平线往下",linkType:"构件" },
+  { source:"一",target:"土",branchName:"地平线就是大地",linkType:"意义" },
+  { source:"一",target:"木",branchName:"像一棵小苗",linkType:"形似" },
+  { source:"一",target:"大",branchName:"像一个人伸展双臂",linkType:"形似" },
+
+  // ── 交叉联想 ──
+  { source:"二",target:"人",branchName:"两笔写成的字",linkType:"笔数" },
+  { source:"三",target:"丰",branchName:"三横加一竖",linkType:"加笔" },
+  { source:"三",target:"水",branchName:"三笔写成的字",linkType:"笔数" },
+  { source:"三",target:"川",branchName:"三道水流",linkType:"形似" },
+  { source:"四",target:"口",branchName:"像一个四方的框",linkType:"形似" },
+
+  // ── 口→日→星→明 ──
+  { source:"口",target:"日",branchName:"口里加一横像太阳",linkType:"加笔" },
+  { source:"日",target:"旦",branchName:"太阳从地平线升起",linkType:"加笔" },
+  { source:"日",target:"早",branchName:"太阳照到草上",linkType:"构件" },
+  { source:"日",target:"草",branchName:"草里有日",linkType:"构件" },
+  { source:"日",target:"明",branchName:"日月在一起",linkType:"意义" },
+  { source:"日",target:"星",branchName:"天上很多小亮点",linkType:"构件" },
+  { source:"月",target:"明",branchName:"日月在一起",linkType:"意义" },
+  { source:"星",target:"晶",branchName:"很多星星亮晶晶",linkType:"构件" },
+
+  // ── 人的衍生 ──
+  { source:"人",target:"大",branchName:"一个人伸展双臂",linkType:"加笔" },
+  { source:"人",target:"立",branchName:"一个人站在地上",linkType:"构件" },
+  { source:"人",target:"从",branchName:"两个人并排",linkType:"构件" },
+  { source:"人",target:"众",branchName:"三个人在一起",linkType:"构件" },
+  { source:"人",target:"仁",branchName:"两个人之间的爱",linkType:"构件" },
+  { source:"人",target:"休",branchName:"人靠在树旁",linkType:"构件" },
+  { source:"人",target:"仙",branchName:"人在山边",linkType:"构件" },
+  { source:"大",target:"天",branchName:"人头顶上的空间",linkType:"加笔" },
+  { source:"大",target:"太",branchName:"比大还多一个点",linkType:"加笔" },
+  { source:"大",target:"夫",branchName:"大人头上的簪子",linkType:"加笔" },
+
+  // ── 天的衍生 ──
+  { source:"天",target:"日",branchName:"天上最亮的",linkType:"意义" },
+  { source:"天",target:"月",branchName:"天上弯弯的",linkType:"意义" },
+  { source:"天",target:"星",branchName:"天上很多小亮点",linkType:"意义" },
+  { source:"天",target:"气",branchName:"天上飘着的",linkType:"意义" },
+  { source:"气",target:"云",branchName:"气聚在一起",linkType:"加笔" },
+
+  // ── 地的衍生 ──
+  { source:"地",target:"土",branchName:"大地就是土",linkType:"意义" },
+  { source:"土",target:"山",branchName:"土堆高了就是山",linkType:"加笔" },
+
+  // ── 木的衍生 ──
+  { source:"木",target:"本",branchName:"树的根",linkType:"加笔" },
+  { source:"木",target:"末",branchName:"树的梢",linkType:"加笔" },
+  { source:"木",target:"休",branchName:"人靠在树旁",linkType:"构件" },
+  { source:"木",target:"林",branchName:"两棵树",linkType:"构件" },
+  { source:"木",target:"森",branchName:"三棵树",linkType:"构件" },
+  { source:"木",target:"果",branchName:"树上结了果实",linkType:"意义" },
+  { source:"木",target:"采",branchName:"手在树上摘东西",linkType:"构件" },
+  { source:"木",target:"集",branchName:"鸟停在树上",linkType:"构件" },
+
+  // ── 水的衍生 ──
+  { source:"水",target:"冰",branchName:"水遇冷变成的",linkType:"意义" },
+  { source:"水",target:"江",branchName:"大的水流",linkType:"构件" },
+  { source:"水",target:"河",branchName:"可以渡过的水流",linkType:"构件" },
+  { source:"水",target:"海",branchName:"水最多的地方",linkType:"构件" },
+  { source:"水",target:"雨",branchName:"天上落下的水",linkType:"构件" },
+  { source:"雨",target:"雪",branchName:"雨遇冷变成的",linkType:"构件" },
+  { source:"川",target:"州",branchName:"水中的陆地",linkType:"加笔" },
+
+  // ── 火的衍生 ──
+  { source:"火",target:"炎",branchName:"两把火更热",linkType:"构件" },
+  { source:"火",target:"灾",branchName:"房子着火",linkType:"构件" },
+  { source:"火",target:"灭",branchName:"把火盖住",linkType:"构件" },
+  { source:"火",target:"灯",branchName:"火能照明",linkType:"构件" },
+  { source:"火",target:"光",branchName:"火发出光亮",linkType:"意义" },
+  { source:"水",target:"火",branchName:"水和火相反",linkType:"意义" },
+
+  // ── 金贝 ──
+  { source:"贝",target:"财",branchName:"贝是古钱",linkType:"构件" },
+  { source:"金",target:"银",branchName:"两种贵金属",linkType:"构件" },
+  { source:"金",target:"贝",branchName:"古代钱币",linkType:"意义" },
+
+  // ── 草花木 ──
+  { source:"草",target:"木",branchName:"草木都从地里长",linkType:"意义" },
+  { source:"草",target:"花",branchName:"草木开花",linkType:"意义" },
+  { source:"丰",target:"艳",branchName:"丰盛的颜色",linkType:"构件" },
+
+  // ── 山石田力 ──
+  { source:"山",target:"石",branchName:"山里有石头",linkType:"意义" },
+  { source:"土",target:"田",branchName:"土可以种田",linkType:"意义" },
+  { source:"田",target:"男",branchName:"在田里出力",linkType:"构件" },
+  { source:"田",target:"力",branchName:"种田需要力气",linkType:"意义" },
+
+  // ── 人伦 ──
+  { source:"人",target:"男",branchName:"男人",linkType:"意义" },
+  { source:"人",target:"女",branchName:"女人",linkType:"意义" },
+  { source:"女",target:"好",branchName:"女子抱着孩子",linkType:"构件" },
+  { source:"子",target:"好",branchName:"有子有女就是好",linkType:"构件" },
+  { source:"子",target:"学",branchName:"孩子在屋里学",linkType:"构件" },
+  { source:"学",target:"习",branchName:"小鸟反复练飞",linkType:"构件" },
+  { source:"人",target:"儿",branchName:"人是大人，儿是小孩",linkType:"意义" },
+  { source:"子",target:"儿",branchName:"都是孩子",linkType:"意义" },
+  { source:"一",target:"中",branchName:"一竖穿中间",linkType:"形似" },
+  { source:"中",target:"心",branchName:"心中",linkType:"构件" },
+  { source:"人",target:"心",branchName:"人人都有心",linkType:"意义" },
+
+  // ── 口舌言 ──
+  { source:"口",target:"舌",branchName:"口里伸出舌头",linkType:"构件" },
+  { source:"口",target:"言",branchName:"口上说话",linkType:"加笔" },
+  { source:"舌",target:"话",branchName:"舌头发出的",linkType:"构件" },
+  { source:"言",target:"话",branchName:"言语就是话语",linkType:"意义" },
+  { source:"言",target:"语",branchName:"言就是语",linkType:"构件" },
+  { source:"言",target:"讲",branchName:"言字旁组成",linkType:"构件" },
+  { source:"言",target:"读",branchName:"言字旁组成",linkType:"构件" },
+  { source:"言",target:"诗",branchName:"言字旁组成",linkType:"构件" },
+  { source:"口",target:"唱",branchName:"用口唱",linkType:"构件" },
+  { source:"口",target:"吃",branchName:"用口吃",linkType:"构件" },
+  { source:"口",target:"喝",branchName:"用口喝",linkType:"构件" },
+  { source:"口",target:"吐",branchName:"从口里出来",linkType:"构件" },
+  { source:"口",target:"吞",branchName:"大口吞下",linkType:"构件" },
+  { source:"天",target:"吞",branchName:"天加口",linkType:"构件" },
+  { source:"吐",target:"吞",branchName:"吐和吞相反",linkType:"意义" },
+  { source:"人",target:"信",branchName:"人言为信",linkType:"构件" },
+  { source:"言",target:"信",branchName:"言出必信",linkType:"构件" },
+  { source:"信",target:"诚",branchName:"诚信",linkType:"意义" },
+  { source:"言",target:"诚",branchName:"真诚的话",linkType:"构件" },
+  { source:"言",target:"误",branchName:"说错的话",linkType:"构件" },
+  { source:"言",target:"让",branchName:"言语谦让",linkType:"构件" },
+  { source:"让",target:"礼",branchName:"礼让",linkType:"意义" },
+
+  // ── 心 ──
+  { source:"心",target:"想",branchName:"用心想",linkType:"构件" },
+  { source:"心",target:"思",branchName:"用心思考",linkType:"构件" },
+  { source:"想",target:"思",branchName:"想和思意思相近",linkType:"意义" },
+  { source:"心",target:"念",branchName:"心里念着",linkType:"构件" },
+  { source:"念",target:"想",branchName:"想念",linkType:"意义" },
+  { source:"心",target:"忘",branchName:"心丢了就忘了",linkType:"构件" },
+  { source:"心",target:"记",branchName:"记住和心有关",linkType:"意义" },
+  { source:"忘",target:"记",branchName:"忘记相反",linkType:"意义" },
+  { source:"心",target:"怕",branchName:"心里害怕",linkType:"构件" },
+  { source:"心",target:"惊",branchName:"心里受惊",linkType:"构件" },
+  { source:"心",target:"快",branchName:"心里快乐",linkType:"构件" },
+  { source:"心",target:"慢",branchName:"心里不急",linkType:"构件" },
+  { source:"快",target:"慢",branchName:"快慢相反",linkType:"意义" },
+  { source:"心",target:"忙",branchName:"心丢了就很忙",linkType:"构件" },
+  { source:"忙",target:"忘",branchName:"忙和忘都有亡",linkType:"构件" },
+
+  // ── 手 ──
+  { source:"手",target:"打",branchName:"用手打",linkType:"构件" },
+  { source:"手",target:"拍",branchName:"用手拍",linkType:"构件" },
+  { source:"手",target:"拉",branchName:"用手拉",linkType:"构件" },
+  { source:"手",target:"推",branchName:"用手推",linkType:"构件" },
+  { source:"拉",target:"推",branchName:"拉和推相反",linkType:"意义" },
+  { source:"手",target:"抱",branchName:"用手抱",linkType:"构件" },
+  { source:"手",target:"拿",branchName:"合手为拿",linkType:"构件" },
+  { source:"手",target:"挂",branchName:"用手挂",linkType:"构件" },
+  { source:"手",target:"扔",branchName:"用手扔",linkType:"构件" },
+  { source:"手",target:"捡",branchName:"用手捡",linkType:"构件" },
+  { source:"扔",target:"捡",branchName:"扔和捡相反",linkType:"意义" },
+  { source:"人",target:"手",branchName:"人都有手",linkType:"意义" },
+
+  // ── 目 ──
+  { source:"目",target:"见",branchName:"目加人就是见",linkType:"构件" },
+  { source:"目",target:"看",branchName:"用目看",linkType:"构件" },
+  { source:"手",target:"看",branchName:"手搭在目上",linkType:"构件" },
+  { source:"目",target:"眼",branchName:"目就是眼",linkType:"构件" },
+  { source:"眼",target:"睛",branchName:"眼睛",linkType:"构件" },
+  { source:"目",target:"泪",branchName:"目边流出的水",linkType:"构件" },
+  { source:"水",target:"泪",branchName:"泪水是水",linkType:"意义" },
+  { source:"目",target:"盲",branchName:"眼睛看不见了",linkType:"构件" },
+  { source:"人",target:"目",branchName:"人都有目",linkType:"意义" },
+
+  // ── 足 ──
+  { source:"足",target:"走",branchName:"用足走",linkType:"意义" },
+  { source:"足",target:"跑",branchName:"用足跑",linkType:"构件" },
+  { source:"足",target:"跳",branchName:"用足跳",linkType:"构件" },
+  { source:"足",target:"踢",branchName:"用足踢",linkType:"构件" },
+  { source:"足",target:"路",branchName:"足走的路",linkType:"构件" },
+  { source:"走",target:"跑",branchName:"跑比走快",linkType:"意义" },
+  { source:"人",target:"足",branchName:"人都有足",linkType:"意义" },
+
+  // ── 辶 ──
+  { source:"走",target:"过",branchName:"走过",linkType:"意义" },
+  { source:"辶",target:"进",branchName:"向前进",linkType:"意义" },
+  { source:"辶",target:"退",branchName:"向后退",linkType:"意义" },
+  { source:"进",target:"退",branchName:"进退相反",linkType:"意义" },
+  { source:"辶",target:"送",branchName:"送出去",linkType:"意义" },
+  { source:"辶",target:"迎",branchName:"迎进来",linkType:"意义" },
+  { source:"送",target:"迎",branchName:"送迎相反",linkType:"意义" },
+  { source:"辶",target:"运",branchName:"移动运输",linkType:"意义" },
+  { source:"辶",target:"远",branchName:"距离远",linkType:"意义" },
+  { source:"辶",target:"近",branchName:"距离近",linkType:"意义" },
+  { source:"远",target:"近",branchName:"远近相反",linkType:"意义" },
+
+  // ── 示 ──
+  { source:"示",target:"礼",branchName:"用示来行礼",linkType:"构件" },
+  { source:"示",target:"神",branchName:"祭祀神",linkType:"构件" },
+  { source:"人",target:"礼",branchName:"人要讲礼",linkType:"意义" },
+  { source:"仁",target:"礼",branchName:"仁和礼都是美德",linkType:"意义" },
+  { source:"示",target:"福",branchName:"求神赐福",linkType:"构件" },
+  { source:"示",target:"祝",branchName:"向神祝福",linkType:"构件" },
+  { source:"福",target:"祝",branchName:"祝福",linkType:"意义" },
+  { source:"示",target:"祖",branchName:"祭祀祖先",linkType:"构件" },
+  { source:"示",target:"祭",branchName:"祭祀",linkType:"构件" },
+
+  // ── 衣 ──
+  { source:"衣",target:"衫",branchName:"衣字旁组成",linkType:"构件" },
+  { source:"衣",target:"裤",branchName:"衣字旁组成",linkType:"构件" },
+  { source:"衣",target:"袜",branchName:"衣字旁组成",linkType:"构件" },
+  { source:"衣",target:"被",branchName:"衣字旁组成",linkType:"构件" },
+  { source:"衣",target:"初",branchName:"用刀裁衣",linkType:"构件" },
+  { source:"人",target:"衣",branchName:"人要穿衣",linkType:"意义" },
+
+  // ── 反义词 ──
+  { source:"多",target:"少",branchName:"多少相反",linkType:"意义" },
+  { source:"长",target:"短",branchName:"长短相反",linkType:"意义" },
+  { source:"高",target:"低",branchName:"高低相反",linkType:"意义" },
+  { source:"冷",target:"热",branchName:"冷热相反",linkType:"意义" },
+  { source:"白",target:"黑",branchName:"白黑相反",linkType:"意义" },
+  { source:"大",target:"多",branchName:"大和多近义",linkType:"意义" },
+  { source:"上",target:"高",branchName:"上和高近义",linkType:"意义" },
+  { source:"下",target:"低",branchName:"下和低近义",linkType:"意义" },
+  { source:"冰",target:"冷",branchName:"冰冷相近",linkType:"意义" },
+  { source:"火",target:"热",branchName:"火热相近",linkType:"意义" },
+  { source:"日",target:"白",branchName:"日就是白天",linkType:"意义" },
+  { source:"日",target:"夜",branchName:"日和夜相反",linkType:"意义" },
+  { source:"夜",target:"黑",branchName:"夜就是黑的",linkType:"意义" },
+
+  // ── 自然季节 ──
+  { source:"日",target:"春",branchName:"春日暖阳",linkType:"意义" },
+  { source:"草",target:"春",branchName:"春天草木生",linkType:"意义" },
+  { source:"日",target:"夏",branchName:"夏天太阳烈",linkType:"意义" },
+  { source:"火",target:"夏",branchName:"夏天如火",linkType:"意义" },
+  { source:"禾",target:"秋",branchName:"秋天庄稼熟",linkType:"意义" },
+  { source:"火",target:"秋",branchName:"秋天禾如火",linkType:"构件" },
+  { source:"冰",target:"冬",branchName:"冬天结冰",linkType:"意义" },
+  { source:"春",target:"夏",branchName:"春夏相连",linkType:"意义" },
+  { source:"夏",target:"秋",branchName:"夏秋相连",linkType:"意义" },
+  { source:"秋",target:"冬",branchName:"秋冬相连",linkType:"意义" },
+  { source:"日",target:"东",branchName:"太阳从东升起",linkType:"意义" },
+  { source:"日",target:"西",branchName:"太阳从西落下",linkType:"意义" },
+  { source:"东",target:"西",branchName:"东西相反",linkType:"意义" },
+  { source:"木",target:"东",branchName:"日在木中为东",linkType:"构件" },
+  { source:"东",target:"南",branchName:"东南方向",linkType:"意义" },
+  { source:"南",target:"西",branchName:"南西方向",linkType:"意义" },
+  { source:"西",target:"北",branchName:"西北方向",linkType:"意义" },
+  { source:"北",target:"东",branchName:"东北方向",linkType:"意义" },
+  { source:"南",target:"北",branchName:"南北相反",linkType:"意义" },
+
+  // ── 雷电 ──
+  { source:"雨",target:"雷",branchName:"下雨时打雷",linkType:"构件" },
+  { source:"雷",target:"电",branchName:"雷电相伴",linkType:"意义" },
+  { source:"雨",target:"电",branchName:"雷电交加",linkType:"意义" },
+  { source:"天",target:"雷",branchName:"天上打雷",linkType:"意义" },
+
+  // ── 颜色形状 ──
+  { source:"红",target:"火",branchName:"红色如火",linkType:"意义" },
+  { source:"红",target:"花",branchName:"红花",linkType:"意义" },
+  { source:"绿",target:"草",branchName:"绿草",linkType:"意义" },
+  { source:"绿",target:"木",branchName:"绿树",linkType:"意义" },
+  { source:"黄",target:"金",branchName:"黄金",linkType:"意义" },
+  { source:"黄",target:"土",branchName:"黄土",linkType:"意义" },
+  { source:"圆",target:"日",branchName:"太阳是圆的",linkType:"意义" },
+  { source:"圆",target:"月",branchName:"月亮是圆的",linkType:"意义" },
+  { source:"方",target:"四",branchName:"四方",linkType:"意义" },
+  { source:"方",target:"口",branchName:"方口",linkType:"形似" },
+  { source:"圆",target:"方",branchName:"圆方相反",linkType:"意义" },
+
+
+// ==================== 注意：这是第6份，到这里结束 ====================
+// 接下来请拼接第7份（连线数据：动物 → 连接词）
+  // ── 动物 ──
+  { source:"马",target:"牛",branchName:"都是家畜",linkType:"意义" },
+  { source:"牛",target:"羊",branchName:"都是食草动物",linkType:"意义" },
+  { source:"鱼",target:"水",branchName:"鱼离不开水",linkType:"意义" },
+  { source:"虫",target:"草",branchName:"虫吃草",linkType:"意义" },
+  { source:"犬",target:"人",branchName:"犬是人类的朋友",linkType:"意义" },
+  { source:"龙",target:"天",branchName:"龙在天上飞",linkType:"意义" },
+
+  // ── 家庭社会 ──
+  { source:"家",target:"宀",branchName:"宀是房子",linkType:"构件" },
+  { source:"父",target:"母",branchName:"父母",linkType:"意义" },
+  { source:"父",target:"大",branchName:"父亲是大人",linkType:"意义" },
+  { source:"母",target:"女",branchName:"母亲是女性",linkType:"意义" },
+  { source:"子",target:"父",branchName:"父子",linkType:"意义" },
+  { source:"子",target:"母",branchName:"母子",linkType:"意义" },
+  { source:"老",target:"师",branchName:"老师",linkType:"构件" },
+  { source:"师",target:"教",branchName:"教师",linkType:"意义" },
+  { source:"学",target:"生",branchName:"学生",linkType:"构件" },
+  { source:"师",target:"生",branchName:"师生",linkType:"意义" },
+  { source:"老",target:"少",branchName:"老少相反",linkType:"意义" },
+
+  // ── 门字族 ──
+  { source:"门",target:"间",branchName:"门缝见日光",linkType:"构件" },
+  { source:"门",target:"问",branchName:"在门口问",linkType:"构件" },
+  { source:"门",target:"闻",branchName:"在门里听",linkType:"构件" },
+  { source:"门",target:"闭",branchName:"把门关上",linkType:"构件" },
+  { source:"门",target:"开",branchName:"打开门",linkType:"意义" },
+  { source:"门",target:"关",branchName:"关门",linkType:"意义" },
+  { source:"开",target:"关",branchName:"开关相反",linkType:"意义" },
+  { source:"闭",target:"开",branchName:"闭开相反",linkType:"意义" },
+  { source:"口",target:"问",branchName:"用口问",linkType:"构件" },
+  { source:"耳",target:"闻",branchName:"用耳闻",linkType:"构件" },
+
+  // ── 车字族 ──
+  { source:"车",target:"轮",branchName:"车有轮子",linkType:"构件" },
+  { source:"车",target:"轻",branchName:"车子轻便",linkType:"构件" },
+  { source:"轻",target:"重",branchName:"轻重相反",linkType:"意义" },
+
+  // ── 舟字族 ──
+  { source:"舟",target:"船",branchName:"舟就是船",linkType:"构件" },
+  { source:"水",target:"舟",branchName:"舟行水上",linkType:"意义" },
+
+  // ── 竹字族 ──
+  { source:"竹",target:"笔",branchName:"竹加毛就是笔",linkType:"构件" },
+  { source:"竹",target:"笑",branchName:"风吹竹子如笑",linkType:"构件" },
+  { source:"竹",target:"算",branchName:"古人用竹筹算",linkType:"构件" },
+
+  // ── 页字族 ──
+  { source:"页",target:"顶",branchName:"头顶",linkType:"构件" },
+  { source:"页",target:"领",branchName:"头领",linkType:"构件" },
+  { source:"页",target:"颜",branchName:"面容颜色",linkType:"构件" },
+  { source:"页",target:"顾",branchName:"回头看",linkType:"构件" },
+  { source:"人",target:"页",branchName:"页是人头",linkType:"意义" },
+
+  // ── 米 ──
+  { source:"田",target:"米",branchName:"田里种米",linkType:"意义" },
+  { source:"米",target:"来",branchName:"来字本义是麦",linkType:"意义" },
+
+  // ── 来回出入 ──
+  { source:"来",target:"去",branchName:"来去相反",linkType:"意义" },
+  { source:"出",target:"入",branchName:"出入相反",linkType:"意义" },
+  { source:"进",target:"入",branchName:"进入同义",linkType:"意义" },
+  { source:"出",target:"去",branchName:"出去同义",linkType:"意义" },
+  { source:"来",target:"回",branchName:"来回",linkType:"意义" },
+  { source:"回",target:"去",branchName:"回去",linkType:"意义" },
+
+  // ── 坐飞 ──
+  { source:"坐",target:"立",branchName:"坐立相反",linkType:"意义" },
+  { source:"人",target:"坐",branchName:"人坐着",linkType:"构件" },
+  { source:"土",target:"坐",branchName:"坐在土上",linkType:"构件" },
+  { source:"鸟",target:"飞",branchName:"鸟儿会飞",linkType:"意义" },
+  { source:"飞",target:"走",branchName:"飞比走快",linkType:"意义" },
+
+  // ── 口字族深入 ──
+  { source:"口",target:"叫",branchName:"用口叫",linkType:"构件" },
+  { source:"口",target:"吹",branchName:"用口吹",linkType:"构件" },
+  { source:"口",target:"吸",branchName:"用口吸",linkType:"构件" },
+  { source:"吹",target:"吸",branchName:"吹吸相反",linkType:"意义" },
+  { source:"口",target:"味",branchName:"口尝味道",linkType:"构件" },
+  { source:"口",target:"呀",branchName:"口发惊讶声",linkType:"构件" },
+
+  // ── 欠字族 ──
+  { source:"欠",target:"吹",branchName:"张口吹气",linkType:"构件" },
+  { source:"欠",target:"欢",branchName:"张口欢笑",linkType:"构件" },
+  { source:"欠",target:"歌",branchName:"张口唱歌",linkType:"构件" },
+  { source:"欢",target:"歌",branchName:"欢歌",linkType:"意义" },
+  { source:"唱",target:"歌",branchName:"唱歌",linkType:"意义" },
+  { source:"人",target:"欠",branchName:"人打哈欠",linkType:"意义" },
+
+  // ── 力字族补充 ──
+  { source:"力",target:"动",branchName:"用力移动",linkType:"构件" },
+  { source:"力",target:"助",branchName:"出力帮助",linkType:"构件" },
+  { source:"人",target:"助",branchName:"人帮助人",linkType:"意义" },
+
+  // ── 女字族深入 ──
+  { source:"女",target:"妈",branchName:"妈妈是女性",linkType:"构件" },
+  { source:"女",target:"姐",branchName:"姐姐是女性",linkType:"构件" },
+  { source:"女",target:"妹",branchName:"妹妹是女性",linkType:"构件" },
+  { source:"妈",target:"母",branchName:"妈妈就是母亲",linkType:"意义" },
+  { source:"姐",target:"妹",branchName:"姐妹",linkType:"意义" },
+
+  // ── 宀字族补充 ──
+  { source:"宀",target:"安",branchName:"屋里有女则安",linkType:"构件" },
+  { source:"宀",target:"宁",branchName:"屋里有心则宁",linkType:"构件" },
+  { source:"安",target:"宁",branchName:"安宁",linkType:"意义" },
+  { source:"家",target:"安",branchName:"家宅平安",linkType:"意义" },
+
+  // ── 广字族 ──
+  { source:"广",target:"店",branchName:"广厦做店铺",linkType:"构件" },
+  { source:"广",target:"座",branchName:"广厦下的座位",linkType:"构件" },
+  { source:"坐",target:"座",branchName:"坐和座相关",linkType:"构件" },
+
+  // ── 彳字族 ──
+  { source:"彳",target:"行",branchName:"彳就是行走",linkType:"构件" },
+  { source:"彳",target:"往",branchName:"向前行走",linkType:"构件" },
+  { source:"彳",target:"得",branchName:"行有所得",linkType:"构件" },
+  { source:"彳",target:"很",branchName:"走得很远",linkType:"构件" },
+  { source:"行",target:"往",branchName:"前往",linkType:"构件" },
+  { source:"往",target:"来",branchName:"往来相反",linkType:"意义" },
+  { source:"走",target:"行",branchName:"行走同义",linkType:"意义" },
+
+  // ── 禾字族 ──
+  { source:"禾",target:"种",branchName:"播种禾苗",linkType:"构件" },
+  { source:"禾",target:"科",branchName:"用斗量禾分类",linkType:"构件" },
+  { source:"禾",target:"香",branchName:"禾在日下晒出香",linkType:"构件" },
+  { source:"米",target:"禾",branchName:"禾去壳就是米",linkType:"意义" },
+  { source:"田",target:"禾",branchName:"田里种禾",linkType:"意义" },
+
+  // ── 米字族 ──
+  { source:"米",target:"饭",branchName:"米做饭",linkType:"构件" },
+  { source:"米",target:"粒",branchName:"一粒米",linkType:"构件" },
+  { source:"米",target:"粮",branchName:"米就是粮",linkType:"构件" },
+  { source:"食",target:"饭",branchName:"饭是食物",linkType:"构件" },
+  { source:"田",target:"粮",branchName:"田里产粮",linkType:"意义" },
+
+  // ── 王字族 ──
+  { source:"王",target:"玉",branchName:"王加一点就是玉",linkType:"加笔" },
+  { source:"玉",target:"国",branchName:"国中有玉",linkType:"构件" },
+  { source:"玉",target:"全",branchName:"完整的玉",linkType:"构件" },
+  { source:"大",target:"王",branchName:"大王",linkType:"构件" },
+  { source:"国",target:"家",branchName:"国家",linkType:"意义" },
+  { source:"土",target:"国",branchName:"国土",linkType:"意义" },
+
+  // ── 土字族补充 ──
+  { source:"土",target:"城",branchName:"土筑的城",linkType:"构件" },
+  { source:"土",target:"墙",branchName:"土筑的墙",linkType:"构件" },
+  { source:"城",target:"墙",branchName:"城墙",linkType:"意义" },
+  { source:"家",target:"墙",branchName:"家墙",linkType:"意义" },
+
+  // ── 虫字族 ──
+  { source:"虫",target:"蛇",branchName:"蛇是一种虫",linkType:"构件" },
+  { source:"虫",target:"蜂",branchName:"蜜蜂",linkType:"构件" },
+  { source:"虫",target:"蝶",branchName:"蝴蝶",linkType:"构件" },
+  { source:"蜂",target:"蝶",branchName:"蜂蝶都是昆虫",linkType:"意义" },
+  { source:"花",target:"蜂",branchName:"蜜蜂采花",linkType:"意义" },
+  { source:"花",target:"蝶",branchName:"蝴蝶恋花",linkType:"意义" },
+
+  // ── 鸟字族补充 ──
+  { source:"鸟",target:"鸭",branchName:"鸭子是鸟",linkType:"构件" },
+  { source:"鸟",target:"鸡",branchName:"鸡是鸟",linkType:"构件" },
+  { source:"鸭",target:"水",branchName:"鸭子会游水",linkType:"意义" },
+  { source:"鸡",target:"鸭",branchName:"鸡鸭都是家禽",linkType:"意义" },
+
+  // ── 雨字族补充 ──
+  { source:"雨",target:"雾",branchName:"雨雾蒙蒙",linkType:"构件" },
+  { source:"雨",target:"露",branchName:"雨露滋润",linkType:"构件" },
+  { source:"雨",target:"霜",branchName:"雨霜寒冷",linkType:"构件" },
+  { source:"露",target:"水",branchName:"露水是水",linkType:"意义" },
+  { source:"霜",target:"冰",branchName:"霜和冰都冷",linkType:"意义" },
+  { source:"气",target:"雾",branchName:"雾气弥漫",linkType:"意义" },
+
+
+// ==================== 注意：这是第7份，到这里结束 ====================
+// 接下来请拼接第8份（连线数据：刀字族 → 连接词）
+  // ── 刀字族 ──
+  { source:"刀",target:"刃",branchName:"刀最锋利的地方",linkType:"加笔" },
+  { source:"刀",target:"分",branchName:"用刀分开",linkType:"构件" },
+  { source:"刀",target:"切",branchName:"用刀切",linkType:"构件" },
+  { source:"衣",target:"初",branchName:"用刀裁衣",linkType:"构件" },
+  { source:"八",target:"分",branchName:"八字头加刀",linkType:"构件" },
+  { source:"分",target:"合",branchName:"分合相反",linkType:"意义" },
+
+  // ── 力字族补充 ──
+  { source:"力",target:"功",branchName:"用力做工",linkType:"构件" },
+  { source:"力",target:"加",branchName:"力量增加",linkType:"构件" },
+  { source:"力",target:"劳",branchName:"出力劳作",linkType:"构件" },
+  { source:"功",target:"劳",branchName:"功劳",linkType:"意义" },
+
+  // ── 欠字族补充 ──
+  { source:"欠",target:"饮",branchName:"张大嘴饮",linkType:"构件" },
+  { source:"食",target:"饮",branchName:"饮食",linkType:"意义" },
+  { source:"喝",target:"饮",branchName:"喝和饮同义",linkType:"意义" },
+
+  // ── 又字族 ──
+  { source:"又",target:"友",branchName:"两只右手握在一起",linkType:"构件" },
+  { source:"又",target:"取",branchName:"用手取",linkType:"构件" },
+  { source:"又",target:"受",branchName:"用手接受",linkType:"构件" },
+  { source:"耳",target:"取",branchName:"取字有耳",linkType:"构件" },
+  { source:"人",target:"友",branchName:"人是朋友",linkType:"意义" },
+
+  // ── 寸字族 ──
+  { source:"寸",target:"对",branchName:"寸加又",linkType:"构件" },
+  { source:"寸",target:"时",branchName:"日加寸",linkType:"构件" },
+  { source:"日",target:"时",branchName:"日光移一寸就是时间",linkType:"构件" },
+  { source:"辶",target:"过",branchName:"走之底加寸",linkType:"构件" },
+
+  // ── 反义词补充 ──
+  { source:"真",target:"假",branchName:"真假相反",linkType:"意义" },
+  { source:"深",target:"浅",branchName:"深浅相反",linkType:"意义" },
+  { source:"厚",target:"薄",branchName:"厚薄相反",linkType:"意义" },
+  { source:"水",target:"深",branchName:"水深",linkType:"构件" },
+  { source:"水",target:"浅",branchName:"水浅",linkType:"构件" },
+
+  // ── 厂字族 ──
+  { source:"厂",target:"厅",branchName:"宽敞的房屋",linkType:"构件" },
+  { source:"厂",target:"历",branchName:"经历",linkType:"构件" },
+  { source:"厂",target:"压",branchName:"山崖压下来",linkType:"构件" },
+
+  // ── 尸字族 ──
+  { source:"尸",target:"屋",branchName:"人住的屋子",linkType:"构件" },
+  { source:"尸",target:"层",branchName:"房屋的层次",linkType:"构件" },
+  { source:"尸",target:"居",branchName:"蹲坐引申为居住",linkType:"构件" },
+  { source:"屋",target:"房",branchName:"房屋同义",linkType:"意义" },
+  { source:"居",target:"家",branchName:"居家",linkType:"意义" },
+
+  // ── 户字族 ──
+  { source:"户",target:"房",branchName:"有门的屋子",linkType:"构件" },
+  { source:"户",target:"所",branchName:"处所",linkType:"构件" },
+  { source:"门",target:"户",branchName:"门户相近",linkType:"意义" },
+
+  // ── 疒字族 ──
+  { source:"疒",target:"病",branchName:"生病",linkType:"构件" },
+  { source:"疒",target:"疼",branchName:"疼痛",linkType:"构件" },
+  { source:"疒",target:"痛",branchName:"痛苦",linkType:"构件" },
+  { source:"疼",target:"痛",branchName:"疼痛同义",linkType:"意义" },
+  { source:"人",target:"病",branchName:"人会生病",linkType:"意义" },
+
+  // ── 巾字族 ──
+  { source:"巾",target:"布",branchName:"布料",linkType:"构件" },
+  { source:"巾",target:"市",branchName:"市场",linkType:"构件" },
+  { source:"巾",target:"带",branchName:"带子",linkType:"构件" },
+  { source:"衣",target:"布",branchName:"布做衣服",linkType:"意义" },
+  { source:"城",target:"市",branchName:"城市",linkType:"意义" },
+
+  // ── 连接词 ──
+  { source:"可",target:"但",branchName:"可但是转折",linkType:"意义" },
+  { source:"也",target:"可",branchName:"也可",linkType:"意义" },
+  { source:"人",target:"但",branchName:"人加旦",linkType:"构件" },
+
+
+// ==================== 注意：这是第8份，到这里结束 ====================
+// 接下来请拼接第9份（连线数据：犬字族 → 常用副词连接词）
+  // ── 犬字族 ──
+  { source:"犬",target:"狗",branchName:"狗就是犬",linkType:"构件" },
+  { source:"犬",target:"猫",branchName:"猫是猫科动物",linkType:"构件" },
+  { source:"犬",target:"猪",branchName:"猪是家畜",linkType:"构件" },
+  { source:"犬",target:"狼",branchName:"狼是犬科野兽",linkType:"构件" },
+  { source:"犬",target:"狐",branchName:"狐狸是犬科",linkType:"构件" },
+  { source:"狗",target:"猫",branchName:"猫狗都是宠物",linkType:"意义" },
+  { source:"狗",target:"狼",branchName:"狗和狼很像",linkType:"意义" },
+  { source:"狼",target:"狐",branchName:"狼狈为奸",linkType:"意义" },
+
+  // ── 马字族补充 ──
+  { source:"马",target:"驴",branchName:"驴是马科动物",linkType:"构件" },
+  { source:"马",target:"骆",branchName:"骆驼",linkType:"构件" },
+  { source:"大",target:"骆",branchName:"大骆驼",linkType:"构件" },
+
+  // ── 鱼字族补充 ──
+  { source:"鱼",target:"鲜",branchName:"鱼肉鲜美",linkType:"构件" },
+  { source:"鱼",target:"鲸",branchName:"鲸是巨鱼",linkType:"构件" },
+  { source:"羊",target:"鲜",branchName:"羊肉也鲜美",linkType:"构件" },
+  { source:"海",target:"鲸",branchName:"鲸鱼生活在海里",linkType:"意义" },
+
+  // ── 火字族补充 ──
+  { source:"火",target:"烧",branchName:"用火烧",linkType:"构件" },
+  { source:"火",target:"烤",branchName:"用火烤",linkType:"构件" },
+  { source:"火",target:"烟",branchName:"火产生烟",linkType:"构件" },
+  { source:"烧",target:"烤",branchName:"烧烤",linkType:"意义" },
+  { source:"烟",target:"气",branchName:"烟气",linkType:"意义" },
+
+  // ── 食字族补充 ──
+  { source:"食",target:"饱",branchName:"吃饱",linkType:"构件" },
+  { source:"食",target:"饿",branchName:"饥饿",linkType:"构件" },
+  { source:"饱",target:"饿",branchName:"饱饿相反",linkType:"意义" },
+  { source:"食",target:"饺",branchName:"饺子是食物",linkType:"构件" },
+  { source:"食",target:"饼",branchName:"饼是食物",linkType:"构件" },
+  { source:"米",target:"饺",branchName:"饺子皮用米面做",linkType:"意义" },
+  { source:"米",target:"饼",branchName:"饼用米面做",linkType:"意义" },
+  { source:"饭",target:"饱",branchName:"吃饱饭",linkType:"意义" },
+  { source:"饭",target:"饿",branchName:"饿要吃饭",linkType:"意义" },
+
+  // ── 止字族 ──
+  { source:"止",target:"步",branchName:"脚趾迈步",linkType:"构件" },
+  { source:"止",target:"此",branchName:"脚踩的地方",linkType:"构件" },
+  { source:"止",target:"武",branchName:"扛着兵器去打仗",linkType:"构件" },
+  { source:"步",target:"走",branchName:"走路迈步",linkType:"意义" },
+  { source:"武",target:"文",branchName:"文武相对",linkType:"意义" },
+
+  // ── 瓦字族 ──
+  { source:"瓦",target:"瓶",branchName:"瓦器瓶子",linkType:"构件" },
+  { source:"瓦",target:"瓷",branchName:"瓷器",linkType:"构件" },
+  { source:"土",target:"瓦",branchName:"瓦用土烧",linkType:"意义" },
+  { source:"石",target:"瓦",branchName:"砖瓦和石头都是建材",linkType:"意义" },
+
+  // ── 皿字族 ──
+  { source:"皿",target:"盆",branchName:"器皿盆子",linkType:"构件" },
+  { source:"皿",target:"盘",branchName:"盘子",linkType:"构件" },
+  { source:"皿",target:"盛",branchName:"器皿中装满东西",linkType:"构件" },
+  { source:"盆",target:"盘",branchName:"盆盘都是器皿",linkType:"意义" },
+  { source:"水",target:"盆",branchName:"水盆",linkType:"意义" },
+
+  // ── 穴字族 ──
+  { source:"穴",target:"空",branchName:"洞穴是空的",linkType:"构件" },
+  { source:"穴",target:"穿",branchName:"穿透洞穴",linkType:"构件" },
+  { source:"穴",target:"窗",branchName:"洞穴上的窗户",linkType:"构件" },
+  { source:"空",target:"天",branchName:"天空",linkType:"意义" },
+  { source:"家",target:"窗",branchName:"家家有窗",linkType:"意义" },
+
+  // ── 示字族补充 ──
+  { source:"示",target:"票",branchName:"祭祀的凭证引申为票证",linkType:"构件" },
+  { source:"示",target:"禁",branchName:"设坛禁止入内",linkType:"构件" },
+  { source:"止",target:"禁",branchName:"禁止",linkType:"意义" },
+
+  // ── 刀字族补充 ──
+  { source:"刀",target:"剪",branchName:"用刀裁剪",linkType:"构件" },
+  { source:"刀",target:"划",branchName:"用刀划开",linkType:"构件" },
+  { source:"分",target:"划",branchName:"划分",linkType:"意义" },
+
+  // ── 丝织补充 ──
+  { source:"纟",target:"线",branchName:"丝线",linkType:"构件" },
+  { source:"纟",target:"绳",branchName:"绳子",linkType:"构件" },
+  { source:"线",target:"绳",branchName:"线绳都是丝织",linkType:"意义" },
+  { source:"衣",target:"线",branchName:"线缝衣服",linkType:"意义" },
+
+  // ── 贝字族深入 ──
+  { source:"贝",target:"购",branchName:"用贝购买",linkType:"构件" },
+  { source:"贝",target:"卖",branchName:"卖出换贝",linkType:"构件" },
+  { source:"购",target:"卖",branchName:"买卖相反",linkType:"意义" },
+  { source:"贝",target:"贵",branchName:"贝很贵重",linkType:"构件" },
+  { source:"贝",target:"贱",branchName:"贝不值钱",linkType:"构件" },
+  { source:"贵",target:"贱",branchName:"贵贱相反",linkType:"意义" },
+  { source:"贝",target:"贫",branchName:"分掉贝就穷了",linkType:"构件" },
+  { source:"贝",target:"货",branchName:"换钱的物品",linkType:"构件" },
+  { source:"贫",target:"富",branchName:"贫富相反",linkType:"意义" },
+  { source:"财",target:"购",branchName:"用财购买",linkType:"意义" },
+  { source:"分",target:"贫",branchName:"分贝为贫",linkType:"构件" },
+
+  // ── 月（肉）字族 ──
+  { source:"肉",target:"肝",branchName:"肝脏是肉",linkType:"构件" },
+  { source:"肉",target:"肚",branchName:"肚子是肉",linkType:"构件" },
+  { source:"肉",target:"背",branchName:"脊背是肉",linkType:"构件" },
+  { source:"肉",target:"胖",branchName:"肥胖多肉",linkType:"构件" },
+  { source:"胖",target:"瘦",branchName:"胖瘦相反",linkType:"意义" },
+  { source:"人",target:"肚",branchName:"人有肚子",linkType:"意义" },
+  { source:"人",target:"背",branchName:"人有脊背",linkType:"意义" },
+
+  // ── 山字族补充 ──
+  { source:"山",target:"岛",branchName:"水中的山",linkType:"构件" },
+  { source:"山",target:"岸",branchName:"水边的山",linkType:"构件" },
+  { source:"山",target:"峰",branchName:"山的顶端",linkType:"构件" },
+  { source:"水",target:"岛",branchName:"水中有岛",linkType:"意义" },
+  { source:"海",target:"岛",branchName:"海中有岛",linkType:"意义" },
+  { source:"峰",target:"顶",branchName:"顶峰",linkType:"意义" },
+
+  // ── 反义词补充 ──
+  { source:"古",target:"今",branchName:"古今相反",linkType:"意义" },
+  { source:"内",target:"外",branchName:"内外相反",linkType:"意义" },
+  { source:"古",target:"老",branchName:"古老",linkType:"意义" },
+  { source:"今",target:"新",branchName:"今新同义",linkType:"意义" },
+  { source:"内",target:"里",branchName:"内里同义",linkType:"意义" },
+
+  // ── 工具器物 ──
+  { source:"弓",target:"箭",branchName:"弓箭",linkType:"意义" },
+  { source:"甲",target:"龟",branchName:"龟甲",linkType:"意义" },
+  { source:"力",target:"弓",branchName:"拉弓需要力",linkType:"意义" },
+
+  // ── 常用字补充 ──
+  { source:"更",target:"改",branchName:"更改",linkType:"意义" },
+  { source:"才",target:"刚",branchName:"才刚同义",linkType:"意义" },
+  { source:"已",target:"经",branchName:"已经",linkType:"意义" },
+  { source:"人",target:"才",branchName:"人才",linkType:"构件" },
+  { source:"日",target:"更",branchName:"日更",linkType:"意义" },
+
+  // ── 殳字族 ──
+  { source:"殳",target:"段",branchName:"用工具捶打分段",linkType:"构件" },
+  { source:"金",target:"锻",branchName:"用锤打铁",linkType:"构件" },
+  { source:"殳",target:"发",branchName:"把箭射出去",linkType:"构件" },
+  { source:"弓",target:"发",branchName:"弓发射箭",linkType:"构件" },
+  { source:"段",target:"锻",branchName:"段是锻的声旁",linkType:"构件" },
+
+  // ── 酉字族 ──
+  { source:"酉",target:"酒",branchName:"酉就是酒",linkType:"构件" },
+  { source:"酉",target:"醉",branchName:"酒喝多了",linkType:"构件" },
+  { source:"酉",target:"醒",branchName:"酒醒了",linkType:"构件" },
+  { source:"酉",target:"酸",branchName:"酒变酸了",linkType:"构件" },
+  { source:"醉",target:"醒",branchName:"醉醒相反",linkType:"意义" },
+  { source:"水",target:"酒",branchName:"酒中有水",linkType:"意义" },
+  { source:"酸",target:"甜",branchName:"酸甜相对",linkType:"意义" },
+
+  // ── 里字族 ──
+  { source:"里",target:"理",branchName:"加工玉石的纹理",linkType:"构件" },
+  { source:"里",target:"埋",branchName:"埋进土里",linkType:"构件" },
+  { source:"玉",target:"理",branchName:"理玉",linkType:"构件" },
+  { source:"土",target:"埋",branchName:"土里埋",linkType:"构件" },
+  { source:"内",target:"里",branchName:"内里同义",linkType:"意义" },
+
+  // ── 攵字族 ──
+  { source:"攵",target:"收",branchName:"用手收取",linkType:"构件" },
+  { source:"攵",target:"改",branchName:"用鞭子驱使改变",linkType:"构件" },
+  { source:"攵",target:"教",branchName:"手持教鞭教导",linkType:"构件" },
+  { source:"攵",target:"数",branchName:"用手计算",linkType:"构件" },
+  { source:"攵",target:"放",branchName:"用手放开",linkType:"构件" },
+  { source:"收",target:"放",branchName:"收放相反",linkType:"意义" },
+  { source:"殳",target:"攵",branchName:"殳和攵都是手拿工具",linkType:"意义" },
+
+  // ── 雨字族补充 ──
+  { source:"雨",target:"雹",branchName:"天上掉下的冰粒",linkType:"构件" },
+  { source:"雨",target:"霞",branchName:"雨后云彩",linkType:"构件" },
+  { source:"冰",target:"雹",branchName:"冰雹",linkType:"意义" },
+  { source:"日",target:"霞",branchName:"霞光",linkType:"意义" },
+
+  // ── 皿字族补充 ──
+  { source:"皿",target:"盖",branchName:"器皿的盖子",linkType:"构件" },
+  { source:"皿",target:"尽",branchName:"器皿中东西吃完了",linkType:"构件" },
+  { source:"全",target:"尽",branchName:"全都用尽",linkType:"意义" },
+
+  // ── 豆字族 ──
+  { source:"豆",target:"登",branchName:"踩在豆上登高",linkType:"构件" },
+  { source:"田",target:"豆",branchName:"田里种豆",linkType:"意义" },
+
+  // ── 角字族 ──
+  { source:"角",target:"解",branchName:"用刀解角",linkType:"构件" },
+  { source:"牛",target:"角",branchName:"牛头有角",linkType:"意义" },
+  { source:"刀",target:"解",branchName:"用刀分解",linkType:"构件" },
+
+  // ── 言字族深入 ──
+  { source:"言",target:"谢",branchName:"用言语感谢",linkType:"构件" },
+  { source:"言",target:"该",branchName:"应该说的话",linkType:"构件" },
+  { source:"谢",target:"礼",branchName:"感谢是礼貌",linkType:"意义" },
+
+  // ── 土字族深入 ──
+  { source:"土",target:"块",branchName:"土块",linkType:"构件" },
+  { source:"土",target:"坏",branchName:"土墙崩塌",linkType:"构件" },
+  { source:"好",target:"坏",branchName:"好坏相反",linkType:"意义" },
+  { source:"善",target:"好",branchName:"善好近义",linkType:"意义" },
+
+  // ── 反义词补充 ──
+  { source:"强",target:"弱",branchName:"强弱相反",linkType:"意义" },
+  { source:"大",target:"强",branchName:"大和强近义",linkType:"意义" },
+  { source:"小",target:"弱",branchName:"小和弱近义",linkType:"意义" },
+
+  // ── 白字族 ──
+  { source:"白",target:"的",branchName:"白色鲜明",linkType:"构件" },
+  { source:"白",target:"皇",branchName:"白色是帝王之色",linkType:"构件" },
+  { source:"白",target:"泉",branchName:"白色的水",linkType:"构件" },
+  { source:"水",target:"泉",branchName:"泉水",linkType:"构件" },
+  { source:"帝",target:"皇",branchName:"皇帝",linkType:"意义" },
+
+  // ── 立字族 ──
+  { source:"立",target:"站",branchName:"站立",linkType:"构件" },
+  { source:"立",target:"章",branchName:"文章",linkType:"意义" },
+  { source:"立",target:"竞",branchName:"并肩站立比赛",linkType:"构件" },
+  { source:"站",target:"坐",branchName:"站坐相反",linkType:"意义" },
+
+  // ── 疒字族补充 ──
+  { source:"疒",target:"疗",branchName:"治疗",linkType:"构件" },
+  { source:"疒",target:"疲",branchName:"疲劳",linkType:"构件" },
+  { source:"疒",target:"疯",branchName:"疯狂",linkType:"构件" },
+  { source:"疲",target:"劳",branchName:"疲劳",linkType:"意义" },
+
+  // ── 田字族补充 ──
+  { source:"田",target:"界",branchName:"田地的边界",linkType:"构件" },
+  { source:"田",target:"留",branchName:"在田里停留",linkType:"构件" },
+  { source:"田",target:"略",branchName:"管理田地要规划",linkType:"构件" },
+  { source:"界",target:"边",branchName:"边界",linkType:"意义" },
+
+  // ── 反义词补充 ──
+  { source:"苦",target:"甜",branchName:"苦甜相反",linkType:"意义" },
+  { source:"湿",target:"干",branchName:"湿干相反",linkType:"意义" },
+  { source:"始",target:"终",branchName:"始终相反",linkType:"意义" },
+  { source:"初",target:"始",branchName:"初始同义",linkType:"意义" },
+
+  // ── 身体部位 ──
+  { source:"口",target:"齿",branchName:"口中有齿",linkType:"意义" },
+  { source:"目",target:"面",branchName:"目在面上",linkType:"构件" },
+  { source:"人",target:"身",branchName:"人的身体",linkType:"意义" },
+  { source:"自",target:"鼻",branchName:"自是鼻子本字",linkType:"意义" },
+
+  // ── 自然补充 ──
+  { source:"水",target:"沙",branchName:"水流中的沙",linkType:"构件" },
+  { source:"土",target:"尘",branchName:"细小的土",linkType:"构件" },
+  { source:"水",target:"泥",branchName:"水和土的混合",linkType:"构件" },
+  { source:"水",target:"浪",branchName:"水面波浪",linkType:"构件" },
+  { source:"沙",target:"泥",branchName:"泥沙",linkType:"意义" },
+  { source:"海",target:"浪",branchName:"海浪",linkType:"意义" },
+
+  // ── 建筑补充 ──
+  { source:"木",target:"桥",branchName:"木制桥梁",linkType:"构件" },
+  { source:"土",target:"塔",branchName:"土石垒成的建筑",linkType:"构件" },
+  { source:"水",target:"桥",branchName:"桥跨水面",linkType:"意义" },
+  { source:"高",target:"亭",branchName:"亭子",linkType:"构件" },
+
+  // ── 动物补充 ──
+  { source:"象",target:"鹿",branchName:"象和鹿都是大动物",linkType:"意义" },
+  { source:"虫",target:"蛙",branchName:"蛙是两栖动物",linkType:"构件" },
+  { source:"大",target:"象",branchName:"大象",linkType:"构件" },
+
+  // ── 常用副词连接词 ──
+  { source:"京",target:"就",branchName:"靠近",linkType:"构件" },
+  { source:"者",target:"都",branchName:"都市",linkType:"构件" },
+  { source:"口",target:"只",branchName:"只有",linkType:"构件" },
+  { source:"手",target:"把",branchName:"用手握住",linkType:"构件" },
+  { source:"人",target:"以",branchName:"人用工具",linkType:"构件" },
+  { source:"就",target:"都",branchName:"就都和都是副词",linkType:"意义" },
+
+// ==================== 注意：这是第9份，到这里结束 ====================
+// 接下来请拼接第10份（连线数据：禾字族补充 → 文件末尾）
+  // ── 禾字族补充 ──
+  { source:"禾",target:"和",branchName:"禾谷入口，和谐",linkType:"构件" },
+  { source:"禾",target:"委",branchName:"禾谷弯曲",linkType:"构件" },
+  { source:"禾",target:"季",branchName:"禾谷成熟的季节",linkType:"构件" },
+  { source:"和",target:"同",branchName:"和同近义",linkType:"意义" },
+  { source:"季",target:"四",branchName:"四季",linkType:"意义" },
+
+  // ── 寸字族补充 ──
+  { source:"寸",target:"守",branchName:"用手守护",linkType:"构件" },
+  { source:"寸",target:"付",branchName:"用手交付",linkType:"构件" },
+  { source:"宀",target:"守",branchName:"在屋里守护",linkType:"构件" },
+  { source:"人",target:"付",branchName:"人交付",linkType:"构件" },
+  { source:"守",target:"攻",branchName:"守攻相反",linkType:"意义" },
+
+  // ── 土石字族补充 ──
+  { source:"土",target:"坚",branchName:"土坚固",linkType:"构件" },
+  { source:"石",target:"坚",branchName:"石头坚硬",linkType:"意义" },
+
+  // ── 反义词补充 ──
+  { source:"旧",target:"新",branchName:"新旧相反",linkType:"意义" },
+  { source:"古",target:"旧",branchName:"古旧近义",linkType:"意义" },
+  { source:"今",target:"新",branchName:"今新近义",linkType:"意义" },
+
+  // ── 常用字补充 ──
+  { source:"土",target:"在",branchName:"草木在土里",linkType:"构件" },
+  { source:"人",target:"你",branchName:"第二人称",linkType:"构件" },
+  { source:"人",target:"他",branchName:"第三人称",linkType:"构件" },
+  { source:"我",target:"你",branchName:"你我相对",linkType:"意义" },
+  { source:"你",target:"他",branchName:"你和他",linkType:"意义" },
+  { source:"自",target:"我",branchName:"自我",linkType:"意义" },
+
+  // ==================== 补漏连线：字族内部关联 ====================
+  // ── 数字序列补漏 ──
+  { source:"二",target:"三",branchName:"二加一是三",linkType:"加笔" },
+  { source:"三",target:"四",branchName:"三加一是四",linkType:"加笔" },
+  { source:"四",target:"五",branchName:"四加一是五",linkType:"加笔" },
+  { source:"五",target:"六",branchName:"五加一是六",linkType:"加笔" },
+  { source:"六",target:"七",branchName:"六加一是七",linkType:"加笔" },
+  { source:"七",target:"八",branchName:"七加一是八",linkType:"加笔" },
+  { source:"八",target:"九",branchName:"八加一是九",linkType:"加笔" },
+  { source:"九",target:"十",branchName:"九加一是十",linkType:"加笔" },
+
+  // ── 天地自然补漏 ──
+  { source:"日",target:"夜",branchName:"日夜交替",linkType:"意义" },
+  { source:"日",target:"晨",branchName:"日就是晨",linkType:"意义" },
+  { source:"月",target:"夜",branchName:"月出夜来",linkType:"意义" },
+  { source:"气",target:"风",branchName:"气动成风",linkType:"意义" },
+  { source:"云",target:"雨",branchName:"云聚成雨",linkType:"意义" },
+
+  // ── 人及衍生补漏 ──
+  { source:"人",target:"身",branchName:"人的身体",linkType:"意义" },
+  { source:"人",target:"自",branchName:"人皆有自",linkType:"意义" },
+  { source:"大",target:"立",branchName:"大人站立",linkType:"构件" },
+  { source:"夫",target:"男",branchName:"夫就是成年男子",linkType:"意义" },
+  { source:"儿",target:"子",branchName:"儿子",linkType:"构件" },
+  { source:"女",target:"母",branchName:"女子为母",linkType:"意义" },
+  { source:"母",target:"子",branchName:"母子",linkType:"意义" },
+  { source:"父",target:"子",branchName:"父子",linkType:"意义" },
+  { source:"老",target:"年",branchName:"年老",linkType:"意义" },
+
+  // ── 身体部位补漏 ──
+  { source:"目",target:"面",branchName:"目在面上",linkType:"构件" },
+  { source:"口",target:"面",branchName:"口在面上",linkType:"构件" },
+  { source:"鼻",target:"面",branchName:"鼻在面上",linkType:"构件" },
+  { source:"耳",target:"面",branchName:"耳在面上",linkType:"构件" },
+  { source:"手",target:"身",branchName:"手是身体的一部分",linkType:"构件" },
+  { source:"足",target:"身",branchName:"足是身体的一部分",linkType:"构件" },
+  { source:"心",target:"身",branchName:"心在身内",linkType:"构件" },
+  { source:"齿",target:"口",branchName:"齿在口中",linkType:"构件" },
+
+  // ── 水火补漏 ──
+  { source:"水",target:"江",branchName:"水流成江",linkType:"意义" },
+  { source:"水",target:"河",branchName:"水流成河",linkType:"意义" },
+  { source:"水",target:"海",branchName:"水聚成海",linkType:"意义" },
+  { source:"水",target:"泉",branchName:"水源为泉",linkType:"意义" },
+  { source:"火",target:"光",branchName:"火发光",linkType:"意义" },
+  { source:"火",target:"热",branchName:"火发热",linkType:"意义" },
+
+  // ── 木字族补漏 ──
+  { source:"木",target:"林",branchName:"双木成林",linkType:"构件" },
+  { source:"林",target:"森",branchName:"三木成森",linkType:"构件" },
+  { source:"木",target:"果",branchName:"树木结果",linkType:"意义" },
+  { source:"木",target:"桥",branchName:"木可搭桥",linkType:"构件" },
+
+  // ── 口舌言补漏 ──
+  { source:"口",target:"齿",branchName:"口中有齿",linkType:"构件" },
+  { source:"舌",target:"味",branchName:"舌尝味道",linkType:"意义" },
+  { source:"言",target:"词",branchName:"言语成词",linkType:"构件" },
+  { source:"语",target:"言",branchName:"语言同义",linkType:"意义" },
+  { source:"话",target:"语",branchName:"话语同义",linkType:"意义" },
+  { source:"言",target:"诗",branchName:"言语成诗",linkType:"构件" },
+
+  // ── 心字族补漏 ──
+  { source:"想",target:"念",branchName:"想念同义",linkType:"意义" },
+  { source:"怕",target:"惊",branchName:"怕和惊都是恐惧",linkType:"意义" },
+  { source:"快",target:"乐",branchName:"快乐同义",linkType:"意义" },
+
+  // ── 手足字族补漏 ──
+  { source:"手",target:"足",branchName:"手足都是身体",linkType:"意义" },
+  { source:"打",target:"拍",branchName:"打和拍都是手部动作",linkType:"意义" },
+  { source:"拉",target:"推",branchName:"拉推相反",linkType:"意义" },
+  { source:"拿",target:"取",branchName:"拿取同义",linkType:"意义" },
+  { source:"走",target:"跑",branchName:"走和跑都是移动",linkType:"意义" },
+  { source:"跳",target:"跑",branchName:"跳和跑都是运动",linkType:"意义" },
+
+  // ── 辶字族补漏 ──
+  { source:"辶",target:"过",branchName:"走之底表示走过",linkType:"构件" },
+  { source:"辶",target:"进",branchName:"走之底表示前进",linkType:"构件" },
+  { source:"辶",target:"退",branchName:"走之底表示后退",linkType:"构件" },
+  { source:"辶",target:"送",branchName:"走之底表示送别",linkType:"构件" },
+  { source:"辶",target:"迎",branchName:"走之底表示迎接",linkType:"构件" },
+  { source:"辶",target:"运",branchName:"走之底表示运输",linkType:"构件" },
+  { source:"辶",target:"远",branchName:"走之底表示远处",linkType:"构件" },
+  { source:"辶",target:"近",branchName:"走之底表示近处",linkType:"构件" },
+
+  // ── 金银贝补漏 ──
+  { source:"金",target:"贵",branchName:"金子贵重",linkType:"意义" },
+  { source:"银",target:"贵",branchName:"银子贵重",linkType:"意义" },
+  { source:"贝",target:"贵",branchName:"贝在古代贵重",linkType:"意义" },
+  { source:"金",target:"银",branchName:"金银都是贵金属",linkType:"意义" },
+  { source:"财",target:"富",branchName:"财富",linkType:"意义" },
+  { source:"贫",target:"富",branchName:"贫富相反",linkType:"意义" },
+
+  // ── 门字族补漏 ──
+  { source:"门",target:"户",branchName:"门户同义",linkType:"意义" },
+  { source:"门",target:"开",branchName:"开门",linkType:"构件" },
+  { source:"门",target:"关",branchName:"关门",linkType:"构件" },
+  { source:"开",target:"关",branchName:"开关相反",linkType:"意义" },
+  { source:"问",target:"答",branchName:"问答相对",linkType:"意义" },
+  { source:"闻",target:"听",branchName:"闻就是听",linkType:"意义" },
+
+  // ── 示字族补漏 ──
+  { source:"示",target:"神",branchName:"示神同源",linkType:"构件" },
+  { source:"神",target:"仙",branchName:"神仙同义",linkType:"意义" },
+  { source:"福",target:"祸",branchName:"福祸相对",linkType:"意义" },
+  { source:"祭",target:"祀",branchName:"祭祀同义",linkType:"意义" },
+
+  // ── 反义词成对补漏 ──
+  { source:"上",target:"下",branchName:"上下相反",linkType:"意义" },
+  { source:"左",target:"右",branchName:"左右相反",linkType:"意义" },
+  { source:"前",target:"后",branchName:"前后相反",linkType:"意义" },
+  { source:"是",target:"非",branchName:"是非相反",linkType:"意义" },
+  { source:"善",target:"恶",branchName:"善恶相反",linkType:"意义" },
+  { source:"美",target:"丑",branchName:"美丑相反",linkType:"意义" },
+
+  // ── 季节方位补漏 ──
+  { source:"春",target:"秋",branchName:"春秋相对",linkType:"意义" },
+  { source:"夏",target:"冬",branchName:"夏冬相对",linkType:"意义" },
+  { source:"东",target:"西",branchName:"东西相对",linkType:"意义" },
+  { source:"南",target:"北",branchName:"南北相对",linkType:"意义" },
+  { source:"春",target:"暖",branchName:"春天温暖",linkType:"意义" },
+  { source:"秋",target:"凉",branchName:"秋天凉爽",linkType:"意义" },
+  { source:"夏",target:"热",branchName:"夏天炎热",linkType:"意义" },
+  { source:"冬",target:"冷",branchName:"冬天寒冷",linkType:"意义" },
+
+  // ── 动物补漏 ──
+  { source:"鸟",target:"鸡",branchName:"鸡是鸟类",linkType:"构件" },
+  { source:"鸟",target:"鸭",branchName:"鸭是鸟类",linkType:"构件" },
+  { source:"犬",target:"狼",branchName:"犬和狼同科",linkType:"意义" },
+  { source:"犬",target:"狐",branchName:"犬和狐同科",linkType:"意义" },
+  { source:"鱼",target:"鲸",branchName:"鲸是巨鱼",linkType:"构件" },
+  { source:"虫",target:"蝶",branchName:"蝴蝶是虫",linkType:"构件" },
+  { source:"虫",target:"蜂",branchName:"蜜蜂是虫",linkType:"构件" },
+
+  // ── 学习补漏 ──
+  { source:"学",target:"教",branchName:"教学相长",linkType:"意义" },
+  { source:"学",target:"问",branchName:"学问",linkType:"构件" },
+  { source:"读",target:"书",branchName:"读书",linkType:"构件" },
+  { source:"写",target:"字",branchName:"写字",linkType:"构件" },
+  { source:"笔",target:"写",branchName:"用笔写",linkType:"构件" },
+  { source:"笔",target:"纸",branchName:"笔在纸上写",linkType:"意义" },
+  { source:"文",target:"字",branchName:"文字",linkType:"构件" },
+  { source:"文",target:"章",branchName:"文章",linkType:"构件" },
+
+  // ── 颜色补漏 ──
+  { source:"红",target:"绿",branchName:"红绿相对",linkType:"意义" },
+  { source:"白",target:"黑",branchName:"白黑相对",linkType:"意义" },
+  { source:"黄",target:"金",branchName:"黄金同色",linkType:"意义" },
+  { source:"青",target:"绿",branchName:"青绿近义",linkType:"意义" },
+  { source:"蓝",target:"天",branchName:"蓝天",linkType:"意义" },
+  { source:"红",target:"火",branchName:"火是红色",linkType:"意义" },
+  { source:"绿",target:"草",branchName:"草是绿色",linkType:"意义" },
+  { source:"黄",target:"土",branchName:"土是黄色",linkType:"意义" },
+  { source:"白",target:"雪",branchName:"雪是白色",linkType:"意义" },
+  { source:"黑",target:"夜",branchName:"夜是黑色",linkType:"意义" },
+
+  // ── 生活器物补漏 ──
+  { source:"车",target:"轮",branchName:"车有轮子",linkType:"构件" },
+  { source:"车",target:"船",branchName:"车船都是交通工具",linkType:"意义" },
+  { source:"舟",target:"船",branchName:"舟就是船",linkType:"意义" },
+  { source:"刀",target:"刃",branchName:"刀有刃",linkType:"加笔" },
+  { source:"刀",target:"剪",branchName:"刀剪同类",linkType:"构件" },
+  { source:"碗",target:"盘",branchName:"碗盘都是食器",linkType:"意义" },
+  { source:"碗",target:"杯",branchName:"碗杯都是器皿",linkType:"意义" },
+  { source:"桌",target:"椅",branchName:"桌椅配套",linkType:"意义" },
+  { source:"床",target:"被",branchName:"床被配套",linkType:"意义" },
+  { source:"灯",target:"光",branchName:"灯发光",linkType:"意义" },
+  { source:"灯",target:"电",branchName:"电灯",linkType:"构件" },
+
+  // ── 食物补漏 ──
+  { source:"米",target:"饭",branchName:"米做成饭",linkType:"构件" },
+  { source:"饭",target:"菜",branchName:"饭菜搭配",linkType:"意义" },
+  { source:"酒",target:"醉",branchName:"酒喝多了就醉",linkType:"构件" },
+  { source:"茶",target:"水",branchName:"茶水",linkType:"构件" },
+  { source:"瓜",target:"果",branchName:"瓜果",linkType:"构件" },
+  { source:"肉",target:"食",branchName:"肉食",linkType:"构件" },
+
+  // ── 常用字补漏 ──
+  { source:"我",target:"们",branchName:"我们",linkType:"构件" },
+  { source:"你",target:"们",branchName:"你们",linkType:"构件" },
+  { source:"他",target:"们",branchName:"他们",linkType:"构件" },
+  { source:"它",target:"们",branchName:"它们",linkType:"构件" },
+  { source:"这",target:"那",branchName:"这和那相对",linkType:"意义" },
+  { source:"此",target:"彼",branchName:"此彼相对",linkType:"意义" },
+  { source:"是",target:"否",branchName:"是否相对",linkType:"意义" },
+  { source:"对",target:"错",branchName:"对错相反",linkType:"意义" },
+  { source:"真",target:"伪",branchName:"真伪相反",linkType:"意义" },
+  { source:"真",target:"假",branchName:"真假相反",linkType:"意义" },
+  { source:"有",target:"无",branchName:"有无相反",linkType:"意义" },
+  { source:"生",target:"死",branchName:"生死相反",linkType:"意义" },
+  { source:"存",target:"亡",branchName:"存亡相反",linkType:"意义" },
+
+  // ── 跨字族意义关联 ──
+  { source:"日",target:"时",branchName:"日就是时间",linkType:"构件" },
+  { source:"日",target:"间",branchName:"日就是时间",linkType:"构件" },
+  { source:"时",target:"间",branchName:"时间",linkType:"构件" },
+  { source:"心",target:"中",branchName:"心中",linkType:"构件" },
+  { source:"里",target:"外",branchName:"里外相反",linkType:"意义" },
+  { source:"家",target:"门",branchName:"家门",linkType:"构件" },
+  { source:"家",target:"户",branchName:"家户",linkType:"构件" },
+  { source:"国",target:"家",branchName:"国家",linkType:"构件" },
+  { source:"天",target:"地",branchName:"天地相对",linkType:"意义" },
+  { source:"日",target:"月",branchName:"日月相伴",linkType:"意义" },
+  { source:"山",target:"水",branchName:"山水相依",linkType:"意义" },
+  { source:"花",target:"草",branchName:"花草相伴",linkType:"意义" },
+  { source:"风",target:"雨",branchName:"风雨同来",linkType:"意义" },
+  { source:"雷",target:"电",branchName:"雷电同来",linkType:"意义" },
+  { source:"云",target:"雾",branchName:"云雾相似",linkType:"意义" },
+  { source:"冰",target:"雪",branchName:"冰雪相似",linkType:"意义" },
+  { source:"霜",target:"雪",branchName:"霜雪相似",linkType:"意义" },
+  { source:"露",target:"霜",branchName:"露霜都是水汽凝结",linkType:"意义" },
+  { source:"金",target:"石",branchName:"金石都很硬",linkType:"意义" },
+  { source:"木",target:"竹",branchName:"木竹都是植物",linkType:"意义" },
+  { source:"牛",target:"马",branchName:"牛马都是家畜",linkType:"意义" },
+  { source:"鸡",target:"鸭",branchName:"鸡鸭都是家禽",linkType:"意义" },
+  { source:"猫",target:"狗",branchName:"猫狗都是宠物",linkType:"意义" },
+  { source:"狼",target:"狗",branchName:"狼狗相似",linkType:"意义" },
+
+  // ══════════ 第6批链接 ══════════
+  { source:"父",target:"爸",branchName:"父亲就是爸爸",linkType:"意义" },
+  { source:"爸",target:"妈",branchName:"爸爸妈妈",linkType:"意义" },
+  { source:"哥",target:"弟",branchName:"兄弟",linkType:"意义" },
+  { source:"兄",target:"弟",branchName:"兄弟",linkType:"意义" },
+  { source:"哥",target:"兄",branchName:"哥就是兄",linkType:"意义" },
+  { source:"父",target:"爷",branchName:"爷爷是爸爸的爸爸",linkType:"意义" },
+  { source:"母",target:"奶",branchName:"奶奶是妈妈的妈妈",linkType:"意义" },
+  { source:"伯",target:"叔",branchName:"伯父叔父",linkType:"意义" },
+  { source:"姑",target:"姨",branchName:"姑姑和姨妈",linkType:"意义" },
+  { source:"女",target:"姑",branchName:"姑姑是女性",linkType:"构件" },
+  { source:"女",target:"姨",branchName:"姨妈是女性",linkType:"构件" },
+  { source:"女",target:"奶",branchName:"奶奶是女性",linkType:"构件" },
+  { source:"大",target:"小",branchName:"大小相对",linkType:"意义" },
+  { source:"小",target:"少",branchName:"小就是少",linkType:"意义" },
+  { source:"小",target:"尖",branchName:"上小下大就是尖",linkType:"构件" },
+  { source:"大",target:"尖",branchName:"上小下大就是尖",linkType:"构件" },
+  { source:"木",target:"树",branchName:"树就是木",linkType:"意义" },
+  { source:"树",target:"林",branchName:"树林",linkType:"构件" },
+  { source:"树",target:"叶",branchName:"树叶",linkType:"构件" },
+  { source:"树",target:"根",branchName:"树根",linkType:"构件" },
+  { source:"树",target:"枝",branchName:"树枝",linkType:"构件" },
+  { source:"花",target:"朵",branchName:"花朵",linkType:"构件" },
+  { source:"了",target:"子",branchName:"了比子少一横",linkType:"减笔" },
+  { source:"是",target:"不",branchName:"是不是",linkType:"意义" },
+  { source:"不",target:"否",branchName:"不就是否",linkType:"意义" },
+  { source:"要",target:"需",branchName:"需要",linkType:"构件" },
+  { source:"会",target:"能",branchName:"会能都是助动词",linkType:"意义" },
+  { source:"还",target:"有",branchName:"还有",linkType:"构件" },
+  { source:"言",target:"说",branchName:"言就是说",linkType:"意义" },
+  { source:"说",target:"话",branchName:"说话",linkType:"构件" },
+  { source:"说",target:"讲",branchName:"说讲同义",linkType:"意义" },
+  { source:"手",target:"画",branchName:"用手画",linkType:"意义" },
+  { source:"画",target:"笔",branchName:"用笔画画",linkType:"意义" },
+  { source:"玩",target:"耍",branchName:"玩耍",linkType:"构件" },
+  { source:"给",target:"取",branchName:"给取相反",linkType:"意义" },
+  { source:"找",target:"寻",branchName:"找寻同义",linkType:"意义" },
+  { source:"学",target:"校",branchName:"学校",linkType:"构件" },
+  { source:"校",target:"园",branchName:"校园",linkType:"构件" },
+  { source:"课",target:"堂",branchName:"课堂",linkType:"构件" },
+  { source:"朋",target:"友",branchName:"朋友",linkType:"构件" },
+  { source:"班",target:"级",branchName:"班级",linkType:"构件" },
+  { source:"头",target:"脑",branchName:"头脑",linkType:"构件" },
+  { source:"头",target:"首",branchName:"头就是首",linkType:"意义" },
+  { source:"脚",target:"足",branchName:"脚就是足",linkType:"意义" },
+  { source:"牙",target:"齿",branchName:"牙齿",linkType:"构件" },
+  { source:"脸",target:"面",branchName:"脸就是面",linkType:"意义" },
+  { source:"脸",target:"头",branchName:"脸在头上",linkType:"意义" },
+  { source:"日",target:"昨",branchName:"昨天",linkType:"构件" },
+  { source:"昨",target:"明",branchName:"昨天明天相对",linkType:"意义" },
+  { source:"晚",target:"早",branchName:"早晚相对",linkType:"意义" },
+  { source:"晚",target:"夜",branchName:"夜晚",linkType:"构件" },
+  { source:"衣",target:"鞋",branchName:"衣鞋都是穿戴",linkType:"意义" },
+  { source:"衣",target:"帽",branchName:"衣帽都是穿戴",linkType:"意义" },
+  { source:"伞",target:"雨",branchName:"下雨打伞",linkType:"意义" },
+  { source:"窗",target:"帘",branchName:"窗帘",linkType:"构件" },
+  { source:"旗",target:"布",branchName:"旗是布做的",linkType:"意义" },
+  { source:"穿",target:"戴",branchName:"穿戴",linkType:"构件" },
+  { source:"帽",target:"戴",branchName:"戴帽",linkType:"构件" },
+  { source:"爸",target:"爷",branchName:"爸爸的爸爸是爷爷",linkType:"意义" },
+  { source:"弟",target:"第",branchName:"弟加竹头是第",linkType:"加笔" },
+  { source:"找",target:"我",branchName:"找我形似",linkType:"形似" },
+  { source:"还",target:"环",branchName:"还环形似",linkType:"形似" },
+
+  // ══════════ 第7批链接 ══════════
+  { source:"他",target:"她",branchName:"他和她",linkType:"构件" },
+  { source:"水",target:"游",branchName:"在水里游",linkType:"构件" },
+  { source:"游",target:"戏",branchName:"游戏",linkType:"构件" },
+  { source:"笑",target:"哭",branchName:"笑哭相对",linkType:"意义" },
+  { source:"心",target:"爱",branchName:"爱心",linkType:"构件" },
+  { source:"爱",target:"恨",branchName:"爱恨相反",linkType:"意义" },
+  { source:"知",target:"道",branchName:"知道",linkType:"构件" },
+  { source:"认",target:"识",branchName:"认识",linkType:"构件" },
+  { source:"言",target:"认",branchName:"言字旁",linkType:"构件" },
+  { source:"用",target:"使",branchName:"用就是使",linkType:"意义" },
+  { source:"做",target:"作",branchName:"做作形近",linkType:"形似" },
+  { source:"请",target:"言",branchName:"言字旁",linkType:"构件" },
+  { source:"请",target:"求",branchName:"请求",linkType:"构件" },
+  { source:"文",target:"字",branchName:"文字",linkType:"构件" },
+  { source:"字",target:"句",branchName:"字句",linkType:"构件" },
+  { source:"元",target:"角",branchName:"元角都是钱",linkType:"意义" },
+  { source:"毛",target:"笔",branchName:"毛笔",linkType:"构件" },
+  { source:"日",target:"阳",branchName:"太阳",linkType:"构件" },
+  { source:"阳",target:"阴",branchName:"阴阳相对",linkType:"意义" },
+  { source:"明",target:"亮",branchName:"明亮",linkType:"构件" },
+  { source:"亮",target:"暗",branchName:"亮暗相反",linkType:"意义" },
+  { source:"水",target:"湖",branchName:"湖水",linkType:"构件" },
+  { source:"湖",target:"海",branchName:"湖海",linkType:"意义" },
+  { source:"颗",target:"粒",branchName:"颗粒",linkType:"构件" },
+  { source:"条",target:"件",branchName:"条件",linkType:"构件" },
+  { source:"片",target:"面",branchName:"片面",linkType:"构件" },
+  { source:"双",target:"单",branchName:"双单相反",linkType:"意义" },
+  { source:"群",target:"众",branchName:"群众",linkType:"构件" },
+  { source:"耳",target:"声",branchName:"耳朵听声音",linkType:"意义" },
+  { source:"声",target:"音",branchName:"声音",linkType:"构件" },
+  { source:"音",target:"乐",branchName:"音乐",linkType:"构件" },
+  { source:"舞",target:"蹈",branchName:"舞蹈",linkType:"构件" },
+  { source:"梦",target:"想",branchName:"梦想",linkType:"构件" },
+  { source:"梦",target:"幻",branchName:"梦幻",linkType:"构件" },
+  { source:"故",target:"事",branchName:"故事",linkType:"构件" },
+  { source:"事",target:"情",branchName:"事情",linkType:"构件" },
+  { source:"物",target:"品",branchName:"物品",linkType:"构件" },
+  { source:"永",target:"远",branchName:"永远",linkType:"构件" },
+  { source:"永",target:"久",branchName:"永久",linkType:"构件" },
+  { source:"满",target:"空",branchName:"满空相反",linkType:"意义" },
+  { source:"满",target:"足",branchName:"满足",linkType:"构件" },
+  { source:"门",target:"闲",branchName:"门里放木是空闲",linkType:"构件" },
+  { source:"忙",target:"闲",branchName:"忙闲相反",linkType:"意义" },
+  { source:"群",target:"羊",branchName:"羊群",linkType:"构件" },
+  { source:"故",target:"乡",branchName:"故乡",linkType:"构件" },
+  { source:"物",target:"理",branchName:"物理",linkType:"构件" },
+
+  // ── 补漏 ──
+  { source:"虎",target:"猫",branchName:"虎猫都是猫科",linkType:"意义" },
+  { source:"虎",target:"狮",branchName:"虎狮都是猛兽",linkType:"意义" },
+  { source:"虎",target:"虫",branchName:"虎字头虍像虎纹",linkType:"构件" },
+  { source:"首",target:"道",branchName:"首在道上走",linkType:"构件" },
+  { source:"死",target:"生",branchName:"生死相反",linkType:"意义" },
+  { source:"环",target:"玉",branchName:"环是玉做的",linkType:"构件" },
+];
+
+// ==================== 合并导出 ====================
+const WORD_DATA = {
+  nodes: ALL_NODES,
+  links: ALL_LINKS,
+};
