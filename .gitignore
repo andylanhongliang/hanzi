@@ -14,3 +14,30 @@ Thumbs.db
 # Build
 *.exe
 *.pdb
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Builds
+dist/
+build/
+coverage/
+
+# Logs and env
+*.log
+.env
+
+# Temp
+*.tmp
+
+# Archives
+*.zip
+
+# Local history
+.history/
