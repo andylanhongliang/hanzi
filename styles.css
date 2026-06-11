@@ -742,13 +742,26 @@ body {
   .header-btn { width: 34px; height: 34px; font-size: 15px; }
   #userBtn { width: auto; }
 
-  /* 左侧工具缩小 */
-  .float-tool { left: 4px; gap: 6px; }
-  .progress-ring { width: 40px; height: 40px; }
+  /* 左侧工具移到底部水平排列 */
+  .float-tool {
+    left: 4px; right: 4px; top: auto; bottom: 4px;
+    transform: none;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 8px;
+    background: var(--bg-float);
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    z-index: 50;
+  }
+  .progress-ring { width: 36px; height: 36px; }
   .tool-btn { width: 36px; height: 36px; font-size: 15px; border-radius: 10px; }
   .filter-btn { width: 36px; height: 28px; font-size: 13px; border-radius: 10px; }
   .progress-text { font-size: 8px; }
   .progress-ring svg { width: 100%; height: 100%; }
+  .daily-task { display: none; }
+  .pet-widget { display: none; }
 
   /* 弹窗 */
   .modal-card { width: 92%; padding: 16px; max-height: 80vh; overflow-y: auto; }
@@ -763,8 +776,8 @@ body {
   /* 手机端：弹窗标题小一点 */
   .modal-title { font-size: 20px; margin-bottom: 10px; }
 
-  /* 手机端：猜字结果区可滚动 */
-  #guessResult { max-height: 30vh; overflow-y: auto; }
+  /* 手机端：猜字结果区尽量大 */
+  #guessResult { max-height: 55vh; overflow-y: auto; }
 
   /* 面板默认隐藏，右下角按钮切换 */
   .aside-panel { width: 92%; max-height: 40vh; }

@@ -61,7 +61,7 @@
         raw = localStorage.getItem(getUserKey('mistakes'));
         currentUserData.mistakes = raw ? JSON.parse(raw) : [];
         currentUserData.avatar = localStorage.getItem(getUserKey('avatar')) || '👤';
-        currentUserData.nickname = localStorage.getItem(getUserKey('nickname')) || '';
+        // nickname 已废弃，用户名即显示名
         currentUserData.dailyTarget = parseInt(localStorage.getItem(getUserKey('dailyTarget')) || '3', 10);
         currentUserData.lastActiveDate = localStorage.getItem(getUserKey('lastActiveDate')) || '';
         currentUserData.streakDays = parseInt(localStorage.getItem(getUserKey('streakDays')) || '0', 10);
@@ -106,7 +106,7 @@
       localStorage.setItem(getUserKey('recent'), JSON.stringify(recentUnlocks));
       localStorage.setItem(getUserKey('mistakes'), JSON.stringify(Array.from(mistakeSet)));
       localStorage.setItem(getUserKey('avatar'), currentUserData.avatar || '👤');
-      localStorage.setItem(getUserKey('nickname'), currentUserData.nickname || '');
+      // nickname 已废弃
       localStorage.setItem(getUserKey('dailyTarget'), String(currentUserData.dailyTarget || 3));
       localStorage.setItem(getUserKey('lastActiveDate'), currentUserData.lastActiveDate || '');
       localStorage.setItem(getUserKey('streakDays'), String(currentUserData.streakDays || 0));
@@ -120,7 +120,7 @@
 
   function updateUserDisplay() {
     var el = document.getElementById('userNameDisplay');
-    var label = currentUserData.nickname ? currentUserData.nickname : (currentUser || '默认');
+    var label = currentUser || '默认';
     if(el) el.innerText = label;
     var avatarEl = document.getElementById('userAvatar');
     if(avatarEl) avatarEl.innerText = currentUserData.avatar || '👤';
@@ -585,8 +585,6 @@
       document.getElementById('guessNext').innerText = '回到图谱';
       document.getElementById('guessNext').onclick = function() {
         closeGuess();
-        var panel = document.getElementById('asidePanel');
-        if(panel.classList.contains('hide')) { panel.classList.remove('hide'); document.getElementById('asideToggle').classList.remove('hide'); }
         fillPanel(currentGuessTarget);
         setTimeout(function() { locateToRecommended(); }, 600);
       };
@@ -947,17 +945,8 @@
   }
 
   function saveProfile() {
-    var nickInput = document.getElementById('userNickname');
-    if(nickInput && nickInput.value.trim()) {
-      currentUserData.nickname = nickInput.value.trim();
-    }
-    currentUserData.avatar = selectedAvatar;
-    var avatarEl = document.getElementById('userAvatar');
-    if(avatarEl) avatarEl.innerText = currentUserData.avatar || '👤';
-    var nameEl = document.getElementById('userNameDisplay');
-    if(nameEl) nameEl.innerText = currentUserData.nickname || currentUser || '默认';
-    saveCurrentUserData();
-    showPetBubble('资料已保存！继续学习吧～');
+    // 用户名即显示名，点击保存直接关闭弹窗
+    document.getElementById('userMask').classList.remove('show');
   }
 
   // ======================== 辅助功能 ========================
@@ -1416,10 +1405,7 @@
 
     document.getElementById('userBtn').onclick = function() {
       renderUserList();
-      renderAvatarPicker();
       document.getElementById('newUserName').value = '';
-      var nickInput = document.getElementById('userNickname');
-      if(nickInput) nickInput.value = currentUserData.nickname || '';
       document.getElementById('userMask').classList.add('show');
     };
     document.getElementById('userClose').onclick = function() {
