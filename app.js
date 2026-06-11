@@ -587,11 +587,11 @@
           document.getElementById('asideToggle').classList.remove('hide');
         }
         fillPanel(unlockedNodeId);
-        // 同时高亮父节点，居中到父节点看上下文
+        // 短暂高亮后自动跳转到推荐节点（带强力重试）
         var parentId = getParent(unlockedNodeId);
         applyFocus(unlockedNodeId, parentId ? [parentId] : [], parentId || unlockedNodeId);
-        // 短暂延迟后定位到推荐节点
-        setTimeout(function() { locateToRecommended(); }, 1500);
+        // 800ms 后清除高亮并重试定位（总共最多等 5 秒）
+        setTimeout(function() { clearFocus(); autoLocateRecommended(0); }, 800);
       }, 500);
     } else {
       // 记录错字
@@ -1050,9 +1050,33 @@
         if(tip) { tip.innerText = '🎉 太棒了！所有汉字都解锁了！'; tip.classList.add('show'); tip.style.color = '#52c41a'; setTimeout(function(){ tip.classList.remove('show'); tip.style.color = ''; tip.innerText = '点击 ⭐? 猜字解锁 · 点击汉字查看详情 · 滚轮缩放'; }, 2000); }
         return;
       }
-      // 先恢复所有节点可见性（取消 applyFocus 的暗化效果）
       clearFocus();
       locateToNode(rec);
+    }
+
+    // 强力自动重试定位（最多 10 次，间隔 500ms = 5 秒）
+    function autoLocateRecommended(attempt) {
+      if(attempt >= 10) return;
+      var rec = getRecommendedNode();
+      if(!rec) return;
+      var opt = myChart.getOption();
+      if(!opt.series || !opt.series[0] || !opt.series[0].data) {
+        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 500);
+        return;
+      }
+      var node = opt.series[0].data.find(function(d) { return d.id === rec; });
+      if(!node || node.x == null || node.y == null) {
+        // 节点坐标未就绪，继续等待
+        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 500);
+        return;
+      }
+      // 定位成功
+      myChart.setOption({ series: [{ zoom: 1.5 }] });
+      setTimeout(function() {
+        var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
+        var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
+        myChart.dispatchAction({ type: 'graphRoam', dx: dx, dy: dy });
+      }, 150);
     }
 
     function clearFocus() {
