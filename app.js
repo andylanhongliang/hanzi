@@ -134,19 +134,13 @@
   let starCount = 0;
   let currentGuessTarget = null, currentHintIndex = 0, guessAttempts = 3;
   let nodePositionsCache = {}, useFixedPositions = false;
+  var statsCache = null;
+  var achievementsCache = null;
   let showOnlyUnlocked = false;
   let lastUnlockedNodeId = '一';
   var recentUnlocks = [];
   var soundEnabled = true;
   var mistakeSet = new Set();
-
-  // 查找节点的父节点
-  function getParent(nodeId) {
-    for(var i = 0; i < ALL_LINKS.length; i++) {
-      if(ALL_LINKS[i].target === nodeId) return ALL_LINKS[i].source;
-    }
-    return null;
-  }
 
   // 获取某节点下第一个未解锁的子节点
   function getFirstUnguessedChild(nodeId) {
@@ -207,79 +201,74 @@
   // ======================== 数据预处理 ========================
   const nodeMap = new Map();           // id → node 对象
   const childrenMap = new Map();      // id → [child ids]
-  const linkIndex = new Map();        // "source→target" → link 对象
+  const linkMap = new Map();          // "source→target" → [link数组]
   const neighborMap = new Map();      // id → [related ids]
+  const parentMap = new Map();        // id → parent id（O(1)）
 
   function initDataStructures() {
     ALL_NODES.forEach(n => {
       nodeMap.set(n.id, n);
       childrenMap.set(n.id, []);
       neighborMap.set(n.id, []);
+      parentMap.set(n.id, null);
     });
     ALL_LINKS.forEach(l => {
       if(!nodeMap.has(l.source) || !nodeMap.has(l.target)) return;
       const key = l.source + '→' + l.target;
-      linkIndex.set(key, l);
-      childrenMap.get(l.source).push(l.target);
-      // 建立双向邻居关系
+      if(!linkMap.has(key)) linkMap.set(key, []);
+      linkMap.get(key).push(l);
+      if(childrenMap.get(l.source).indexOf(l.target) < 0) childrenMap.get(l.source).push(l.target);
+      if(parentMap.get(l.target) === null) parentMap.set(l.target, l.source);
       if(neighborMap.get(l.source).indexOf(l.target) < 0) neighborMap.get(l.source).push(l.target);
       if(neighborMap.get(l.target).indexOf(l.source) < 0) neighborMap.get(l.target).push(l.source);
     });
   }
 
+  function getParent(nodeId) {
+    return parentMap.get(nodeId) || null;
+  }
+
   // ======================== 可见数据（战争迷雾：仅1跳邻居） ========================
   // 只显示：已解锁节点 + 它们的直接子节点（"?"待猜）
   // 每解锁一个节点，它的子节点才出现在图谱中
-  function getVisibleData() {
+  function getVisibleData(recommendedId) {
     const vn = new Set(), vl = [], linkSeen = new Set();
+    if(recommendedId === undefined) recommendedId = getRecommendedNode();
 
-    // 1. 所有已解锁节点
     unlocked.forEach(function(id) {
       if(nodeMap.has(id)) vn.add(id);
     });
 
-    // 2. 已解锁节点的直接子节点（显示为"?"）
-    // 筛选模式下仍然保留推荐节点
-    var recommendedId = getRecommendedNode();
     unlocked.forEach(function(id) {
       (childrenMap.get(id) || []).forEach(function(ch) {
         if(!nodeMap.has(ch)) return;
-        if(showOnlyUnlocked && ch !== recommendedId) return; // 筛选：只保留推荐
+        if(showOnlyUnlocked && ch !== recommendedId) return;
         vn.add(ch);
         const key = id + '→' + ch;
-        const link = linkIndex.get(key);
-        if(link && !linkSeen.has(key)) {
-          linkSeen.add(key);
-          vl.push(link);
-        }
+        (linkMap.get(key) || []).forEach(function(link) {
+          if(!linkSeen.has(link)) { linkSeen.add(link); vl.push(link); }
+        });
       });
     });
 
-    // 确保推荐节点一定在可见数据中
     if(recommendedId && nodeMap.has(recommendedId) && !vn.has(recommendedId)) {
       vn.add(recommendedId);
-      // 补充一条从推荐节点的父节点到推荐节点的连接
       var recParent = getParent(recommendedId);
       if(recParent && unlocked.has(recParent)) {
         var recKey = recParent + '→' + recommendedId;
-        var recLink = linkIndex.get(recKey);
-        if(recLink && !linkSeen.has(recKey)) {
-          linkSeen.add(recKey);
-          vl.push(recLink);
-        }
+        (linkMap.get(recKey) || []).forEach(function(link) {
+          if(!linkSeen.has(link)) { linkSeen.add(link); vl.push(link); }
+        });
       }
     }
 
-    // 3. 已解锁节点之间的链接也显示
     unlocked.forEach(function(src) {
       (childrenMap.get(src) || []).forEach(function(tgt) {
         if(unlocked.has(tgt)) {
           const key = src + '→' + tgt;
-          const link = linkIndex.get(key);
-          if(link && !linkSeen.has(key)) {
-            linkSeen.add(key);
-            vl.push(link);
-          }
+          (linkMap.get(key) || []).forEach(function(link) {
+            if(!linkSeen.has(link)) { linkSeen.add(link); vl.push(link); }
+          });
         }
       });
     });
@@ -363,10 +352,9 @@
 
   function renderChart() {
     if(!myChart) return;
-    const { vn, vl } = getVisibleData();
-    const nodes = [], links = [];
-
     var recommendedId = getRecommendedNode();
+    const { vn, vl } = getVisibleData(recommendedId);
+    const nodes = [], links = [];
     vn.forEach(id => {
       const n = nodeMap.get(id);
       if(!n) return;
@@ -414,13 +402,18 @@
       });
     });
 
+    var edgeIndexMap = {};
+    var edgeCurves = [0.15, -0.15, 0.25, -0.25, 0.35, -0.35, 0.45, -0.45];
     vl.forEach(l => {
+      var key = l.source + '→' + l.target;
+      var idx = (edgeIndexMap[key] || 0);
+      edgeIndexMap[key] = idx + 1;
       links.push({
         source: l.source, target: l.target,
         lineStyle: {
           color: linkColors[l.linkType] || '#999',
           type: linkDashes[l.linkType] || 'solid',
-          width: 2, curveness: 0.2, opacity: 0.7
+          width: 2, curveness: edgeCurves[idx % edgeCurves.length] || 0.2, opacity: 0.7
         },
         label: { show: true, formatter: l.branchName, fontSize: 10, backgroundColor: 'rgba(255,255,240,0.8)', padding: [2,4] }
       });
@@ -534,7 +527,6 @@
     if(!n) return;
 
     var hints = n.hints ? n.hints.split('|') : ['猜猜这个字是什么？'];
-    // 重置为正常猜字模式（可能上次是复习模式）
     document.getElementById('guessHint').innerText = '📖 ' + hints[0];
     document.getElementById('guessInput').value = '';
     document.getElementById('guessInput').style.display = '';
@@ -543,14 +535,11 @@
     document.getElementById('attemptCount').innerText = '💡 剩余机会：' + guessAttempts + '次  |  点"更多提示"获取线索';
     document.getElementById('guessSubmit').disabled = false;
     document.getElementById('guessSubmit').style.display = '';
+    document.getElementById('guessMore').style.display = '';
     document.getElementById('guessMore').innerText = '💡 更多提示';
     document.getElementById('guessMore').onclick = nextHint;
     document.getElementById('guessNext').innerText = '跳过';
     document.getElementById('guessNext').onclick = closeGuess;
-    // 生成候选字按钮
-    var candidates = generateCandidates(nodeId);
-    renderCandidates(candidates, n.name);
-    // 修改标题
     document.querySelector('#guessMask .modal-title').innerText = '🔍 猜猜这是什么字？';
     document.getElementById('guessMask').classList.add('show');
     setTimeout(function() { document.getElementById('guessInput').focus(); }, 200);
@@ -583,29 +572,29 @@
       playUnlockSound();
       speakText('答对了！' + n.name);
 
-      document.getElementById('guessResult').innerHTML = '<span class="result-success">🎉 答对了！是「' + n.name + '」</span>';
-      document.getElementById('guessSubmit').disabled = true;
-      document.getElementById('attemptCount').innerText = '解锁成功！';
+      var detailHtml = '<div style="text-align:center;font-size:48px;color:#4a90e2;">' + n.name + '</div>';
+      if(n.pinyin) detailHtml += '<div style="text-align:center;font-size:18px;color:#f5a623;">' + n.pinyin + '</div>';
+      if(n.oracle) detailHtml += '<div style="margin-top:10px;font-weight:bold;color:#4a90e2;">汉字怎么来的？</div><div>' + n.oracle + '</div>';
+      if(n.origin) detailHtml += '<div style="margin-top:8px;font-weight:bold;color:#4a90e2;">一句话记住</div><div>' + n.origin + '</div>';
+      if(n.groupWords) detailHtml += '<div style="margin-top:8px;font-weight:bold;color:#4a90e2;">常用词语</div><div>' + n.groupWords.replace(/\|/g, ' · ') + '</div>';
+      document.getElementById('guessResult').innerHTML = detailHtml;
+      document.getElementById('guessSubmit').style.display = 'none';
+      document.getElementById('guessMore').style.display = 'none';
+      document.getElementById('guessInput').style.display = 'none';
+      document.getElementById('attemptCount').innerText = '🎉 解锁成功！';
+      document.getElementById('guessNext').innerText = '回到图谱';
+      document.getElementById('guessNext').onclick = function() {
+        closeGuess();
+        var panel = document.getElementById('asidePanel');
+        if(panel.classList.contains('hide')) { panel.classList.remove('hide'); document.getElementById('asideToggle').classList.remove('hide'); }
+        fillPanel(currentGuessTarget);
+        setTimeout(function() { locateToRecommended(); }, 600);
+      };
 
-      // 捕获当前节点位置，保持布局稳定
       captureNodePositions();
       useFixedPositions = true;
       renderChart();
       useFixedPositions = false;
-
-      // 关闭弹窗，等力导向稳定后定位到⭐
-      var unlockedNodeId = currentGuessTarget;
-      setTimeout(function() {
-        closeGuess();
-        var panel = document.getElementById('asidePanel');
-        if(panel.classList.contains('hide')) {
-          panel.classList.remove('hide');
-          document.getElementById('asideToggle').classList.remove('hide');
-        }
-        fillPanel(unlockedNodeId);
-        // 等力导向充分稳定（renderChart 后 2000ms）再定位
-        autoLocateRecommended(0);
-      }, 2000);
     } else {
       // 记录错字
       if(currentGuessTarget) { mistakeSet.add(currentGuessTarget); saveUserData(); }
@@ -654,7 +643,7 @@
       var siblings = (childrenMap.get(parent) || []).filter(function(id) {
         return id !== nodeId && !usedNames.has(nodeMap.get(id).name);
       });
-      siblings.sort(function() { return Math.random() - 0.5; });
+      shuffle(siblings);
       for(var i = 0; i < Math.min(2, siblings.length); i++) {
         var name = nodeMap.get(siblings[i]).name;
         distractors.push(name);
@@ -662,15 +651,22 @@
       }
     }
 
-    // 补充：随机从剩余节点中选
+    // 补充：随机从剩余节点中选（手机端6个候选，电脑端4个）
+    var isMobile = window.innerWidth < 768;
+    var targetCount = isMobile ? 5 : 3;
     var pool = ALL_NODES.filter(function(x) { return !usedNames.has(x.name); });
-    pool.sort(function() { return Math.random() - 0.5; });
-    while(distractors.length < 3 && pool.length > 0) {
+    shuffle(pool);
+    while(distractors.length < targetCount && pool.length > 0) {
       distractors.push(pool.shift().name);
     }
 
     var all = distractors.concat([correct]);
-    return all.sort(function() { return Math.random() - 0.5; });
+    shuffle(all); return all;
+  }
+
+  function shuffle(array) {
+    for(var i = array.length-1; i>0; i--) { var j=Math.floor(Math.random()*(i+1)); var t=array[i]; array[i]=array[j]; array[j]=t; }
+    return array;
   }
 
   function renderCandidates(candidates, correctAnswer) {
@@ -727,7 +723,9 @@
 
   function getAchievementKey() { return getUserKey('achievements'); }
   function getUnlockedAchievements() {
-    try { return JSON.parse(localStorage.getItem(getAchievementKey()) || '[]'); } catch(e) { return []; }
+    if(achievementsCache) return achievementsCache;
+    try { achievementsCache = JSON.parse(localStorage.getItem(getAchievementKey()) || '[]'); } catch(e) { achievementsCache = []; }
+    return achievementsCache;
   }
   function saveAchievement(id) {
     var arr = getUnlockedAchievements();
@@ -735,9 +733,11 @@
   }
 
   function getStats() {
-    try { return JSON.parse(localStorage.getItem(getUserKey('stats')) || '{}'); } catch(e) { return {}; }
+    if(statsCache) return statsCache;
+    try { statsCache = JSON.parse(localStorage.getItem(getUserKey('stats')) || '{}'); } catch(e) { statsCache = {}; }
+    return statsCache;
   }
-  function saveStats(s) { localStorage.setItem(getUserKey('stats'), JSON.stringify(s)); }
+  function saveStats(s) { statsCache = s || statsCache || {}; localStorage.setItem(getUserKey('stats'), JSON.stringify(statsCache)); }
   function getStat(key) { var s = getStats(); return s[key] || 0; }
   function incStat(key) { var s = getStats(); s[key] = (s[key] || 0) + 1; saveStats(s); }
 
@@ -1513,6 +1513,7 @@
       }, 800);
       updateDailyTask();
       updatePetUI();
+      window.addEventListener('resize', function() { if(myChart) myChart.resize(); });
       console.log('汉字王国初始化完成 | 用户: ' + (currentUser||'默认') + ' | 已解锁: ' + unlocked.size + ' 个');
     } catch(e) {
       console.error('初始化失败:', e);
