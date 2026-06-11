@@ -19,7 +19,7 @@
     <div class="search-results" id="searchResults"></div>
   </div>
   <div class="header-right">
-    <button class="header-btn" id="userBtn" title="切换用户">👤 <span id="userNameDisplay">默认</span></button>
+    <button class="header-btn user-button" id="userBtn" title="切换用户"><span class="user-avatar" id="userAvatar">👤</span><span id="userNameDisplay">默认</span></button>
     <button class="header-btn" id="eyeBtn" title="护眼模式">👁️</button>
     <button class="header-btn" id="muteBtn" title="音效开关">🔊</button>
     <button class="header-btn" id="starBtn" title="我的">⭐</button>
@@ -32,6 +32,12 @@
     <svg viewBox="0 0 100 100"><circle class="progress-bg" cx="50" cy="50" r="42"/><circle class="progress-fill" id="progressFill" cx="50" cy="50" r="42"/></svg>
     <div class="progress-text" id="progressText">1/519</div>
   </div>
+  <div class="daily-task" id="dailyTaskTip">今日任务：已学0 / 3 个字</div>
+  <div class="pet-widget">
+    <button class="tool-btn pet-avatar" id="petAvatar" title="我的小宠物">🐯</button>
+    <div class="pet-exp" id="petExpBar" title="宠物经验"><div class="pet-exp-fill" id="petExpFill" style="width:0%"></div></div>
+  </div>
+  <button class="tool-btn pet-bubble" id="petBubble" style="display:none;pointer-events:none;">我在这里哦～</button>
   <button class="filter-btn" id="filterBtn" title="只看已解锁的字">⭐</button>
   <button class="tool-btn" id="locateBtn" title="定位推荐节点">📍</button>
   <button class="tool-btn" id="zoomIn" title="放大">+</button>
@@ -76,20 +82,21 @@
 <div class="modal-mask" id="guessMask"><div class="modal-card"><span class="modal-close" id="guessClose">✕</span><div class="modal-title">汉字猜猜乐 🎮</div><div class="guess-hint" id="guessHint"></div><div class="candidate-wrap" id="candidateWrap"></div><input class="guess-input" id="guessInput" placeholder="电脑打字 / 手机手写"><div class="guess-result" id="guessResult"></div><div class="attempt-count" id="attemptCount">剩余机会：3次</div><div class="modal-row"><button class="modal-btn" id="guessSubmit">提交答案</button><button class="modal-btn secondary" id="guessMore">💡 更多提示</button></div><div class="modal-row"><button class="modal-btn secondary" id="guessNext" style="width:100%">跳过</button></div></div></div>
 
 <!-- 我的中心 -->
-<div class="modal-mask" id="starMask"><div class="modal-card"><span class="modal-close" id="starClose">✕</span><div class="modal-title">我的汉字王国 ⭐</div><div class="info-row"><span>已认识汉字</span><span id="myCharNum">0</span></div><div class="info-row"><span>获得星星</span><span id="myStarNum">0</span></div><div class="info-row"><span>闯关进度</span><span id="myLevel">第1关</span></div><div class="panel-label">最近认识的字</div><div class="tag-wrap" id="recentChars"></div><div class="panel-label" id="mistakeLabel">错字本</div><div class="tag-wrap" id="mistakeChars"></div><button class="modal-btn" id="reviewMistakes" style="width:100%;margin-top:8px;">📝 复习错字</button><div class="panel-label">我的成就</div><div class="tag-wrap" id="myBadge"><span class="tag-item">识字小能手</span></div></div></div>
+<div class="modal-mask" id="starMask"><div class="modal-card"><span class="modal-close" id="starClose">✕</span><div class="modal-title">我的汉字王国 ⭐</div><div class="info-row"><span>已认识汉字</span><span id="myCharNum">0</span></div><div class="info-row"><span>获得星星</span><span id="myStarNum">0</span></div><div class="info-row"><span>今日已学</span><span id="myTodayCount">0</span></div><div class="info-row"><span>连续学习</span><span id="myStreakDays">1天</span></div><div class="info-row"><span>闯关进度</span><span id="myLevel">第1关</span></div><div class="panel-label">小宠物</div><div class="info-row"><span id="petStageName">小萌宠</span><span id="petLevelDisplay">Lv1</span></div><div class="info-row"><span>宠物经验</span><span id="petExpLabel">0/5</span></div><div class="pet-exp" id="petExpBarCenter"><div class="pet-exp-fill" id="petExpFillCenter" style="width:0%"></div></div><div class="panel-label">最近认识的字</div><div class="tag-wrap" id="recentChars"></div><div class="panel-label" id="mistakeLabel">错字本</div><div class="tag-wrap" id="mistakeChars"></div><button class="modal-btn" id="reviewMistakes" style="width:100%;margin-top:8px;">📝 复习错字</button><div class="panel-label">我的成就</div><div class="tag-wrap" id="myBadge"><span class="tag-item">识字小能手</span></div></div></div>
 
 <!-- 复习弹窗 -->
 <div class="modal-mask" id="reviewMask"><div class="modal-card"><span class="modal-close" id="reviewClose">✕</span><div class="modal-title">错字复习 📝</div><div class="review-char" id="reviewChar"></div><div class="review-pinyin" id="reviewPinyin"></div><div class="review-origin" id="reviewOrigin"></div><div class="modal-row"><button class="modal-btn" id="reviewKnow">✅ 记住了</button><button class="modal-btn secondary" id="reviewSkip">⏭ 下一个</button></div></div></div>
 
 <!-- 家长中心 -->
-<div class="modal-mask" id="parentMask"><div class="modal-card"><span class="modal-close" id="parentClose">✕</span><div class="modal-title">家长中心 👨‍👩‍👧</div><div class="setting-row"><span>护眼模式</span><div class="switch" id="eyeSwitch"></div></div><div class="setting-row"><span>每日学习时长限制</span><select id="timeLimit" style="padding:6px;border-radius:6px;"><option value="20">20分钟</option><option value="30" selected>30分钟</option><option value="45">45分钟</option><option value="60">60分钟</option></select></div><div class="panel-label">本周学习报告</div><div class="info-row"><span>本周学习天数</span><span>3天</span></div><div class="info-row"><span>新认识汉字</span><span>12个</span></div><div class="info-row"><span>易错汉字</span><span>2个</span></div></div></div>
+<div class="modal-mask" id="parentMask"><div class="modal-card"><span class="modal-close" id="parentClose">✕</span><div class="modal-title">家长中心 👨‍👩‍👧</div><div class="setting-row"><span>护眼模式</span><div class="switch" id="eyeSwitch"></div></div><div class="setting-row"><span>每日学习时长限制</span><select id="timeLimit" style="padding:6px;border-radius:6px;"><option value="20">20分钟</option><option value="30" selected>30分钟</option><option value="45">45分钟</option><option value="60">60分钟</option></select></div><div class="panel-label">本周学习报告</div><div class="info-row"><span>本周学习天数</span><span id="parentWeekDays">0天</span></div><div class="info-row"><span>新认识汉字</span><span id="parentWeekNew">0个</span></div><div class="info-row"><span>错字本</span><span id="parentMistakes">0个</span></div><div class="info-row"><span>今日目标</span><span id="parentTodayGoal">0/3</span></div></div></div>
 
 <div class="milestone-toast" id="milestoneToast"><div class="milestone-badge" id="milestoneBadge"></div><div class="milestone-title" id="milestoneTitle"></div></div>
 
 <!-- 用户选择 -->
-<div class="modal-mask" id="userMask"><div class="modal-card"><span class="modal-close" id="userClose">✕</span><div class="modal-title">选择用户 👤</div><div class="user-list" id="userList"></div><div class="modal-row" style="margin-top:12px;"><input class="guess-input" id="newUserName" placeholder="输入新用户名" style="flex:1;height:42px;font-size:16px;"><button class="modal-btn" id="userCreate" style="width:80px;">创建</button></div></div></div>
+<div class="modal-mask" id="userMask"><div class="modal-card"><span class="modal-close" id="userClose">✕</span><div class="modal-title">选择用户 👤</div><div class="user-list" id="userList"></div><div class="profile-editor"><div class="panel-label">我的资料</div><div class="avatar-picker" id="avatarPicker"></div><input class="guess-input" id="userNickname" placeholder="设置昵称，例如小淘气" style="width:100%;margin-top:10px;"><button class="modal-btn secondary" id="saveProfileBtn" style="margin-top:10px;">保存资料</button></div><div class="modal-row" style="margin-top:12px;"><input class="guess-input" id="newUserName" placeholder="输入新用户名" style="flex:1;height:42px;font-size:16px;"><button class="modal-btn" id="userCreate" style="width:80px;">创建</button></div></div></div>
 
 <div id="particlePool" style="display:none;"><div class="firework"></div><div class="firework"></div><div class="firework"></div><div class="firework"></div><div class="firework"></div><div class="firework"></div><div class="firework"></div><div class="firework"></div></div>
+<div id="petConfetti" class="confetti-zone" aria-hidden="true"></div>
 
   <script src="hanzi-writer.min.js"></script>
   <script src="echarts.min.js"></script>
