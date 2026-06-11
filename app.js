@@ -432,7 +432,7 @@
         }
       },
       series: [{
-        type: 'graph', layout: 'force', roam: true, draggable: true,
+        type: 'graph', layout: 'force', roam: 'scale', draggable: true,
         force: { repulsion: 400, gravity: 0.2, edgeLength: [80, 150], friction: 0.6 },
         data: nodes, links: links,
         emphasis: { focus: 'adjacency', lineStyle: { width: 4 } }
