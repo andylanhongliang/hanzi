@@ -635,7 +635,7 @@
       renderChart();
       useFixedPositions = false;
 
-      // 关闭弹窗，直接定位到⭐推荐节点
+      // 关闭弹窗，等力导向稳定后定位到⭐
       var unlockedNodeId = currentGuessTarget;
       setTimeout(function() {
         closeGuess();
@@ -645,8 +645,9 @@
           document.getElementById('asideToggle').classList.remove('hide');
         }
         fillPanel(unlockedNodeId);
+        // 等力导向充分稳定（renderChart 后 2000ms）再定位
         autoLocateRecommended(0);
-      }, 500);
+      }, 2000);
     } else {
       // 记录错字
       if(currentGuessTarget) { mistakeSet.add(currentGuessTarget); saveUserData(); }
@@ -1108,9 +1109,9 @@
       locateToNode(rec);
     }
 
-    // 强力自动重试定位（最多 15 次，间隔 400ms = 6 秒）
+    // 自动定位（布局已稳定，最多 3 次重试）
     function autoLocateRecommended(attempt) {
-      if(attempt >= 15) return;
+      if(attempt >= 3) return;
       if(!myChart) return;
       // 图表尺寸未就绪则重试
       var cw = myChart.getWidth(), ch = myChart.getHeight();
