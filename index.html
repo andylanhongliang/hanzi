@@ -39,18 +39,14 @@
   </div>
   <button class="tool-btn pet-bubble" id="petBubble" style="display:none;pointer-events:none;">我在这里哦～</button>
   <button class="filter-btn" id="filterBtn" title="只看已解锁的字">⭐</button>
-  <button class="tool-btn" id="locateBtn" title="定位推荐节点">📍</button>
   <button class="tool-btn" id="zoomIn" title="放大">+</button>
   <button class="tool-btn" id="zoomOut" title="缩小">-</button>
   <button class="tool-btn" id="resetView" title="重置视图">↺</button>
   <button class="tool-btn" id="backRoot" title="返回首页">🏠</button>
-  <button class="tool-btn" id="hintToggle" title="使用提示">💡</button>
-  <div class="hint-tooltip" id="hintTip">点击 ⭐? 猜字解锁 · 点击汉字查看详情 · 滚轮缩放</div>
+  <button class="tool-btn aside-toggle" id="asideToggle" title="汉字详情">📋</button>
 </div>
 
-<button class="tool-btn aside-toggle" id="asideToggle">⇆</button>
-
-<div class="aside-panel" id="asidePanel">
+<div class="aside-panel hide" id="asidePanel">
   <div class="empty-tip">点击汉字查看详情 👆</div>
   <div id="panelContent" style="display: none;">
     <div class="panel-char" id="panelChar"></div>

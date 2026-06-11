@@ -530,6 +530,9 @@
     currentGuessTarget = nodeId;
     currentHintIndex = 0;
     guessAttempts = 3;
+    // 手机端隐藏文本输入框，用大候选按钮
+    var isMobile = window.innerWidth < 768;
+    document.getElementById('guessInput').style.display = isMobile ? 'none' : '';
     var n = nodeMap.get(nodeId);
     if(!n) return;
 
@@ -661,10 +664,12 @@
       }
     }
 
-    // 补充：随机从剩余节点中选
+    // 补充：随机从剩余节点中选（手机端6个候选，电脑端4个）
+    var isMobile = window.innerWidth < 768;
+    var targetCount = isMobile ? 5 : 3;
     var pool = ALL_NODES.filter(function(x) { return !usedNames.has(x.name); });
     pool.sort(function() { return Math.random() - 0.5; });
-    while(distractors.length < 3 && pool.length > 0) {
+    while(distractors.length < targetCount && pool.length > 0) {
       distractors.push(pool.shift().name);
     }
 
@@ -1279,19 +1284,6 @@
       });
       if(changed) myChart.setOption(opt);
     }
-    document.getElementById('locateBtn').onclick = function() {
-      locateToRecommended();
-      var tip = document.getElementById('hintTip');
-      if(tip) { tip.classList.add('show'); tip.style.color = '#ffa000'; setTimeout(function(){ tip.classList.remove('show'); tip.style.color = ''; }, 1500); }
-    };
-    // 提示切换
-    document.getElementById('hintToggle').onclick = function() {
-      var tip = document.getElementById('hintTip');
-      if(tip) {
-        tip.classList.toggle('show');
-        this.classList.toggle('active', tip.classList.contains('show'));
-      }
-    };
     document.getElementById('asideToggle').onclick = function() {
       document.getElementById('asidePanel').classList.toggle('hide');
       document.getElementById('asideToggle').classList.toggle('hide');

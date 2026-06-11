@@ -671,36 +671,6 @@ body {
   display: none;
 }
 
-/* ========== 提示 ========== */
-.hint-tooltip {
-  position: absolute;
-  left: 60px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  white-space: nowrap;
-  z-index: 97;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-.hint-tooltip::before {
-  content: '';
-  position: absolute;
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 6px solid transparent;
-  border-right-color: rgba(0,0,0,0.8);
-}
-.hint-tooltip.show {
-  opacity: 1;
-}
-
 /* 里程碑弹窗 */
 .milestone-toast {
   position: fixed;
@@ -784,8 +754,13 @@ body {
   .modal-card { width: 92%; padding: 16px; }
   .review-char { font-size: 56px; }
 
-  /* 底部提示 */
-  .hint-tooltip { font-size: 11px; left: 48px; padding: 6px 10px; }
+  /* 手机端：大候选按钮（隐藏文本输入） */
+  .candidate-btn { width: 100%; height: 52px; font-size: 22px; border-radius: 12px; margin: 4px 0; }
+  .candidate-wrap { display: flex; flex-direction: column; gap: 4px; }
+
+  /* 面板默认隐藏，点击📋展开 */
+  .aside-panel { width: 92%; max-height: 40vh; }
+
 }
 @media (max-width: 400px) {
   .header-btn { width: 30px; height: 30px; font-size: 13px; }
