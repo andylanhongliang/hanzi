@@ -229,6 +229,21 @@
       });
     });
 
+    // 确保推荐节点一定在可见数据中
+    if(recommendedId && nodeMap.has(recommendedId) && !vn.has(recommendedId)) {
+      vn.add(recommendedId);
+      // 补充一条从推荐节点的父节点到推荐节点的连接
+      var recParent = getParent(recommendedId);
+      if(recParent && unlocked.has(recParent)) {
+        var recKey = recParent + '→' + recommendedId;
+        var recLink = linkIndex.get(recKey);
+        if(recLink && !linkSeen.has(recKey)) {
+          linkSeen.add(recKey);
+          vl.push(recLink);
+        }
+      }
+    }
+
     // 3. 已解锁节点之间的链接也显示
     unlocked.forEach(function(src) {
       (childrenMap.get(src) || []).forEach(function(tgt) {
