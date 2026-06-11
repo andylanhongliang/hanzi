@@ -604,22 +604,19 @@
       renderChart();
       useFixedPositions = false;
 
-      // 关闭弹窗，聚焦到新解锁的节点，并更新右侧面板
+      // 关闭弹窗，直接定位到⭐推荐节点
       var unlockedNodeId = currentGuessTarget;
       setTimeout(function() {
         closeGuess();
-        // 确保右侧面板可见
         var panel = document.getElementById('asidePanel');
         if(panel.classList.contains('hide')) {
           panel.classList.remove('hide');
           document.getElementById('asideToggle').classList.remove('hide');
         }
         fillPanel(unlockedNodeId);
-        // 短暂高亮后自动跳转到推荐节点（带强力重试）
-        var parentId = getParent(unlockedNodeId);
-        applyFocus(unlockedNodeId, parentId ? [parentId] : [], parentId || unlockedNodeId);
-        // 800ms 后清除高亮并重试定位（总共最多等 5 秒）
-        setTimeout(function() { clearFocus(); autoLocateRecommended(0); }, 800);
+        // 恢复所有节点可见性后立刻开始重试定位
+        clearFocus();
+        autoLocateRecommended(0);
       }, 500);
     } else {
       // 记录错字
@@ -1082,29 +1079,26 @@
       locateToNode(rec);
     }
 
-    // 强力自动重试定位（最多 10 次，间隔 500ms = 5 秒）
+    // 强力自动重试定位（最多 15 次，间隔 400ms = 6 秒）
     function autoLocateRecommended(attempt) {
-      if(attempt >= 10) return;
+      if(attempt >= 15) return;
+      if(!myChart) return;
       var rec = getRecommendedNode();
       if(!rec) return;
       var opt = myChart.getOption();
       if(!opt.series || !opt.series[0] || !opt.series[0].data) {
-        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 500);
+        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 400);
         return;
       }
       var node = opt.series[0].data.find(function(d) { return d.id === rec; });
       if(!node || node.x == null || node.y == null) {
-        // 节点坐标未就绪，继续等待
-        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 500);
+        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 400);
         return;
       }
-      // 定位成功
-      myChart.setOption({ series: [{ zoom: 1.5 }] });
-      setTimeout(function() {
-        var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
-        var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
-        myChart.dispatchAction({ type: 'graphRoam', dx: dx, dy: dy });
-      }, 150);
+      // 直接平移到推荐节点
+      var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
+      var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
+      myChart.dispatchAction({ type: 'graphRoam', dx: dx, dy: dy });
     }
 
     function clearFocus() {
