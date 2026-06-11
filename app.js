@@ -162,6 +162,10 @@
         if(!visited.has(ch)) queue.push(ch);
       }
     }
+    // 回退：任意未解锁节点
+    for(var i = 0; i < ALL_NODES.length; i++) {
+      if(!unlocked.has(ALL_NODES[i].id)) return ALL_NODES[i].id;
+    }
     return null;
   }
 
@@ -1018,12 +1022,20 @@
       renderChart();
     };
     // 定位到指定节点
-    function locateToNode(nodeId) {
+    function locateToNode(nodeId, retryLeft) {
       if(!nodeId || !myChart) return;
+      if(retryLeft === undefined) retryLeft = 5;
       var opt = myChart.getOption();
-      if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
+      if(!opt.series || !opt.series[0] || !opt.series[0].data) {
+        if(retryLeft > 0) setTimeout(function() { locateToNode(nodeId, retryLeft - 1); }, 400);
+        return;
+      }
       var node = opt.series[0].data.find(function(d) { return d.id === nodeId; });
-      if(!node || node.x == null || node.y == null) return;
+      if(!node || node.x == null || node.y == null) {
+        // 节点坐标未就绪，延迟重试
+        if(retryLeft > 0) setTimeout(function() { locateToNode(nodeId, retryLeft - 1); }, 400);
+        return;
+      }
       myChart.setOption({ series: [{ zoom: 1.5 }] });
       setTimeout(function() {
         var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
@@ -1032,7 +1044,14 @@
       }, 150);
     }
     function locateToRecommended() {
-      locateToNode(getRecommendedNode());
+      var rec = getRecommendedNode();
+      if(!rec) {
+        // 全部解锁完成
+        var tip = document.getElementById('hintTip');
+        if(tip) { tip.innerText = '🎉 太棒了！所有汉字都解锁了！'; tip.classList.add('show'); tip.style.color = '#52c41a'; setTimeout(function(){ tip.classList.remove('show'); tip.style.color = ''; tip.innerText = '点击 ⭐? 猜字解锁 · 点击汉字查看详情 · 滚轮缩放'; }, 2000); }
+        return;
+      }
+      locateToNode(rec);
     }
     document.getElementById('locateBtn').onclick = function() {
       locateToRecommended();
