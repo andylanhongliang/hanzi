@@ -1065,7 +1065,7 @@
       setTimeout(function() {
         var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
         var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
-        myChart.dispatchAction({ type: 'graphRoam', dx: dx, dy: dy });
+        myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx: dx, dy: dy });
       }, 150);
     }
     function locateToRecommended() {
@@ -1083,6 +1083,12 @@
     function autoLocateRecommended(attempt) {
       if(attempt >= 15) return;
       if(!myChart) return;
+      // 图表尺寸未就绪则重试
+      var cw = myChart.getWidth(), ch = myChart.getHeight();
+      if(!cw || !ch || cw < 100) {
+        setTimeout(function() { autoLocateRecommended(attempt + 1); }, 400);
+        return;
+      }
       var rec = getRecommendedNode();
       if(!rec) return;
       var opt = myChart.getOption();
@@ -1095,10 +1101,10 @@
         setTimeout(function() { autoLocateRecommended(attempt + 1); }, 400);
         return;
       }
-      // 直接平移到推荐节点
-      var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
-      var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
-      myChart.dispatchAction({ type: 'graphRoam', dx: dx, dy: dy });
+      // 平移到推荐节点（显式指定 seriesIndex）
+      var dx = (cw / 2 - node.x) * 0.7;
+      var dy = (ch / 2 - node.y) * 0.7;
+      myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx: dx, dy: dy });
     }
 
     function clearFocus() {
