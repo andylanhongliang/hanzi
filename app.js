@@ -1291,9 +1291,10 @@
           // 未解锁 → 猜字
           openGuess(id);
         } else {
-          // 已解锁 → 查看详情 + 聚焦
+          // 已解锁 → 填充面板内容（手机端不自动弹出，桌面端弹出）
           var panel = document.getElementById('asidePanel');
-          if(panel.classList.contains('hide')) {
+          var isMobile = window.innerWidth < 768;
+          if(!isMobile && panel.classList.contains('hide')) {
             panel.classList.remove('hide');
             document.getElementById('asideToggle').classList.remove('hide');
           }
@@ -1329,7 +1330,8 @@
             openGuess(n.id);
           } else {
             var panel = document.getElementById('asidePanel');
-            if(panel.classList.contains('hide')) { panel.classList.remove('hide'); document.getElementById('asideToggle').classList.remove('hide'); }
+            var isMobile = window.innerWidth < 768;
+            if(!isMobile && panel.classList.contains('hide')) { panel.classList.remove('hide'); document.getElementById('asideToggle').classList.remove('hide'); }
             fillPanel(n.id);
             applyFocus(n.id);
           }
