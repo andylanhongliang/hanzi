@@ -136,7 +136,7 @@
   // 2. 兄弟都解锁完了 → 看当前节点的子节点
   // 3. BFS 从根遍历，找第一个「已解锁但有未解锁子节点」的节点
   function getRecommendedNode() {
-    // 兄弟优先
+    // 1. 兄弟优先：同父节点下的未解锁节点
     var parent = getParent(lastUnlockedNodeId);
     if(parent) {
       var children = childrenMap.get(parent) || [];
@@ -144,10 +144,19 @@
         if(!unlocked.has(children[i]) && children[i] !== lastUnlockedNodeId) return children[i];
       }
     }
-    // 当前节点的子节点
+    // 2. 当前节点的子节点
     var child = getFirstUnguessedChild(lastUnlockedNodeId);
     if(child) return child;
-    // BFS 从根搜索：找任意已解锁节点下的第一个未解锁子节点
+    // 3. 沿父链向上：祖父、曾祖父…每层找未解锁子节点（保持在家族附近）
+    var ancestor = parent;
+    while(ancestor) {
+      var ancKids = childrenMap.get(ancestor) || [];
+      for(var i = 0; i < ancKids.length; i++) {
+        if(!unlocked.has(ancKids[i]) && ancKids[i] !== lastUnlockedNodeId) return ancKids[i];
+      }
+      ancestor = getParent(ancestor);
+    }
+    // 4. BFS 全图搜索
     var visited = new Set();
     var queue = ['一'];
     while(queue.length > 0) {
@@ -162,7 +171,7 @@
         if(!visited.has(ch)) queue.push(ch);
       }
     }
-    // 回退：任意未解锁节点
+    // 5. 回退：任意未解锁节点
     for(var i = 0; i < ALL_NODES.length; i++) {
       if(!unlocked.has(ALL_NODES[i].id)) return ALL_NODES[i].id;
     }
