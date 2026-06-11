@@ -1046,12 +1046,28 @@
     function locateToRecommended() {
       var rec = getRecommendedNode();
       if(!rec) {
-        // 全部解锁完成
         var tip = document.getElementById('hintTip');
         if(tip) { tip.innerText = '🎉 太棒了！所有汉字都解锁了！'; tip.classList.add('show'); tip.style.color = '#52c41a'; setTimeout(function(){ tip.classList.remove('show'); tip.style.color = ''; tip.innerText = '点击 ⭐? 猜字解锁 · 点击汉字查看详情 · 滚轮缩放'; }, 2000); }
         return;
       }
+      // 先恢复所有节点可见性（取消 applyFocus 的暗化效果）
+      clearFocus();
       locateToNode(rec);
+    }
+
+    function clearFocus() {
+      if(!myChart) return;
+      var opt = myChart.getOption();
+      if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
+      var changed = false;
+      opt.series[0].data.forEach(function(item) {
+        if(item.itemStyle && item.itemStyle.opacity !== undefined && item.itemStyle.opacity < 1) {
+          item.itemStyle.opacity = 1;
+          item.itemStyle.shadowBlur = 0;
+          changed = true;
+        }
+      });
+      if(changed) myChart.setOption(opt);
     }
     document.getElementById('locateBtn').onclick = function() {
       locateToRecommended();
