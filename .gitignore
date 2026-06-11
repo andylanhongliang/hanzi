@@ -41,3 +41,6 @@ coverage/
 
 # Local history
 .history/
+
+# Private project config
+project.private.config.json

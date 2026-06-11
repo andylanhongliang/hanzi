@@ -1,0 +1,220 @@
+.profile-page {
+  min-height: 100vh;
+  padding: 16px;
+  background: var(--bg-main);
+}
+
+/* 统计卡片 */
+.stats-card {
+  display: flex;
+  justify-content: space-around;
+  background: var(--bg-panel);
+  border-radius: 16px;
+  padding: 20px 12px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-normal);
+}
+.stat-item {
+  text-align: center;
+}
+.stat-num {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-primary);
+  display: block;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* 分区 */
+.section {
+  background: var(--bg-panel);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-normal);
+}
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin-bottom: 10px;
+}
+.empty-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.mistake-tag {
+  background: rgba(255,77,79,0.12) !important;
+  color: #ff4d4f !important;
+}
+
+/* 宠物 */
+.pet-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.pet-avatar {
+  font-size: 48px;
+}
+.pet-info {
+  flex: 1;
+}
+.pet-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 6px;
+}
+.pet-exp-bar {
+  height: 8px;
+  background: rgba(74,144,226,0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.pet-exp-fill {
+  height: 100%;
+  background: var(--color-secondary);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.pet-exp-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  display: block;
+}
+
+/* 成就 */
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.badge-item {
+  font-size: 18px;
+  padding: 4px 10px;
+  background: rgba(245,166,35,0.15);
+  border-radius: 12px;
+}
+
+/* 设置 */
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 15px;
+}
+.setting-row:last-child {
+  border-bottom: none;
+}
+.switch {
+  font-size: 18px;
+}
+
+/* 用户 */
+.user-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.user-item {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(74,144,226,0.1);
+  color: var(--color-primary);
+  font-size: 14px;
+}
+.user-item.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+.add-user {
+  display: flex;
+  gap: 8px;
+}
+.user-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 2px solid var(--color-border);
+  background: #fff;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  margin-top: 8px;
+  width: 100%;
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-border);
+}
+.back-btn {
+  margin: 12px 0 30px;
+  width: 100%;
+}
+
+/* 复习弹窗 */
+.review-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.review-card {
+  width: 85%;
+  max-width: 360px;
+  background: var(--bg-panel);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+.review-char {
+  font-size: 64px;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+.review-pinyin {
+  font-size: 18px;
+  color: var(--color-secondary);
+}
+.review-origin {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 12px 0 20px;
+  line-height: 1.5;
+}
+.review-btns {
+  display: flex;
+  gap: 10px;
+}
+.review-btns .btn {
+  flex: 1;
+  margin: 0;
+}

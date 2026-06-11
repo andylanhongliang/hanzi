@@ -738,7 +738,7 @@ body {
   .search-box input { height: 30px; font-size: 12px; padding: 0 8px; }
   #userBtn { font-size: 12px; padding: 0 8px; }
   #userBtn span { max-width: 40px; }
-  .header-btn { width: 34px; height: 34px; font-size: 15px; }
+   .header-btn { width: 44px; height: 44px; font-size: 17px; }
   #userBtn { width: auto; }
 
   /* 左侧工具移到底部水平排列 */
@@ -754,9 +754,9 @@ body {
     border: 1px solid var(--color-border);
     z-index: 50;
   }
-  .progress-ring { width: 44px; height: 44px; }
-  .tool-btn { width: 44px; height: 44px; font-size: 20px; border-radius: 12px; }
-  .filter-btn { width: 44px; height: 44px; font-size: 16px; border-radius: 12px; }
+  .progress-ring { width: 48px; height: 48px; }
+  .tool-btn { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+  .filter-btn { width: 48px; height: 48px; font-size: 16px; border-radius: 12px; }
   .progress-text { font-size: 8px; }
   .progress-ring svg { width: 100%; height: 100%; }
   .daily-task { display: none; }
@@ -776,16 +776,31 @@ body {
   /* 手机端：弹窗标题小一点 */
   .modal-title { font-size: 20px; margin-bottom: 10px; }
 
-  /* 手机端：猜字结果区尽量大 */
-  #guessResult { max-height: 55vh; overflow-y: auto; }
+   /* 手机端：猜字结果区尽量大 */
+   #guessResult { max-height: 55vh; overflow-y: auto; }
 
-}
+   /* 手机端：候选按钮更大，方便手指点击 */
+   .candidate-btn { width: 64px; height: 64px; font-size: 30px; border-radius: 16px; }
+
+   /* 手机端：弹窗关闭按钮增大触摸区 */
+   .modal-close { top: 10px; right: 10px; font-size: 30px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+
+   /* 手机端：弹窗按钮更高 */
+   .modal-btn { padding: 16px; font-size: 17px; border-radius: 14px; }
+
+   /* 手机端：搜索列表项增大 */
+   .search-item { padding: 14px 18px; font-size: 17px; }
+
+   /* 手机端：搜索输入框更高 */
+   .search-box input { height: 38px; font-size: 14px; }
+
+ }
 @media (max-width: 400px) {
-  .header-btn { width: 30px; height: 30px; font-size: 13px; }
-  #userBtn { font-size: 11px; padding: 0 6px; }
-  .search-box { max-width: 70px; }
-  .tool-btn { width: 32px; height: 32px; font-size: 13px; }
-  .filter-btn { width: 32px; height: 26px; font-size: 11px; }
+   .header-btn { width: 40px; height: 40px; font-size: 15px; }
+   #userBtn { font-size: 11px; padding: 0 6px; }
+   .search-box { max-width: 70px; }
+   .tool-btn { width: 44px; height: 44px; font-size: 15px; }
+   .filter-btn { width: 44px; height: 36px; font-size: 13px; }
 }
 
 /* ========== 成就徽章 ========== */

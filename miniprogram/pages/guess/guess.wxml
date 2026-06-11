@@ -1,0 +1,59 @@
+<view class="guess-page {{eyeProtect ? 'eye-protect' : ''}}">
+  <view class="guess-header">
+    <text class="guess-title">汉字猜猜乐 🎮</text>
+    <text class="guess-info">剩余机会：{{attempts}} 次</text>
+  </view>
+
+  <!-- 提示区 -->
+  <view class="hint-section">
+    <view class="hint-label">猜猜这是什么字？</view>
+    <view class="hint-text">{{currentHint}}</view>
+    <view wx:if="{{showMoreHints}}" class="hint-extra">
+      <text class="hint-item">📝 提示：{{extraHint}}</text>
+    </view>
+  </view>
+
+  <!-- 候选按钮 -->
+  <view class="candidates">
+    <button 
+      wx:for="{{candidates}}" 
+      wx:key="*this"
+      class="candidate-btn {{item === selectedAnswer ? 'selected' : ''}} {{item === correctAnswer && showResult ? 'correct' : ''}} {{item === wrongAnswer ? 'wrong' : ''}}"
+      data-char="{{item}}"
+      bindtap="selectCandidate"
+      disabled="{{showResult}}"
+    >{{item}}</button>
+  </view>
+
+  <!-- 输入区 -->
+  <view class="input-section">
+    <input 
+      class="guess-input" 
+      placeholder="也可以在这里打字…"
+      value="{{inputValue}}"
+      bindinput="onInput"
+      bindconfirm="submitGuess"
+      disabled="{{showResult}}"
+    />
+  </view>
+
+  <!-- 结果反馈 -->
+  <view wx:if="{{showResult}}" class="result-section">
+    <view wx:if="{{isCorrect}}" class="result-correct">
+      <text class="result-icon">🎉</text>
+      <text class="result-text">答对了！{{targetChar}} = {{correctAnswer}}</text>
+    </view>
+    <view wx:else class="result-wrong">
+      <text class="result-icon">😅</text>
+      <text class="result-text">答案是：{{correctAnswer}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button wx:if="{{!showResult}}" class="btn btn-primary" bindtap="submitGuess">提交答案</button>
+    <button wx:if="{{!showResult}}" class="btn btn-secondary" bindtap="moreHints">💡 更多提示</button>
+    <button wx:if="{{showResult}}" class="btn btn-primary" bindtap="goNext">继续探索 →</button>
+    <button class="btn btn-secondary" bindtap="goBack">返回图谱</button>
+  </view>
+</view>

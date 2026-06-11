@@ -1,0 +1,70 @@
+<!-- 汉字王国主页 - 图谱 -->
+<view class="page-container {{eyeProtect ? 'eye-protect' : ''}}">
+
+  <!-- 顶部导航 -->
+  <view class="header">
+    <text class="logo">汉字王国</text>
+    <view class="header-right">
+      <button class="icon-btn" bindtap="toggleEye">👁️</button>
+      <button class="icon-btn" bindtap="toggleSound">{{soundEnabled ? '🔊' : '🔇'}}</button>
+      <button class="icon-btn" bindtap="openProfile">⭐</button>
+      <button class="icon-btn" bindtap="openUser">👤</button>
+    </view>
+  </view>
+
+  <!-- 图表区域 -->
+  <view class="chart-container">
+    <ec-canvas 
+      id="hanziChart"
+      canvas-id="hanziChart"
+      ec="{{ ec }}"
+    ></ec-canvas>
+  </view>
+
+  <!-- 左侧工具栏 -->
+  <view class="float-tool">
+    <view class="progress-ring" bindtap="openProfile">
+      <text class="progress-text">{{unlockedCount}}/{{totalCount}}</text>
+    </view>
+    <view class="daily-task">已学{{todayCount}}/{{dailyTarget}}</view>
+    <button class="tool-btn" bindtap="toggleFilter">{{showOnlyUnlocked ? '🔍' : '⭐'}}</button>
+    <button class="tool-btn" bindtap="zoomIn">+</button>
+    <button class="tool-btn" bindtap="zoomOut">-</button>
+    <button class="tool-btn" bindtap="locateRecommended">🎯</button>
+  </view>
+
+  <!-- 详情面板 -->
+  <view class="aside-panel {{showPanel ? '' : 'hide'}}" wx:if="{{selectedNode}}">
+    <view class="panel-char">{{selectedNode.name}}</view>
+    <view class="panel-pinyin">{{selectedNode.pinyin}}</view>
+    <view wx:if="{{selectedNode.nameTrad !== selectedNode.name}}" class="panel-trad">繁：{{selectedNode.nameTrad}}</view>
+    <view class="panel-label">汉字怎么来的？</view>
+    <view class="panel-text">{{selectedNode.oracle || '古人造字的智慧'}}</view>
+    <view class="panel-label">一句话记住</view>
+    <view class="panel-text">{{selectedNode.origin || ''}}</view>
+    <view class="panel-label">常用词语</view>
+    <view class="tag-wrap">
+      <text wx:for="{{words}}" wx:key="*this" class="tag-item">{{item}}</text>
+    </view>
+    <view class="panel-label">相关成语</view>
+    <view class="tag-wrap">
+      <text wx:for="{{idioms}}" wx:key="*this" class="tag-item">{{item}}</text>
+    </view>
+    <view class="panel-label">关联汉字</view>
+    <view class="tag-wrap">
+      <text wx:for="{{neighbors}}" wx:key="*this" class="tag-item related-tag" data-id="{{item}}" bindtap="onNeighborTap">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 加载遮罩 -->
+  <view class="loading-mask {{loading ? '' : 'hide'}}">
+    <text class="loading-text">欢迎来到汉字王国</text>
+  </view>
+
+  <!-- 里程碑提示 -->
+  <view class="milestone-toast {{showMilestone ? 'show' : ''}}">
+    <text class="milestone-badge">{{milestoneData.badge}}</text>
+    <text class="milestone-title">{{milestoneData.title}}</text>
+  </view>
+
+</view>

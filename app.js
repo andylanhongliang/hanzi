@@ -355,6 +355,8 @@
     var recommendedId = getRecommendedNode();
     const { vn, vl } = getVisibleData(recommendedId);
     const nodes = [], links = [];
+    var isMobile = window.innerWidth < 768;
+    var sizeMul = isMobile ? 1.3 : 1;
     vn.forEach(id => {
       const n = nodeMap.get(id);
       if(!n) return;
@@ -363,7 +365,7 @@
       const isRecommended = !isUnlocked && id === recommendedId;
       nodes.push({
         id: n.id, name: isRecommended ? '⭐?' : (isUnlocked ? n.name : '?'),
-        symbolSize: isRoot ? 70 : (isRecommended ? 48 : (isUnlocked ? 55 : 30)),
+        symbolSize: Math.round((isRoot ? 70 : (isRecommended ? 48 : (isUnlocked ? 55 : 30))) * sizeMul),
          itemStyle: {
           color: isRecommended ? '#ffd700' : (isUnlocked ? (isRoot ? '#4a90e2' : '#f5a623') : '#f5a623'),
           borderColor: isRecommended ? '#ff6600' : (isUnlocked ? (isRoot ? '#357abd' : '#e6951a') : '#ccc'),
@@ -432,7 +434,7 @@
         }
       },
       series: [{
-        type: 'graph', layout: 'force', roam: 'scale', draggable: true,
+        type: 'graph', layout: 'force', roam: true, draggable: true,
         force: { repulsion: 400, gravity: 0.2, edgeLength: [80, 150], friction: 0.6 },
         data: nodes, links: links,
         emphasis: { focus: 'adjacency', lineStyle: { width: 4 } }
