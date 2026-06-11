@@ -523,76 +523,6 @@
       };
       relatedWrap.appendChild(span);
     });
-    // 初始化笔顺动画
-    initStrokeWriter(nodeId);
-  }
-
-  // ======================== 笔顺动画 ========================
-  var strokeWriter = null;
-  var strokeQuizMode = false;
-
-  function initStrokeWriter(nodeId) {
-    var node = nodeMap.get(nodeId);
-    if(!node) return;
-    var canvasEl = document.getElementById('strokeCanvas');
-    if(!canvasEl) return;
-    canvasEl.innerHTML = '';
-    document.getElementById('strokeHint').innerText = '点击播放';
-    strokeQuizMode = false;
-
-    try {
-      strokeWriter = HanziWriter.create(canvasEl, node.name, {
-        width: 180,
-        height: 180,
-        padding: 10,
-        showOutline: true,
-        strokeAnimationSpeed: 1.5,
-        delayBetweenStrokes: 300,
-        strokeColor: '#4a90e2',
-        outlineColor: '#ddd',
-        highlightColor: '#f5a623',
-        charDataLoader: function(char) {
-          return fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + char + '.json')
-            .then(function(r) { return r.json(); });
-        }
-      });
-    } catch(e) {
-      document.getElementById('strokeHint').innerText = '笔顺数据加载中…';
-    }
-  }
-
-  function playStroke() {
-    if(!strokeWriter) return;
-    document.getElementById('strokeHint').innerText = '播放中…';
-    strokeQuizMode = false;
-    strokeWriter.cancelQuiz();
-    strokeWriter.animateCharacter({
-      onComplete: function() {
-        document.getElementById('strokeHint').innerText = '点击重播';
-      }
-    });
-  }
-
-  function startStrokeQuiz() {
-    if(!strokeWriter) return;
-    document.getElementById('strokeHint').innerText = '跟着描红 ✍️';
-    strokeQuizMode = true;
-    strokeWriter.quiz({
-      onCorrectStroke: function(data) {
-        document.getElementById('strokeHint').innerText = '第' + data.strokeNum + '笔 ✓';
-      },
-      onMistake: function(data) {
-        document.getElementById('strokeHint').innerText = '再试一次～';
-      },
-      onComplete: function(data) {
-        var score = data.score;
-        document.getElementById('strokeHint').innerText = '得分: ' + score + '分！';
-        if(score >= 80) {
-          playCorrectSound();
-          showFirework();
-        }
-      }
-    });
   }
 
   // ======================== 猜字游戏（节点点击触发） ========================
@@ -1446,13 +1376,6 @@
       nextHint();
     };
 
-    // 笔顺按钮事件
-    document.getElementById('strokePlay').onclick = playStroke;
-    document.getElementById('strokeQuiz').onclick = startStrokeQuiz;
-    document.getElementById('strokeCanvas').onclick = function() {
-      if(strokeQuizMode) return;
-      playStroke();
-    };
     document.getElementById('guessNext').onclick = closeGuess;
 
     document.getElementById('starClose').onclick = function() { document.getElementById('starMask').classList.remove('show'); };
