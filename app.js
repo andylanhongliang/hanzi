@@ -434,6 +434,76 @@
       };
       relatedWrap.appendChild(span);
     });
+    // 初始化笔顺动画
+    initStrokeWriter(nodeId);
+  }
+
+  // ======================== 笔顺动画 ========================
+  var strokeWriter = null;
+  var strokeQuizMode = false;
+
+  function initStrokeWriter(nodeId) {
+    var node = nodeMap.get(nodeId);
+    if(!node) return;
+    var canvasEl = document.getElementById('strokeCanvas');
+    if(!canvasEl) return;
+    canvasEl.innerHTML = '';
+    document.getElementById('strokeHint').innerText = '点击播放';
+    strokeQuizMode = false;
+
+    try {
+      strokeWriter = HanziWriter.create(canvasEl, node.name, {
+        width: 180,
+        height: 180,
+        padding: 10,
+        showOutline: true,
+        strokeAnimationSpeed: 1.5,
+        delayBetweenStrokes: 300,
+        strokeColor: '#4a90e2',
+        outlineColor: '#ddd',
+        highlightColor: '#f5a623',
+        charDataLoader: function(char) {
+          return fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + char + '.json')
+            .then(function(r) { return r.json(); });
+        }
+      });
+    } catch(e) {
+      document.getElementById('strokeHint').innerText = '笔顺数据加载中…';
+    }
+  }
+
+  function playStroke() {
+    if(!strokeWriter) return;
+    document.getElementById('strokeHint').innerText = '播放中…';
+    strokeQuizMode = false;
+    strokeWriter.cancelQuiz();
+    strokeWriter.animateCharacter({
+      onComplete: function() {
+        document.getElementById('strokeHint').innerText = '点击重播';
+      }
+    });
+  }
+
+  function startStrokeQuiz() {
+    if(!strokeWriter) return;
+    document.getElementById('strokeHint').innerText = '跟着描红 ✍️';
+    strokeQuizMode = true;
+    strokeWriter.quiz({
+      onCorrectStroke: function(data) {
+        document.getElementById('strokeHint').innerText = '第' + data.strokeNum + '笔 ✓';
+      },
+      onMistake: function(data) {
+        document.getElementById('strokeHint').innerText = '再试一次～';
+      },
+      onComplete: function(data) {
+        var score = data.score;
+        document.getElementById('strokeHint').innerText = '得分: ' + score + '分！';
+        if(score >= 80) {
+          playCorrectSound();
+          showFirework();
+        }
+      }
+    });
   }
 
   // ======================== 猜字游戏（节点点击触发） ========================
@@ -482,8 +552,11 @@
       if(recentUnlocks.length > 5) recentUnlocks.pop();
       addLearnedChar(currentGuessTarget);
       starCount++;
+      incStat('correctTotal');
       saveUserData();
       updateProgress();
+      recordToday();
+      checkAchievements();
       showFirework();
       playCorrectSound();
       playUnlockSound();
@@ -614,7 +687,89 @@
     if(!unlocked.has(charId)) {
       unlocked.add(charId);
       renderChart();
+      recordToday();
+      checkAchievements();
     }
+  }
+
+  // ======================== 成就系统 ========================
+  var achievements = [
+    { id: 'first',     icon: '🌟', name: '初识汉字', desc: '认识第1个汉字', check: function() { return learnedSet.size >= 1; } },
+    { id: 'newbie5',   icon: '🌱', name: '识字新手', desc: '认识5个汉字',   check: function() { return learnedSet.size >= 5; } },
+    { id: 'learner20', icon: '📖', name: '识字达人', desc: '认识20个汉字',  check: function() { return learnedSet.size >= 20; } },
+    { id: 'scholar50', icon: '🎓', name: '汉字小博士', desc: '认识50个汉字', check: function() { return learnedSet.size >= 50; } },
+    { id: 'master100',icon: '👑', name: '汉字大师', desc: '认识100个汉字', check: function() { return learnedSet.size >= 100; } },
+    { id: 'king200',  icon: '🏆', name: '汉字王者', desc: '认识200个汉字', check: function() { return learnedSet.size >= 200; } },
+    { id: 'streak3',  icon: '🔥', name: '一马当先', desc: '连续3天学习',   check: function() { return getStreak() >= 3; } },
+    { id: 'streak7',  icon: '💪', name: '坚持不懈', desc: '连续7天学习',   check: function() { return getStreak() >= 7; } },
+    { id: 'days30',   icon: '📅', name: '全勤标兵', desc: '累计学习30天',  check: function() { return getTotalDays() >= 30; } },
+    { id: 'correct10',icon: '🎯', name: '十全十美', desc: '累计答对10次',  check: function() { return getStat('correctTotal') >= 10; } },
+    { id: 'correct100',icon:'💯', name: '百发百中', desc: '累计答对100次', check: function() { return getStat('correctTotal') >= 100; } },
+    { id: 'review10', icon: '🔄', name: '知错能改', desc: '复习错字10次',  check: function() { return getStat('reviewCount') >= 10; } }
+  ];
+
+  function getAchievementKey() { return getUserKey('achievements'); }
+  function getUnlockedAchievements() {
+    try { return JSON.parse(localStorage.getItem(getAchievementKey()) || '[]'); } catch(e) { return []; }
+  }
+  function saveAchievement(id) {
+    var arr = getUnlockedAchievements();
+    if(arr.indexOf(id) < 0) { arr.push(id); localStorage.setItem(getAchievementKey(), JSON.stringify(arr)); }
+  }
+
+  function getStats() {
+    try { return JSON.parse(localStorage.getItem(getUserKey('stats')) || '{}'); } catch(e) { return {}; }
+  }
+  function saveStats(s) { localStorage.setItem(getUserKey('stats'), JSON.stringify(s)); }
+  function getStat(key) { var s = getStats(); return s[key] || 0; }
+  function incStat(key) { var s = getStats(); s[key] = (s[key] || 0) + 1; saveStats(s); }
+
+  function recordToday() {
+    var today = new Date().toDateString();
+    var s = getStats();
+    s.lastDate = s.lastDate || '';
+    if(s.lastDate !== today) {
+      var yesterday = new Date(Date.now() - 86400000).toDateString();
+      if(s.lastDate === yesterday) { s.streak = (s.streak || 0) + 1; }
+      else { s.streak = 1; }
+      s.days = (s.days || 0) + 1;
+      s.lastDate = today;
+      saveStats(s);
+    }
+  }
+  function getStreak() { var s = getStats(); recordToday(); return s.streak || 0; }
+  function getTotalDays() { var s = getStats(); recordToday(); return s.days || 0; }
+
+  var lastAchieveToastTime = 0;
+  function checkAchievements() {
+    var unlocked = getUnlockedAchievements();
+    var newAchieve = null;
+    achievements.forEach(function(a) {
+      if(unlocked.indexOf(a.id) < 0 && a.check()) {
+        saveAchievement(a.id);
+        if(!newAchieve) newAchieve = a;
+      }
+    });
+    if(newAchieve && Date.now() - lastAchieveToastTime > 2000) {
+      lastAchieveToastTime = Date.now();
+      showAchievementToast(newAchieve);
+    }
+  }
+
+  function showAchievementToast(a) {
+    var toast = document.getElementById('milestoneToast');
+    document.getElementById('milestoneBadge').innerText = a.icon;
+    document.getElementById('milestoneTitle').innerText = a.name + '：' + a.desc;
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    playCorrectSound();
+  }
+
+  function getAchievementById(id) {
+    for(var i=0; i<achievements.length; i++) {
+      if(achievements[i].id === id) return achievements[i];
+    }
+    return null;
   }
 
   // ======================== 辅助功能 ========================
@@ -779,6 +934,23 @@
     document.getElementById('mistakeLabel').style.display = ''; // always show label
     if(mistakes.length === 0) document.getElementById('mistakeLabel').innerText = '错字本 (0)';
     else document.getElementById('mistakeLabel').innerText = '错字本 (' + mistakes.length + ')';
+    // 成就展示
+    var badgeEl = document.getElementById('myBadge');
+    badgeEl.innerHTML = '';
+    var unlockedAchieves = getUnlockedAchievements();
+    if(unlockedAchieves.length === 0) {
+      badgeEl.innerHTML = '<span style="color:var(--text-secondary);font-size:14px;">继续探索解锁成就！</span>';
+    } else {
+      unlockedAchieves.forEach(function(aid) {
+        var a = getAchievementById(aid);
+        if(!a) return;
+        var span = document.createElement('span');
+        span.className = 'tag-item achievement-tag';
+        span.title = a.desc;
+        span.innerHTML = a.icon + ' ' + a.name;
+        badgeEl.appendChild(span);
+      });
+    }
   }
 
   // ======================== 复习闪卡 ========================
@@ -806,6 +978,7 @@
   function removeMistake() {
     var id = reviewList[reviewIdx];
     mistakeSet.delete(id);
+    incStat('reviewCount');
     saveUserData();
     reviewList.splice(reviewIdx, 1);
     if(reviewList.length === 0) {
@@ -956,6 +1129,14 @@
     document.getElementById('guessSubmit').onclick = submitGuess;
     document.getElementById('guessMore').onclick = function() {
       nextHint();
+    };
+
+    // 笔顺按钮事件
+    document.getElementById('strokePlay').onclick = playStroke;
+    document.getElementById('strokeQuiz').onclick = startStrokeQuiz;
+    document.getElementById('strokeCanvas').onclick = function() {
+      if(strokeQuizMode) return;
+      playStroke();
     };
     document.getElementById('guessNext').onclick = closeGuess;
 

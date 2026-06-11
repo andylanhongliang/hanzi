@@ -794,3 +794,58 @@ body {
   .tool-btn { width: 32px; height: 32px; font-size: 13px; }
   .filter-btn { width: 32px; height: 26px; font-size: 11px; }
 }
+
+/* ========== 笔顺动画区域 ========== */
+.stroke-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 2px;
+}
+.stroke-canvas {
+  width: 140px;
+  height: 140px;
+  border: 2px dashed var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.3s;
+}
+.stroke-canvas:hover {
+  border-color: var(--color-primary);
+}
+.stroke-canvas svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+.stroke-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--bg-panel);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--color-primary);
+}
+.stroke-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* ========== 成就徽章 ========== */
+.achievement-tag {
+  background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+  border: 1px solid #f59e0b !important;
+  color: #92400e !important;
+  font-weight: 500;
+}
+.achievement-tag:hover {
+  background: linear-gradient(135deg, #fde68a, #fcd34d) !important;
+}
