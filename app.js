@@ -325,20 +325,20 @@
       const isRecommended = !isUnlocked && id === recommendedId;
       nodes.push({
         id: n.id, name: isRecommended ? '⭐?' : (isUnlocked ? n.name : '?'),
-        symbolSize: isRoot ? 70 : (isRecommended ? 40 : (isUnlocked ? 55 : 30)),
+        symbolSize: isRoot ? 70 : (isRecommended ? 48 : (isUnlocked ? 55 : 30)),
          itemStyle: {
           color: isRecommended ? '#ffd700' : (isUnlocked ? (isRoot ? '#4a90e2' : '#f5a623') : '#f5a623'),
-          borderColor: isRecommended ? '#ffa000' : (isUnlocked ? (isRoot ? '#357abd' : '#e6951a') : '#ccc'),
-          borderWidth: isRecommended ? 4 : (isUnlocked ? 3 : 2),
+          borderColor: isRecommended ? '#ff6600' : (isUnlocked ? (isRoot ? '#357abd' : '#e6951a') : '#ccc'),
+          borderWidth: isRecommended ? 5 : (isUnlocked ? 3 : 2),
           borderType: isRecommended ? 'solid' : (isUnlocked ? 'solid' : 'dashed'),
-          shadowBlur: isRecommended ? 20 : (isUnlocked ? (isRoot ? 20 : 8) : 0),
-          shadowColor: isRecommended ? 'rgba(255,215,0,0.6)' : (isUnlocked ? (isRoot ? 'rgba(74,144,226,0.3)' : 'rgba(245,166,35,0.15)') : 'transparent'),
+          shadowBlur: isRecommended ? 30 : (isUnlocked ? (isRoot ? 20 : 8) : 0),
+          shadowColor: isRecommended ? 'rgba(255,215,0,0.8)' : (isUnlocked ? (isRoot ? 'rgba(74,144,226,0.3)' : 'rgba(245,166,35,0.15)') : 'transparent'),
           opacity: isRecommended ? 1 : (isUnlocked ? 1 : 0.35)
         },
         label: {
           show: true,
           color: isRecommended ? '#fff' : (isUnlocked ? '#fff' : '#999'),
-          fontSize: isRecommended ? 16 : (isRoot ? 28 : (isUnlocked ? 22 : 14)),
+          fontSize: isRecommended ? 18 : (isRoot ? 28 : (isUnlocked ? 22 : 14)),
           fontWeight: 'bold'
         },
         _raw: n,
@@ -381,6 +381,25 @@
         emphasis: { focus: 'adjacency', lineStyle: { width: 4 } }
       }]
     }, true);
+    // 启动推荐节点脉冲动画
+    startPulse(recommendedId);
+  }
+
+  var pulseTimer = null;
+  function startPulse(nodeId) {
+    if(pulseTimer) clearInterval(pulseTimer);
+    if(!nodeId || !myChart) return;
+    var big = true;
+    pulseTimer = setInterval(function() {
+      if(!myChart) { clearInterval(pulseTimer); return; }
+      var opt = myChart.getOption();
+      if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
+      var d = opt.series[0].data.find(function(x) { return x.id === nodeId; });
+      if(!d) return;
+      d.symbolSize = big ? 52 : 44;
+      big = !big;
+      myChart.setOption({ series: [{ data: [d] }] });
+    }, 600);
   }
 
   // ======================== 右侧面板 ========================
