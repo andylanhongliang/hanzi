@@ -371,9 +371,19 @@
           y: nodePositionsCache[n.id][1],
           fixed: true
         } : (isRecommended && !nodePositionsCache[n.id] ? {
-          // 新推荐节点：初始位置设在视图中心，避免飘到屏幕外
-          x: (myChart && myChart.getWidth && myChart.getWidth()) ? myChart.getWidth()/2 : 400,
-          y: (myChart && myChart.getHeight && myChart.getHeight()) ? myChart.getHeight()/2 : 400
+          // 新推荐节点：初始位置放在父节点旁边，确保在视野内
+          x: (function() {
+            var p = getParent(n.id);
+            if(p && nodePositionsCache[p]) return nodePositionsCache[p][0] + 60;
+            var cw = myChart && myChart.getWidth && myChart.getWidth();
+            return cw ? cw/2 : 400;
+          })(),
+          y: (function() {
+            var p = getParent(n.id);
+            if(p && nodePositionsCache[p]) return nodePositionsCache[p][1] + 60;
+            var ch = myChart && myChart.getHeight && myChart.getHeight();
+            return ch ? ch/2 : 400;
+          })()
         } : {}))
       });
     });
@@ -635,8 +645,6 @@
           document.getElementById('asideToggle').classList.remove('hide');
         }
         fillPanel(unlockedNodeId);
-        // 恢复所有节点可见性后立刻开始重试定位
-        clearFocus();
         autoLocateRecommended(0);
       }, 500);
     } else {
