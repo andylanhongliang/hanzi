@@ -761,6 +761,7 @@ body {
   .progress-ring svg { width: 100%; height: 100%; }
   .daily-task { display: none; }
   .pet-widget { display: none; }
+  .pet-bubble { display: none !important; }
 
   /* 弹窗 */
   .modal-card { width: 92%; padding: 16px; max-height: 80vh; overflow-y: auto; }
