@@ -355,7 +355,11 @@
           x: nodePositionsCache[n.id][0],
           y: nodePositionsCache[n.id][1],
           fixed: true
-        } : {})
+        } : (isRecommended && !nodePositionsCache[n.id] ? {
+          // 新推荐节点：初始位置设在视图中心，避免飘到屏幕外
+          x: myChart ? (myChart.getWidth ? myChart.getWidth()/2 : 400) : 400,
+          y: myChart ? (myChart.getHeight ? myChart.getHeight()/2 : 400) : 400
+        } : {}))
       });
     });
 
