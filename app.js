@@ -372,8 +372,8 @@
           fixed: true
         } : (isRecommended && !nodePositionsCache[n.id] ? {
           // 新推荐节点：初始位置设在视图中心，避免飘到屏幕外
-          x: myChart ? (myChart.getWidth ? myChart.getWidth()/2 : 400) : 400,
-          y: myChart ? (myChart.getHeight ? myChart.getHeight()/2 : 400) : 400
+          x: (myChart && myChart.getWidth && myChart.getWidth()) ? myChart.getWidth()/2 : 400,
+          y: (myChart && myChart.getHeight && myChart.getHeight()) ? myChart.getHeight()/2 : 400
         } : {}))
       });
     });
@@ -422,11 +422,13 @@
       if(!myChart) { clearInterval(pulseTimer); return; }
       var opt = myChart.getOption();
       if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
-      var d = opt.series[0].data.find(function(x) { return x.id === nodeId; });
+      var allData = opt.series[0].data;
+      var d = allData.find(function(x) { return x.id === nodeId; });
       if(!d) return;
       d.symbolSize = big ? 52 : 44;
       big = !big;
-      myChart.setOption({ series: [{ data: [d] }] });
+      // 传入完整 data 数组，不是只有 [d]
+      myChart.setOption({ series: [{ data: allData }] });
     }, 600);
   }
 
