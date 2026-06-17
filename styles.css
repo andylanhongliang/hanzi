@@ -23,6 +23,37 @@
   --color-secondary: #e6a040;
   --color-border: rgba(90, 158, 210, 0.2);
 }
+/* ── 三套主题皮肤 ── */
+:root.theme-forest {
+  --bg-main: #edf5e8;
+  --bg-panel: #f4faf0;
+  --bg-float: rgba(244, 250, 240, 0.95);
+  --text-primary: #2d3a24;
+  --text-secondary: #5a6b4f;
+  --color-primary: #4a9c3f;
+  --color-secondary: #d4a030;
+  --color-border: rgba(74, 156, 63, 0.2);
+}
+:root.theme-ocean {
+  --bg-main: #e8f0f8;
+  --bg-panel: #f0f4fa;
+  --bg-float: rgba(240, 244, 250, 0.95);
+  --text-primary: #1a2a3a;
+  --text-secondary: #4a5a6a;
+  --color-primary: #2980b9;
+  --color-secondary: #e67e22;
+  --color-border: rgba(41, 128, 185, 0.2);
+}
+:root.theme-space {
+  --bg-main: #1a1a2e;
+  --bg-panel: #222240;
+  --bg-float: rgba(34, 34, 64, 0.95);
+  --text-primary: #e0ddf0;
+  --text-secondary: #9a95b8;
+  --color-primary: #9b59b6;
+  --color-secondary: #f1c40f;
+  --color-border: rgba(155, 89, 182, 0.3);
+}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -479,6 +510,13 @@ body {
   border: 2px solid var(--color-border);
   color: var(--text-primary);
 }
+.modal-btn.active-btn {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  outline: 3px solid rgba(59,130,246,0.3);
+  outline-offset: 2px;
+}
 .modal-row {
   display: flex;
   gap: 10px;
@@ -611,6 +649,235 @@ body {
   font-size: 14px;
   color: var(--text-secondary);
   margin-top: 8px;
+}
+
+/* ========== 答对详情（朗读增强） ========== */
+.detail-char {
+  text-align: center;
+  font-size: 48px;
+  color: var(--color-primary);
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.detail-row-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.detail-pinyin {
+  font-size: 18px;
+  color: var(--color-secondary);
+}
+.detail-section {
+  margin-top: 10px;
+  padding: 8px 0;
+  border-top: 1px dashed var(--color-border);
+}
+.detail-title {
+  font-weight: bold;
+  color: var(--color-primary);
+  font-size: 15px;
+  margin-right: 4px;
+}
+.detail-text {
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-top: 4px;
+  line-height: 1.6;
+}
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.detail-tag-wrap {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(74,144,226,0.12);
+  color: var(--color-primary);
+  border-radius: 14px;
+  padding: 2px 4px 2px 10px;
+  font-size: 14px;
+  gap: 2px;
+}
+/* 朗读按钮 */
+.speak-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  transition: background 0.15s;
+  vertical-align: middle;
+  opacity: 0.7;
+  line-height: 1;
+}
+.speak-btn:hover {
+  background: rgba(74,144,226,0.15);
+  opacity: 1;
+}
+.speak-btn-tiny {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 50%;
+  transition: background 0.15s;
+  opacity: 0.7;
+  line-height: 1;
+}
+.speak-btn-tiny:hover {
+  background: rgba(245,166,35,0.2);
+  opacity: 1;
+}
+/* 面板中可朗读标签的样式增强 */
+.tag-speak {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tag-speak:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(74,144,226,0.25);
+}
+
+/* ========== 闯关复习弹窗 ========== */
+.quiz-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.quiz-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(74,144,226,0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: var(--color-success);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.quiz-progress-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.quiz-question {
+  text-align: center;
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin: 12px 0;
+  min-height: 50px;
+}
+.quiz-question.small {
+  font-size: 20px;
+  color: var(--text-primary);
+}
+.quiz-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+.quiz-option {
+  padding: 14px 8px;
+  border-radius: 14px;
+  border: 2px solid var(--color-border);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  font-family: inherit;
+}
+.quiz-option:hover {
+  border-color: var(--color-primary);
+  background: rgba(74,144,226,0.08);
+  transform: scale(1.03);
+}
+.quiz-option.correct {
+  border-color: var(--color-success);
+  background: rgba(82,196,26,0.12);
+  color: var(--color-success);
+  animation: quizPulse 0.5s ease;
+}
+.quiz-option.wrong {
+  border-color: var(--color-error);
+  background: rgba(255,77,79,0.1);
+  color: var(--color-error);
+}
+@keyframes quizPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.quiz-feedback {
+  text-align: center;
+  font-size: 16px;
+  min-height: 28px;
+  margin: 8px 0;
+}
+.quiz-feedback .correct-text { color: var(--color-success); }
+.quiz-feedback .wrong-text { color: var(--color-error); }
+.quiz-result {
+  text-align: center;
+}
+.quiz-score {
+  font-size: 48px;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+.quiz-stars {
+  font-size: 32px;
+  margin: 8px 0;
+}
+
+/* ========== 笔画描红 ========== */
+.write-canvas-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+}
+#writeCanvas {
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: crosshair;
+  touch-action: none;
+}
+.write-model-char {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 48px;
+  color: rgba(0,0,0,0.12);
+  pointer-events: none;
+  font-weight: bold;
+}
+.write-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.write-feedback {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 12px;
+  min-height: 28px;
+  color: var(--color-success);
 }
 
 /* ========== 我的中心 & 家长中心 ========== */
@@ -778,6 +1045,7 @@ body {
 
    /* 手机端：猜字结果区尽量大 */
    #guessResult { max-height: 55vh; overflow-y: auto; }
+#guessResult.compact { max-height: 35vh; }
 
    /* 手机端：候选按钮更大，方便手指点击 */
    .candidate-btn { width: 64px; height: 64px; font-size: 30px; border-radius: 16px; }

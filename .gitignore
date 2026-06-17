@@ -42,5 +42,8 @@ coverage/
 # Local history
 .history/
 
+# Local editor/session metadata
+.codewhale/
+
 # Private project config
 project.private.config.json

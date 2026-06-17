@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>测试画布</title>
+  <style>
+    body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    canvas { border: 3px solid #FF6B35; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="600" height="400"></canvas>
+  <script>
+    const c = document.getElementById('c');
+    const cx = c.getContext('2d');
+    
+    // 画一个红色方块
+    cx.fillStyle = 'red';
+    cx.fillRect(50, 50, 100, 100);
+    
+    // 画一个绿色圆
+    cx.fillStyle = 'green';
+    cx.beginPath();
+    cx.arc(300, 200, 50, 0, Math.PI * 2);
+    cx.fill();
+    
+    // 写文字
+    cx.fillStyle = 'white';
+    cx.font = '30px sans-serif';
+    cx.fillText('如果看到这个，游戏引擎正常', 50, 300);
+    
+    console.log('画布测试完成');
+  </script>
+</body>
+</html>

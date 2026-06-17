@@ -98,13 +98,20 @@
   function saveCurrentUserData() {
     var u = getActiveUser();
     if(!u) return;
+    // 同步全局变量到 currentUserData，确保一致性
+    currentUserData.unlocked = Array.from(unlocked);
+    currentUserData.learned = Array.from(learnedSet);
+    currentUserData.stars = starCount;
+    currentUserData.lastNode = lastUnlockedNodeId;
+    currentUserData.recent = recentUnlocks.slice();
+    currentUserData.mistakes = Array.from(mistakeSet);
     try {
-      localStorage.setItem(getUserKey('unlocked'), JSON.stringify(Array.from(unlocked)));
-      localStorage.setItem(getUserKey('learned'), JSON.stringify(Array.from(learnedSet)));
-      localStorage.setItem(getUserKey('stars'), String(starCount));
-      localStorage.setItem(getUserKey('lastNode'), lastUnlockedNodeId);
-      localStorage.setItem(getUserKey('recent'), JSON.stringify(recentUnlocks));
-      localStorage.setItem(getUserKey('mistakes'), JSON.stringify(Array.from(mistakeSet)));
+      localStorage.setItem(getUserKey('unlocked'), JSON.stringify(currentUserData.unlocked));
+      localStorage.setItem(getUserKey('learned'), JSON.stringify(currentUserData.learned));
+      localStorage.setItem(getUserKey('stars'), String(currentUserData.stars));
+      localStorage.setItem(getUserKey('lastNode'), currentUserData.lastNode);
+      localStorage.setItem(getUserKey('recent'), JSON.stringify(currentUserData.recent));
+      localStorage.setItem(getUserKey('mistakes'), JSON.stringify(currentUserData.mistakes));
       localStorage.setItem(getUserKey('avatar'), currentUserData.avatar || '👤');
       // nickname 已废弃
       localStorage.setItem(getUserKey('dailyTarget'), String(currentUserData.dailyTarget || 3));
@@ -196,6 +203,64 @@
       if(!unlocked.has(ALL_NODES[i].id)) return ALL_NODES[i].id;
     }
     return null;
+  }
+
+  // ======================== 区域系统 ========================
+  const ZONE_CONFIG = {
+    '数字平原': { icon: '🌄', color: '#4a90e2', desc: '一二三四五，数字真奇妙', order: 1, radicals: [] },
+    '天地自然': { icon: '🌤️', color: '#5b9bd5', desc: '天地日月星，大自然的力量', order: 2, radicals: ['日','月','气','雨','风','云','雷','电','天','地','星','旦','早'] },
+    '人类部落': { icon: '👨‍👩‍👧', color: '#e57373', desc: '人和人的故事', order: 3, radicals: ['亻','人','大','子','女','儿','母','父','兄','弟','姐','妹'] },
+    '土石山水': { icon: '⛰️', color: '#8d6e63', desc: '山石田土，脚下的大地', order: 4, radicals: ['土','石','山','田','金','玉','王','谷','矿','沙','矿','岩'] },
+    '动物森林': { icon: '🐾', color: '#66bb6a', desc: '飞禽走兽，动物朋友们', order: 5, radicals: ['犭','马','牛','羊','犬','鸟','隹','鱼','虫','龙','虎','象','兔','猫','狗','鸡','鸭','鹅'] },
+    '植物花园': { icon: '🌿', color: '#43a047', desc: '花草木禾，绿色世界', order: 6, radicals: ['木','艹','禾','米','竹','林','森','花','草','树','叶','果','瓜'] },
+    '生活小镇': { icon: '🏠', color: '#ffa726', desc: '衣食住行，日常生活', order: 7, radicals: ['门','户','车','舟','衣','巾','纟','食','饣','酉','皿','瓦','宀','广','厂'] },
+    '智慧学园': { icon: '📚', color: '#ab47bc', desc: '学习思考，智慧成长', order: 8, radicals: ['讠','言','心','忄','目','见','耳','手','扌','足','走','辶','彳','力','刀','刂'] }
+  };
+  const zoneMap = new Map();  // nodeId → zoneName
+  const zoneIconMap = new Map(); // nodeId → zoneIcon
+
+  function classifyZone(nodeId) {
+    // 数字序列（按 ID 直接匹配）
+    var digits = ['一','二','三','四','五','六','七','八','九','十','百','千','万','亿','兆'];
+    if (digits.indexOf(nodeId) >= 0) return '数字平原';
+    // 按偏旁部首推断
+    var radical = nodeId.charAt(0);
+    for (var zn in ZONE_CONFIG) {
+      var cfg = ZONE_CONFIG[zn];
+      if (cfg.radicals && cfg.radicals.indexOf(radical) >= 0) return zn;
+    }
+    // 检查常见偏旁部首（在字中的位置）
+    var commonRadicals = { '亻':'人类部落','氵':'天地自然','火':'天地自然','木':'植物花园','艹':'植物花园','口':'人类部落' };
+    for (var r in commonRadicals) {
+      if (nodeId.indexOf(r) >= 0) return commonRadicals[r];
+    }
+    return '智慧学园';
+  }
+
+  function initZones() {
+    ALL_NODES.forEach(function(n) {
+      var zone = classifyZone(n.id);
+      zoneMap.set(n.id, zone);
+      zoneIconMap.set(n.id, ZONE_CONFIG[zone].icon);
+    });
+    // 输出区域统计到控制台
+    var counts = {};
+    zoneMap.forEach(function(z) { counts[z] = (counts[z]||0) + 1; });
+    console.log('区域统计:', JSON.stringify(counts));
+  }
+
+  function getZoneInfo(nodeId) {
+    var zn = zoneMap.get(nodeId) || '智慧学园';
+    return ZONE_CONFIG[zn] || ZONE_CONFIG['智慧学园'];
+  }
+
+  function getZoneProgress(zoneName) {
+    var cfg = ZONE_CONFIG[zoneName];
+    var total = 0, done = 0;
+    zoneMap.forEach(function(zn, nid) {
+      if (zn === zoneName) { total++; if (unlocked.has(nid)) done++; }
+    });
+    return { icon: cfg.icon, name: zoneName, desc: cfg.desc, total: total, done: done, pct: total ? Math.round(done/total*100) : 0 };
   }
 
   // ======================== 数据预处理 ========================
@@ -363,11 +428,13 @@
       const isUnlocked = unlocked.has(id);
       const isRoot = id === '一';
       const isRecommended = !isUnlocked && id === recommendedId;
+      var zoneInfo = getZoneInfo(id);
+      var zoneColor = zoneInfo ? zoneInfo.color : '#f5a623';
       nodes.push({
         id: n.id, name: isRecommended ? '⭐?' : (isUnlocked ? n.name : '?'),
         symbolSize: Math.round((isRoot ? 70 : (isRecommended ? 48 : (isUnlocked ? 55 : 30))) * sizeMul),
          itemStyle: {
-          color: isRecommended ? '#ffd700' : (isUnlocked ? (isRoot ? '#4a90e2' : '#f5a623') : '#f5a623'),
+          color: isRecommended ? '#ffd700' : (isUnlocked ? (isRoot ? '#4a90e2' : zoneColor) : '#aaa'),
           borderColor: isRecommended ? '#ff6600' : (isUnlocked ? (isRoot ? '#357abd' : '#e6951a') : '#ccc'),
           borderWidth: isRecommended ? 5 : (isUnlocked ? 3 : 2),
           borderType: isRecommended ? 'solid' : (isUnlocked ? 'solid' : 'dashed'),
@@ -445,47 +512,77 @@
   }
 
   var pulseTimer = null;
+  var pulseCachedData = null; // 缓存图谱数据，避免每次getOption
   function startPulse(nodeId) {
     if(pulseTimer) clearInterval(pulseTimer);
     if(!nodeId || !myChart) return;
+    // 缓存当前图谱数据用于脉冲动画
+    pulseCachedData = null;
+    var opt = myChart.getOption();
+    if(opt.series && opt.series[0] && opt.series[0].data) pulseCachedData = opt.series[0].data;
     var big = true;
+    var origSize = 48; // 推荐节点原始大小
+    // 找到推荐节点的原始 symbolSize
+    if(pulseCachedData) {
+      var d = pulseCachedData.find(function(x) { return x.id === nodeId; });
+      if(d && d.symbolSize) origSize = d.symbolSize;
+    }
     pulseTimer = setInterval(function() {
-      if(!myChart) { clearInterval(pulseTimer); return; }
-      var opt = myChart.getOption();
-      if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
-      var allData = opt.series[0].data;
-      var d = allData.find(function(x) { return x.id === nodeId; });
+      if(!myChart || !pulseCachedData) { clearInterval(pulseTimer); return; }
+      var d = pulseCachedData.find(function(x) { return x.id === nodeId; });
       if(!d) return;
-      d.symbolSize = big ? 52 : 44;
+      d.symbolSize = big ? origSize + 6 : origSize - 4;
       big = !big;
-      // 传入完整 data 数组，不是只有 [d]
-      myChart.setOption({ series: [{ data: allData }] });
+      myChart.setOption({ series: [{ data: pulseCachedData }] });
     }, 600);
   }
 
   // ======================== 右侧面板 ========================
+  var currentPanelNodeId = null;
   function fillPanel(nodeId) {
+    currentPanelNodeId = nodeId;
     const node = nodeMap.get(nodeId);
     if(!node) return;
     document.querySelector('.empty-tip').style.display = 'none';
     document.getElementById('panelContent').style.display = 'block';
     document.getElementById('panelChar').innerText = node.name;
-    document.getElementById('panelPinyin').innerText = node.pinyin || '';
+    var pinyinEl = document.getElementById('panelPinyin');
+    pinyinEl.innerText = node.pinyin || '';
+    pinyinEl.style.cursor = 'pointer';
+    pinyinEl.title = '点击朗读拼音';
+    pinyinEl.onclick = function() { if(node.pinyin) speakText(node.pinyin); };
     var tradEl = document.getElementById('panelTrad');
+    // 显示区域信息
+    var zi = getZoneInfo(nodeId);
+    var zoneLabel = zi.icon + ' ' + (function() {
+      for (var zn in ZONE_CONFIG) { if (ZONE_CONFIG[zn] === zi) return zn; }
+      return '';
+    })();
+    tradEl.setAttribute('data-zone', zoneLabel);
     if(node.nameTrad && node.nameTrad !== node.name) {
       tradEl.innerText = '繁：' + node.nameTrad;
       tradEl.style.display = '';
     } else {
       tradEl.style.display = 'none';
     }
-    document.getElementById('panelOracle').innerText = node.oracle || '古人造字的智慧';
-    document.getElementById('panelOrigin').innerText = node.origin || '一笔一划都有故事';
+    var oracleEl = document.getElementById('panelOracle');
+    oracleEl.innerText = node.oracle || '古人造字的智慧';
+    oracleEl.style.cursor = 'pointer';
+    oracleEl.title = '点击朗读';
+    oracleEl.onclick = function() { speakText(node.oracle || '古人造字的智慧'); };
+    var originEl = document.getElementById('panelOrigin');
+    originEl.innerText = node.origin || '一笔一划都有故事';
+    originEl.style.cursor = 'pointer';
+    originEl.title = '点击朗读';
+    originEl.onclick = function() { speakText(node.origin || '一笔一划都有故事'); };
     const wordsWrap = document.getElementById('panelWords');
     wordsWrap.innerHTML = '';
     if(node.groupWords) {
       node.groupWords.split('|').forEach(function(w) {
         var span = document.createElement('span');
-        span.className = 'tag-item'; span.innerText = w;
+        span.className = 'tag-item tag-speak'; span.innerText = w;
+        span.title = '点击朗读 · ' + w;
+        span.onclick = function(e) { e.stopPropagation(); speakText(w); };
         wordsWrap.appendChild(span);
       });
     }
@@ -495,8 +592,9 @@
       node.idioms.split('|').forEach(function(item) {
         var parts = item.split('::');
         var span = document.createElement('span');
-        span.className = 'tag-item'; span.innerText = parts[0];
-        if(parts[1]) span.title = parts[1];
+        span.className = 'tag-item tag-speak'; span.innerText = parts[0];
+        if(parts[1]) span.title = parts[1] + '（点击朗读）';
+        span.onclick = function(e) { e.stopPropagation(); speakIdiom(item); };
         idiomsWrap.appendChild(span);
       });
     }
@@ -562,6 +660,7 @@
       recentUnlocks.unshift(currentGuessTarget);
       if(recentUnlocks.length > 5) recentUnlocks.pop();
       addLearnedChar(currentGuessTarget);
+      updateReviewRecord(currentGuessTarget, true); // 初始化间隔重复
       starCount++;
       incStat('correctTotal');
       saveUserData();
@@ -572,24 +671,89 @@
       showFirework();
       playCorrectSound();
       playUnlockSound();
-      speakText('答对了！' + n.name);
+      var praise = ['太棒啦！','你真厉害！','完美通关！','又学会一个新汉字啦！'];
+      speakText(praise[Math.floor(Math.random() * praise.length)] + ' ' + n.name);
 
-      var detailHtml = '<div style="text-align:center;font-size:48px;color:#4a90e2;">' + n.name + '</div>';
-      if(n.pinyin) detailHtml += '<div style="text-align:center;font-size:18px;color:#f5a623;">' + n.pinyin + '</div>';
-      if(n.oracle) detailHtml += '<div style="margin-top:10px;font-weight:bold;color:#4a90e2;">汉字怎么来的？</div><div>' + n.oracle + '</div>';
-      if(n.origin) detailHtml += '<div style="margin-top:8px;font-weight:bold;color:#4a90e2;">一句话记住</div><div>' + n.origin + '</div>';
-      if(n.groupWords) detailHtml += '<div style="margin-top:8px;font-weight:bold;color:#4a90e2;">常用词语</div><div>' + n.groupWords.replace(/\|/g, ' · ') + '</div>';
+      var detailHtml = '<div class="detail-char">' + n.name + '</div>';
+      if(n.oracle) {
+        detailHtml += '<div class="detail-section"><span class="detail-title">📖 汉字怎么来的？</span>';
+        detailHtml += '<button class="speak-btn" data-speak="' + escHtml(n.oracle) + '" title="朗读">🔊</button>';
+        detailHtml += '<div class="detail-text">' + n.oracle + '</div></div>';
+      }
+      if(n.origin) {
+        detailHtml += '<div class="detail-section"><span class="detail-title">💡 一句话记住</span>';
+        detailHtml += '<button class="speak-btn" data-speak="' + escHtml(n.origin) + '" title="朗读">🔊</button>';
+        detailHtml += '<div class="detail-text">' + n.origin + '</div></div>';
+      }
+      if(n.groupWords) {
+        var words = n.groupWords.split('|');
+        detailHtml += '<div class="detail-section"><span class="detail-title">📝 常用词语</span>';
+        detailHtml += '<button class="speak-btn" data-speak="' + escHtml(words.join('、')) + '" title="朗读全部词语">🔊</button>';
+        detailHtml += '<div class="detail-tags">';
+        words.forEach(function(w) {
+          detailHtml += '<span class="detail-tag">' + w + '</span>';
+        });
+        detailHtml += '</div></div>';
+      }
+      if(n.idioms) {
+        var idiomList = n.idioms.split('|');
+        detailHtml += '<div class="detail-section"><span class="detail-title">📚 相关成语</span>';
+        detailHtml += '<button class="speak-btn" data-speak-all="' + escHtml(n.idioms) + '" title="朗读全部成语">🔊</button>';
+        detailHtml += '<div class="detail-tags">';
+        idiomList.forEach(function(item) {
+          var parts = item.split('::');
+          detailHtml += '<span class="detail-tag">' + parts[0] + '</span>';
+        });
+        detailHtml += '</div></div>';
+      }
       document.getElementById('guessResult').innerHTML = detailHtml;
+      document.getElementById('guessResult').classList.add('compact');
+      document.querySelector('#guessMask .modal-title').style.display = 'none';
+      document.getElementById('guessHint').style.display = 'none';
       document.getElementById('guessSubmit').style.display = 'none';
       document.getElementById('guessMore').style.display = 'none';
       document.getElementById('guessInput').style.display = 'none';
       document.getElementById('attemptCount').innerText = '🎉 解锁成功！';
-      document.getElementById('guessNext').innerText = '回到图谱';
-      document.getElementById('guessNext').onclick = function() {
-        closeGuess();
-        fillPanel(currentGuessTarget);
-        setTimeout(function() { locateToRecommended(); }, 600);
+      // 强制停留 5 秒，期间不可跳过
+      var guessNextBtn = document.getElementById('guessNext');
+      var countdown = 5;
+      guessNextBtn.innerText = '请仔细看（' + countdown + '秒）';
+      guessNextBtn.disabled = true;
+      guessNextBtn.style.opacity = '0.5';
+      guessNextBtn.style.cursor = 'not-allowed';
+      var cdTimer = setInterval(function() {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(cdTimer);
+          guessNextBtn.innerText = '回到图谱（回车 ↵）';
+          guessNextBtn.disabled = false;
+          guessNextBtn.style.opacity = '';
+          guessNextBtn.style.cursor = '';
+          guessNextBtn.classList.add('active-btn');
+          guessNextBtn.classList.remove('secondary');
+          guessNextBtn.focus();
+          guessNextBtn.onclick = function() {
+            clearInterval(cdTimer);
+            maskEl2.removeEventListener('keydown', onKeyBack);
+            closeGuess();
+            fillPanel(currentGuessTarget);
+            setTimeout(function() { locateToRecommended(); }, 600);
+          };
+        } else {
+          guessNextBtn.innerText = '请仔细看（' + countdown + '秒）';
+        }
+      }, 1000);
+      // 回车回到图谱（5 秒后才生效）
+      var maskEl2 = document.getElementById('guessMask');
+      maskEl2.setAttribute('tabindex', '0');
+      maskEl2.focus();
+      var onKeyBack = function(e) {
+        if(e.key === 'Enter' && countdown <= 0) {
+          maskEl2.removeEventListener('keydown', onKeyBack);
+          guessNextBtn.click();
+        }
       };
+      maskEl2.addEventListener('keydown', onKeyBack);
 
       captureNodePositions();
       useFixedPositions = true;
@@ -602,7 +766,8 @@
       document.getElementById('attemptCount').innerText = '💡 剩余机会：' + guessAttempts + '次';
       if(guessAttempts > 0) {
         playWrongSound();
-        document.getElementById('guessResult').innerHTML = '<span class="result-error">不对哦～再想想！</span>';
+        var tips = ['再试一试，你可以的！','差一点点哦，再想想~','没关系，继续加油！'];
+        document.getElementById('guessResult').innerHTML = '<span class="result-error">' + tips[Math.floor(Math.random() * tips.length)] + '</span>';
         document.getElementById('guessInput').select();
       } else {
         // 复习模式：放大展示正确汉字
@@ -693,6 +858,12 @@
 
   function closeGuess() {
     currentGuessTarget = null;
+    document.getElementById('guessResult').classList.remove('compact');
+    document.querySelector('#guessMask .modal-title').style.display = '';
+    document.getElementById('guessHint').style.display = '';
+    var btn = document.getElementById('guessNext');
+    btn.classList.remove('active-btn');
+    btn.classList.add('secondary');
     document.getElementById('guessMask').classList.remove('show');
   }
 
@@ -739,7 +910,7 @@
   }
   function saveStats(s) { statsCache = s || statsCache || {}; localStorage.setItem(getUserKey('stats'), JSON.stringify(statsCache)); }
   function getStat(key) { var s = getStats(); return s[key] || 0; }
-  function incStat(key) { var s = getStats(); s[key] = (s[key] || 0) + 1; saveStats(s); }
+  function incStat(key, amount) { var s = getStats(); s[key] = (s[key] || 0) + (amount || 1); saveStats(s); }
 
   function recordToday() {
     var today = new Date().toDateString();
@@ -889,15 +1060,14 @@
   function updateDailyTask() {
     var today = new Date().toDateString();
     if(currentUserData.lastActiveDate !== today) {
-      currentUserData.lastActiveDate = today;
       var yesterday = new Date(Date.now()-86400000).toDateString();
-      if(currentUserData.lastActiveDate_prev === yesterday) {
+      if(currentUserData.lastActiveDate === yesterday) {
         currentUserData.streakDays = (currentUserData.streakDays||0)+1;
       } else {
         currentUserData.streakDays = 1;
       }
+      currentUserData.lastActiveDate = today;
       currentUserData.todayCount = 0;
-      currentUserData.lastActiveDate_prev = today;
     }
     var tip = document.getElementById('dailyTaskTip');
     if(tip) tip.innerText = '今日任务：已学' + (currentUserData.todayCount||0) + ' / ' + (currentUserData.dailyTarget||3) + ' 个字';
@@ -923,6 +1093,8 @@
     currentUserData.todayCount = (currentUserData.todayCount||0)+1;
     addPetExp(1);
     updateDailyTask();
+    // 延迟检查复习提醒（避免干扰当前交互）
+    setTimeout(function() { checkReviewReminder(); }, 3000);
   }
 
   // ======================== 用户档案 ========================
@@ -952,13 +1124,42 @@
   }
 
   // ======================== 辅助功能 ========================
-  function speakText(text) {
+  // ======================== 语音朗读（增强版） ========================
+  function escHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  var speakQueue = [];
+  function speakText(text, options) {
+    options = options || {};
+    var cancel = options.cancel !== false;
+    if (cancel) {
+      try { window.speechSynthesis.cancel(); } catch(e) {}
+      speakQueue = [];
+    }
+    if (!text) return;
+    speakQueue.push(text);
+    if (speakQueue.length === 1) processSpeakQueue();
+  }
+
+  function processSpeakQueue() {
+    if (speakQueue.length === 0) return;
+    var text = speakQueue.shift();
     try {
-      window.speechSynthesis.cancel();
       var utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'zh-CN'; utter.rate = 0.8;
+      utter.lang = 'zh-CN';
+      utter.rate = 0.85;
+      utter.onend = function() { processSpeakQueue(); };
+      utter.onerror = function() { processSpeakQueue(); };
       window.speechSynthesis.speak(utter);
-    } catch(e) {}
+    } catch(e) { processSpeakQueue(); }
+  }
+
+  function speakIdiom(idiomStr) {
+    var parts = idiomStr.split('::');
+    var text = parts[0];
+    if (parts[1]) text += '，意思是' + parts[1];
+    speakText(text);
   }
 
   function showFirework() {
@@ -1024,11 +1225,11 @@
     var now = ctx.currentTime;
     var osc = ctx.createOscillator();
     var gain = ctx.createGain();
-    osc.type = 'square'; osc.frequency.value = 180;
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(now); osc.stop(now + 0.2);
+     osc.type = 'sine'; osc.frequency.value = 300;
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.25);
   }
 
   function playUnlockSound() {
@@ -1173,6 +1374,379 @@
     showReviewCard();
   }
 
+  // ======================== 闯关复习系统 ========================
+  var quizState = { questions: [], currentIdx: 0, correctCount: 0, totalCount: 5, answered: false };
+
+  // 间隔重复存储
+  function getReviewSchedule() {
+    try {
+      return JSON.parse(localStorage.getItem(getUserKey('reviewSchedule')) || '{}');
+    } catch(e) { return {}; }
+  }
+  function saveReviewSchedule(s) {
+    try { localStorage.setItem(getUserKey('reviewSchedule'), JSON.stringify(s)); } catch(e) {}
+  }
+  function updateReviewRecord(charId, correct) {
+    var sched = getReviewSchedule();
+    var now = Date.now();
+    if (!sched[charId]) {
+      sched[charId] = { learnedAt: now, reviews: [], nextReview: now + 86400000, interval: 1 };
+    }
+    var r = sched[charId];
+    r.reviews.push(now);
+    if (correct) {
+      r.interval = Math.min(r.interval * 2, 30);
+    } else {
+      r.interval = 1;
+    }
+    r.nextReview = now + r.interval * 86400000;
+    saveReviewSchedule(sched);
+  }
+  function getDueReviews() {
+    var sched = getReviewSchedule();
+    var now = Date.now();
+    var due = [];
+    for (var id in sched) {
+      if (sched[id].nextReview <= now && unlocked.has(id)) due.push(id);
+    }
+    // 去重 + 限制数量
+    return due.slice(0, 20);
+  }
+  function checkReviewReminder() {
+    var due = getDueReviews();
+    if (due.length >= 3) {
+      showPetBubble('🕒 有 ' + due.length + ' 个字该复习了，点我去闯关！');
+      var petAvatar = document.getElementById('petAvatar');
+      if (petAvatar) {
+        petAvatar.style.outline = '3px solid #ff6b6b';
+        petAvatar.style.outlineOffset = '3px';
+        petAvatar.title = '点击开始复习闯关';
+        petAvatar.onclick = function(e) { e.stopPropagation(); startQuiz(); };
+        setTimeout(function() {
+          petAvatar.style.outline = '';
+          petAvatar.title = '我的小宠物';
+          petAvatar.onclick = null;
+        }, 10000);
+      }
+    }
+  }
+
+  // 四种题型生成器
+  function generatePinyinMatch(preferredPool) {
+    var pool;
+    if (preferredPool && preferredPool.length >= 4) {
+      pool = preferredPool.filter(function(id) { return nodeMap.has(id) && nodeMap.get(id).pinyin; });
+    }
+    if (!pool || pool.length < 4) pool = Array.from(learnedSet).filter(function(id) { return nodeMap.has(id) && nodeMap.get(id).pinyin; });
+    if (pool.length < 4) pool = unlockedFilter();
+    shuffle(pool);
+    var correct = pool[0];
+    var correctNode = nodeMap.get(correct);
+    var distractors = [];
+    var usedPinyin = new Set([correctNode.pinyin]);
+    for (var i = 1; i < pool.length && distractors.length < 3; i++) {
+      var p = nodeMap.get(pool[i]).pinyin;
+      if (p && !usedPinyin.has(p)) { distractors.push(p); usedPinyin.add(p); }
+    }
+    while (distractors.length < 3) { distractors.push('zhi' + distractors.length); }
+    var options = [correctNode.pinyin].concat(distractors);
+    shuffle(options);
+    return {
+      type: 'pinyin',
+      question: correctNode.name,
+      questionLabel: '选出正确拼音',
+      options: options,
+      answer: correctNode.pinyin,
+      charId: correct
+    };
+  }
+  function generateWordFill(preferredPool) {
+    var srcSet = preferredPool || learnedSet;
+    var pool = [];
+    srcSet.forEach(function(id) {
+      var n = nodeMap.get(id);
+      if (!n || !n.groupWords) return;
+      n.groupWords.split('|').forEach(function(w) {
+        if (w.indexOf(n.name) >= 0) pool.push({ charId: id, word: w, char: n.name });
+      });
+    });
+    if (pool.length < 4) { return generatePinyinMatch(); }
+    shuffle(pool);
+    var item = pool[0];
+    var blankWord = item.word.replace(item.char, '＿＿');
+    var options = [item.char];
+    var usedChars = new Set([item.char]);
+    for (var i = 1; i < pool.length && options.length < 4; i++) {
+      var ch = pool[i].char;
+      if (!usedChars.has(ch)) { options.push(ch); usedChars.add(ch); }
+    }
+    shuffle(options);
+    return {
+      type: 'wordfill',
+      question: blankWord,
+      questionLabel: '填入正确的字',
+      options: options,
+      answer: item.char,
+      charId: item.charId,
+      detail: item.word
+    };
+  }
+  function generateShapeDiscern(preferredPool) {
+    var pool = preferredPool || unlockedFilter();
+    shuffle(pool);
+    var correct = pool[0];
+    var correctNode = nodeMap.get(correct);
+    var distractors = [];
+    var parent = getParent(correct);
+    if (parent) {
+      (childrenMap.get(parent) || []).forEach(function(sib) {
+        if (sib !== correct && distractors.length < 3) distractors.push(sib);
+      });
+    }
+    while (distractors.length < 3) {
+      var r = pool[Math.floor(Math.random() * pool.length)];
+      if (r !== correct && distractors.indexOf(r) < 0) distractors.push(r);
+    }
+    var options = [correct].concat(distractors);
+    shuffle(options);
+    return {
+      type: 'shape',
+      question: correctNode.pinyin || '',
+      questionLabel: '哪个是「' + (correctNode.origin || correctNode.hints || '') + '」？',
+      options: options,
+      answer: correct,
+      charId: correct
+    };
+  }
+  function generateIdiomFill(preferredPool) {
+    var srcSet = preferredPool || learnedSet;
+    var pool = [];
+    srcSet.forEach(function(id) {
+      var n = nodeMap.get(id);
+      if (!n || !n.idioms) return;
+      n.idioms.split('|').forEach(function(idiom) {
+        var parts = idiom.split('::');
+        if (parts[0].indexOf(n.name) >= 0) pool.push({ charId: id, idiom: parts[0], char: n.name });
+      });
+    });
+    if (pool.length < 4) { return generateShapeDiscern(); }
+    shuffle(pool);
+    var item = pool[0];
+    var blankIdiom = item.idiom.replace(item.char, '＿＿');
+    var options = [item.char];
+    var usedChars = new Set([item.char]);
+    for (var i = 1; i < pool.length && options.length < 4; i++) {
+      var ch = pool[i].char;
+      if (!usedChars.has(ch)) { options.push(ch); usedChars.add(ch); }
+    }
+    shuffle(options);
+    return {
+      type: 'idiom',
+      question: blankIdiom,
+      questionLabel: '填入正确的字完成成语',
+      options: options,
+      answer: item.char,
+      charId: item.charId,
+      detail: item.idiom
+    };
+  }
+
+  function unlockedFilter() {
+    return Array.from(unlocked).filter(function(id) { return nodeMap.has(id); });
+  }
+
+  function generateQuizQuestions(count) {
+    var questions = [];
+    var generators = [generatePinyinMatch, generateWordFill, generateShapeDiscern, generateIdiomFill];
+    // 优先从到期复习字中选题
+    var due = getDueReviews();
+    var pool = due.length >= count ? due.slice(0, count) : due.concat(
+      shuffle(Array.from(learnedSet).filter(function(id) { return nodeMap.has(id) && due.indexOf(id) < 0; }))
+    );
+    for (var i = 0; i < count; i++) {
+      questions.push(generators[i % generators.length](pool));
+    }
+    return questions;
+  }
+
+  function startQuiz() {
+    quizState.questions = generateQuizQuestions(quizState.totalCount);
+    quizState.currentIdx = 0;
+    quizState.correctCount = 0;
+    document.getElementById('quizMask').classList.add('show');
+    document.getElementById('quizResult').style.display = 'none';
+    document.getElementById('quizTitle').innerText = '🎯 闯关复习';
+    showQuizQuestion();
+    playCorrectSound();
+  }
+
+  function showQuizQuestion() {
+    if (quizState.currentIdx >= quizState.questions.length) {
+      finishQuiz();
+      return;
+    }
+    quizState.answered = false;
+    var q = quizState.questions[quizState.currentIdx];
+    var idx = quizState.currentIdx + 1;
+    var total = quizState.totalCount;
+    document.getElementById('quizProgressFill').style.width = ((idx - 1) / total * 100) + '%';
+    document.getElementById('quizProgressText').innerText = idx + '/' + total;
+    document.getElementById('quizQuestion').innerHTML =
+      '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">' + q.questionLabel + '</div>' +
+      '<div class="' + (q.type === 'wordfill' || q.type === 'idiom' ? 'quiz-question small' : 'quiz-question') + '">' + q.question + '</div>';
+    var optWrap = document.getElementById('quizOptions');
+    optWrap.innerHTML = '';
+    q.options.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.className = 'quiz-option';
+      btn.innerText = opt;
+      btn.onclick = function() { submitQuizAnswer(opt, btn); };
+      optWrap.appendChild(btn);
+    });
+    document.getElementById('quizFeedback').innerHTML = '';
+    document.getElementById('quizNext').style.display = 'none';
+    document.getElementById('quizSkip').style.display = '';
+  }
+
+  function submitQuizAnswer(answer, btnEl) {
+    if (quizState.answered) return;
+    quizState.answered = true;
+    var q = quizState.questions[quizState.currentIdx];
+    var isCorrect = (answer === q.answer);
+    // 标记选项
+    var allBtns = document.querySelectorAll('#quizOptions .quiz-option');
+    allBtns.forEach(function(b) {
+      b.style.pointerEvents = 'none';
+      if (b.innerText === q.answer) b.classList.add('correct');
+      else if (b.innerText === answer && !isCorrect) b.classList.add('wrong');
+    });
+    var fb = document.getElementById('quizFeedback');
+    if (isCorrect) {
+      quizState.correctCount++;
+      fb.innerHTML = '<span class="correct-text">✅ 答对了！</span>';
+      playCorrectSound();
+      speakText('答对了！');
+      updateReviewRecord(q.charId, true);
+    } else {
+      fb.innerHTML = '<span class="wrong-text">❌ 正确答案是「' + q.answer + '」';
+      if (q.detail) fb.innerHTML += '<br/><small>' + q.detail + '</small>';
+      fb.innerHTML += '</span>';
+      playWrongSound();
+      updateReviewRecord(q.charId, false);
+    }
+    document.getElementById('quizNext').style.display = '';
+    document.getElementById('quizSkip').style.display = 'none';
+  }
+
+  function finishQuiz() {
+    var score = quizState.correctCount;
+    var total = quizState.totalCount;
+    var stars = score >= total ? '🌟🌟🌟' : score >= total * 0.6 ? '🌟🌟' : '🌟';
+    document.getElementById('quizTitle').innerText = '🎉 闯关完成';
+    document.getElementById('quizProgressFill').style.width = '100%';
+    document.getElementById('quizProgressText').innerText = total + '/' + total;
+    document.getElementById('quizQuestion').innerHTML = '';
+    document.getElementById('quizOptions').innerHTML = '';
+    document.getElementById('quizFeedback').innerHTML = '';
+    document.getElementById('quizNext').style.display = 'none';
+    document.getElementById('quizSkip').style.display = 'none';
+    var resultEl = document.getElementById('quizResult');
+    resultEl.style.display = '';
+    document.getElementById('quizScore').innerText = score + ' / ' + total;
+    document.getElementById('quizStars').innerText = stars;
+    if (score === total) { showFirework(); playUnlockSound(); }
+    addPetExp(score);
+    incStat('quizTotal');
+    incStat('quizCorrect', score);
+  }
+
+  // ======================== 笔画描红系统 ========================
+  var writeTarget = null;
+  var writeCtx = null;
+
+  function initWriteCanvas() {
+    var canvas = document.getElementById('writeCanvas');
+    if (!canvas) return;
+    writeCtx = canvas.getContext('2d');
+    drawTianGrid();
+    // 鼠标事件
+    var drawing = false;
+    canvas.onmousedown = function(e) { drawing = true; drawDot(e); };
+    canvas.onmousemove = function(e) { if (drawing) drawDot(e); };
+    canvas.onmouseup = function() { drawing = false; };
+    canvas.onmouseleave = function() { drawing = false; };
+    // 触摸事件
+    canvas.ontouchstart = function(e) { e.preventDefault(); drawing = true; drawDot(e.touches[0]); };
+    canvas.ontouchmove = function(e) { e.preventDefault(); if (drawing) drawDot(e.touches[0]); };
+    canvas.ontouchend = function() { drawing = false; };
+  }
+
+  function drawTianGrid() {
+    if (!writeCtx) return;
+    var w = 300, h = 300;
+    writeCtx.clearRect(0, 0, w, h);
+    // 外框
+    writeCtx.strokeStyle = '#333';
+    writeCtx.lineWidth = 2;
+    writeCtx.strokeRect(4, 4, w-8, h-8);
+    // 十字虚线
+    writeCtx.strokeStyle = '#e57373';
+    writeCtx.lineWidth = 1;
+    writeCtx.setLineDash([6, 4]);
+    writeCtx.beginPath();
+    writeCtx.moveTo(w/2, 4); writeCtx.lineTo(w/2, h-4);
+    writeCtx.moveTo(4, h/2); writeCtx.lineTo(w-4, h/2);
+    writeCtx.stroke();
+    // 米字虚线
+    writeCtx.strokeStyle = '#ccc';
+    writeCtx.beginPath();
+    writeCtx.moveTo(4, 4); writeCtx.lineTo(w-4, h-4);
+    writeCtx.moveTo(w-4, 4); writeCtx.lineTo(4, h-4);
+    writeCtx.stroke();
+    writeCtx.setLineDash([]);
+  }
+
+  function drawDot(e) {
+    if (!writeCtx) return;
+    var rect = document.getElementById('writeCanvas').getBoundingClientRect();
+    var scaleX = 300 / rect.width;
+    var scaleY = 300 / rect.height;
+    var x = (e.clientX - rect.left) * scaleX;
+    var y = (e.clientY - rect.top) * scaleY;
+    writeCtx.fillStyle = '#333';
+    writeCtx.beginPath();
+    writeCtx.arc(x, y, 4, 0, Math.PI * 2);
+    writeCtx.fill();
+  }
+
+  function openWrite(charId) {
+    var n = nodeMap.get(charId);
+    if (!n) return;
+    writeTarget = charId;
+    document.getElementById('writeTitle').innerText = '✍️ 写一写「' + n.name + '」';
+    document.getElementById('writeModelChar').innerText = n.name;
+    document.getElementById('writeFeedback').innerHTML = '';
+    document.getElementById('writeMask').classList.add('show');
+    setTimeout(function() {
+      initWriteCanvas();
+    }, 100);
+  }
+
+  function clearWriteCanvas() {
+    drawTianGrid();
+    document.getElementById('writeFeedback').innerHTML = '';
+  }
+
+  function finishWrite() {
+    var feedback = ['写得真棒！🌟','继续加油！💪','越来越好！✨','这个字写得真好看！','你已经很棒了！'];
+    document.getElementById('writeFeedback').innerHTML = feedback[Math.floor(Math.random() * feedback.length)];
+    playCorrectSound();
+    addPetExp(1);
+    setTimeout(function() {
+      document.getElementById('writeMask').classList.remove('show');
+    }, 1500);
+  }
+
   // ======================== UI 绑定 ========================
   function bindUI() {
     // 缩放工具（graph 类型需直接操作 zoom 属性）
@@ -1279,6 +1853,9 @@
       var ch = document.getElementById('panelChar').innerText;
       if(ch) speakText(ch);
     };
+    document.getElementById('writeBtn').onclick = function() {
+      if (currentPanelNodeId) openWrite(currentPanelNodeId);
+    };
 
     // 图表交互
     if(myChart) {
@@ -1351,6 +1928,22 @@
     document.getElementById('guessClose').onclick = closeGuess;
     document.getElementById('guessMask').onclick = function(e) { if(e.target === this) closeGuess(); };
     document.getElementById('guessInput').onkeydown = function(e) { if(e.key === 'Enter') submitGuess(); };
+    // 答对详情中的朗读按钮（事件委托）
+    document.getElementById('guessResult').addEventListener('click', function(e) {
+      var btn = e.target.closest('.speak-btn, .speak-btn-tiny');
+      if (!btn) return;
+      e.stopPropagation();
+      var sp = btn.getAttribute('data-speak');
+      var spAll = btn.getAttribute('data-speak-all');
+      var spIdiom = btn.getAttribute('data-speak-idiom');
+      if (sp) {
+        speakText(sp);
+      } else if (spAll) {
+        spAll.split('|').forEach(function(item) { speakIdiom(item); });
+      } else if (spIdiom) {
+        speakIdiom(spIdiom);
+      }
+    });
 
     document.getElementById('guessSubmit').onclick = submitGuess;
     document.getElementById('guessMore').onclick = function() {
@@ -1371,10 +1964,37 @@
       document.getElementById('starMask').classList.remove('show');
       loadReview();
     };
+    // 闯关复习入口
+    document.getElementById('startQuizBtn').onclick = function() {
+      document.getElementById('starMask').classList.remove('show');
+      startQuiz();
+    };
     document.getElementById('reviewClose').onclick = function() { document.getElementById('reviewMask').classList.remove('show'); };
     document.getElementById('reviewKnow').onclick = removeMistake;
     document.getElementById('reviewSkip').onclick = skipReview;
     document.getElementById('reviewMask').onclick = function(e) { if(e.target === this) this.classList.remove('show'); };
+    // 闯关复习事件
+    document.getElementById('quizClose').onclick = function() { document.getElementById('quizMask').classList.remove('show'); };
+    document.getElementById('quizMask').onclick = function(e) { if(e.target === this) this.classList.remove('show'); };
+    document.getElementById('quizNext').onclick = function() {
+      quizState.currentIdx++;
+      showQuizQuestion();
+    };
+    document.getElementById('quizSkip').onclick = function() {
+      updateReviewRecord(quizState.questions[quizState.currentIdx].charId, false);
+      quizState.currentIdx++;
+      showQuizQuestion();
+    };
+    document.getElementById('quizFinish').onclick = function() {
+      document.getElementById('quizMask').classList.remove('show');
+      updateMyCenter();
+      updateDailyTask();
+    };
+    // 笔画描红事件
+    document.getElementById('writeClose').onclick = function() { document.getElementById('writeMask').classList.remove('show'); };
+    document.getElementById('writeMask').onclick = function(e) { if(e.target === this) this.classList.remove('show'); };
+    document.getElementById('writeClear').onclick = clearWriteCanvas;
+    document.getElementById('writeDone').onclick = finishWrite;
     document.getElementById('parentClose').onclick = function() { parentMask.classList.remove('show'); };
 
     // ======================== 用户切换 ========================
@@ -1464,6 +2084,18 @@
     };
     eyeSwitch.onclick = toggleEye;
     eyeBtn.onclick = toggleEye;
+    // 主题皮肤切换
+    var themeSel = document.getElementById('themeSelect');
+    if (themeSel) {
+      var curTheme = localStorage.getItem('hanzi_theme') || 'default';
+      themeSel.value = curTheme;
+      themeSel.onchange = function() {
+        var val = this.value;
+        document.documentElement.classList.remove('theme-forest', 'theme-ocean', 'theme-space');
+        if (val && val !== 'default') document.documentElement.classList.add('theme-' + val);
+        localStorage.setItem('hanzi_theme', val);
+      };
+    }
 
     // 遮罩点击关闭
     document.querySelectorAll('.modal-mask').forEach(function(mask) {
@@ -1485,7 +2117,13 @@
         return;
       }
       initDataStructures();
+      initZones();
       loadUserData();
+      // 恢复主题皮肤
+      var savedTheme = localStorage.getItem('hanzi_theme') || 'default';
+      if (savedTheme && savedTheme !== 'default') {
+        document.documentElement.classList.add('theme-' + savedTheme);
+      }
       updateUserDisplay();
       // 初始化里程碑状态
       for(var mi = milestones.length-1; mi >= 0; mi--) {

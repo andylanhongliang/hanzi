@@ -8,11 +8,18 @@
     "preview": "npx http-server -c-1 .",
     "deploy:gh": "echo 'Use gh-pages or GitHub Actions to deploy'"
   },
-  "keywords": ["hanzi", "chinese", "education"],
+  "keywords": [
+    "hanzi",
+    "chinese",
+    "education"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/andylanhongliang/hanzi.git"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "miniprogram-ci": "^2.1.31"
+  }
 }
