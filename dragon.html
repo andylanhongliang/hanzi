@@ -439,8 +439,8 @@ body {
 
 <script src="supabase-client.js"></script>
 <script src="data.js"></script>
+<script src="words.js"></script>
 <script>
-var wordDictionary = {};
 var gameTrail = [];
 var currentWord = '';
 
@@ -496,7 +496,7 @@ function buildDictionary() {
     if (node.groupWords) {
       node.groupWords.split('|').forEach(function(word) {
         word = word.trim();
-        if (word.length >= 2) {
+        if (word.length >= 2 && !wordDictionary[word]) {
           wordDictionary[word] = { type: 'word', char: node.name };
         }
       });
@@ -505,7 +505,7 @@ function buildDictionary() {
       node.idioms.split('|').forEach(function(item) {
         var parts = item.split('::');
         var word = parts[0].trim();
-        if (word.length >= 2) {
+        if (word.length >= 2 && !wordDictionary[word]) {
           wordDictionary[word] = { type: 'idiom', char: node.name };
         }
       });
@@ -526,6 +526,8 @@ function buildDictionary() {
     };
     tagContainer.appendChild(tag);
   });
+  
+  console.log('词库加载完成:', Object.keys(wordDictionary).length, '个词语');
 }
 
 function showStartScreen() {
@@ -568,23 +570,38 @@ function getWordType(word) {
 async function checkWordOnline(word) {
   if(!word || word.length < 2) return false;
   
-  try {
-    var response = await fetch(`https://glosbe.com/gapi/translate?from=zh&dest=zh&format=json&phrase=${encodeURIComponent(word)}`);
-    var data = await response.json();
-    
-    if(data && data.tuc && data.tuc.length > 0) {
-      for(var i = 0; i < data.tuc.length; i++) {
-        if(data.tuc[i].phrase && data.tuc[i].phrase.text === word) {
-          return true;
+  var apis = [
+    function() {
+      return fetch(`https://glosbe.com/gapi/translate?from=zh&dest=zh&format=json&phrase=${encodeURIComponent(word)}`);
+    },
+    function() {
+      return fetch(`https://api.pinyin.sogou.com/parse.php?type=2&key=${encodeURIComponent(word)}&ie=utf-8`);
+    }
+  ];
+  
+  for(var i = 0; i < apis.length; i++) {
+    try {
+      var response = await apis[i]();
+      var data = await response.json();
+      
+      if(data && data.tuc && data.tuc.length > 0) {
+        for(var j = 0; j < data.tuc.length; j++) {
+          if(data.tuc[j].phrase && data.tuc[j].phrase.text === word) {
+            return true;
+          }
         }
       }
+      
+      if(data && data.examples && data.examples.length > 0) {
+        return true;
+      }
+      
+      if(data && data.result && data.result.length > 0) {
+        return true;
+      }
+    } catch(e) {
+      console.warn('API ' + (i+1) + ' 查询失败:', e);
     }
-    
-    if(data && data.examples && data.examples.length > 0) {
-      return true;
-    }
-  } catch(e) {
-    console.warn('在线查询失败:', e);
   }
   
   return false;
