@@ -376,6 +376,150 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.mode-selection {
+  margin-top: 20px;
+}
+.mode-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.mode-btn {
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #fff;
+  color: var(--text-primary);
+}
+.mode-btn:hover, .mode-btn.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(102,126,234,0.05);
+}
+.difficulty-selection {
+  margin-top: 16px;
+  display: none;
+}
+.difficulty-selection.show {
+  display: block;
+}
+.difficulty-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.difficulty-btns {
+  display: flex;
+  gap: 8px;
+}
+.difficulty-btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #fff;
+}
+.difficulty-btn:hover, .difficulty-btn.active {
+  border-color: var(--secondary);
+  color: #fff;
+  background: var(--secondary);
+}
+.turn-indicator {
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-weight: bold;
+  font-size: 15px;
+}
+.turn-indicator.player-turn {
+  background: rgba(102,126,234,0.1);
+  color: var(--primary);
+}
+.turn-indicator.ai-turn {
+  background: rgba(245,166,35,0.1);
+  color: var(--secondary);
+}
+.ai-thinking {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+  color: var(--secondary);
+  font-weight: bold;
+}
+.ai-thinking.show {
+  display: block;
+}
+.ai-thinking-dots span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+  margin: 0 4px;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.ai-thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+.ai-thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+.game-over-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+.game-over-overlay.show {
+  display: flex;
+}
+.game-over-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  animation: popIn 0.3s ease;
+}
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.game-over-card h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.game-over-card p {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.game-over-card .trail-count {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 24px;
+}
+.game-over-card .btn {
+  max-width: 200px;
+  margin: 0 auto;
+}
+
 </style>
 </head>
 <body>
@@ -400,6 +544,21 @@ body {
         <div class="suggestions-label">试试这些：</div>
         <div class="suggestion-tags" id="suggestionTags"></div>
       </div>
+      <div class="mode-selection">
+        <div class="suggestions-label">选择模式</div>
+        <div class="mode-btns">
+          <button class="mode-btn active" onclick="selectMode('solo')" id="modeSolo">📖 单人练习</button>
+          <button class="mode-btn" onclick="selectMode('ai')" id="modeAI">🤖 AI对战</button>
+        </div>
+      </div>
+      <div class="difficulty-selection" id="difficultySelection">
+        <div class="difficulty-label">选择难度</div>
+        <div class="difficulty-btns">
+          <button class="difficulty-btn" onclick="selectDifficulty('easy')" id="diffEasy">😊 简单</button>
+          <button class="difficulty-btn active" onclick="selectDifficulty('medium')" id="diffMedium">🤔 普通</button>
+          <button class="difficulty-btn" onclick="selectDifficulty('hard')" id="diffHard">😈 困难</button>
+        </div>
+      </div>
     </div>
     
     <div id="gameScreen" style="display:none;">
@@ -409,9 +568,13 @@ body {
         <div class="next-char">接 <span id="nextChar"></span></div>
       </div>
       
+      <div class="turn-indicator player-turn" id="turnIndicator">🎮 你的回合</div>
       <div class="result" id="resultMessage"></div>
-      
-      <div class="input-area">
+      <div class="ai-thinking" id="aiThinking">
+        <div>🤖 AI思考中</div>
+        <div class="ai-thinking-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="input-area" id="inputArea">
         <div class="input-label">请输入以 "<span id="inputHint"></span>" 开头的词语或成语</div>
         <input type="text" id="wordInput" class="word-input" placeholder="输入词语..." maxlength="8">
       </div>
@@ -437,9 +600,786 @@ body {
   </div>
 </div>
 
-<script src="supabase-client.js"></script>
-<script src="data.js"></script>
-<script src="words.js"></script>
+  <div class="game-over-overlay" id="gameOverOverlay">
+    <div class="game-over-card">
+      <h2 id="gameOverTitle">🎉 你赢了！</h2>
+      <p id="gameOverMsg">AI想不出词了！</p>
+      <div class="trail-count" id="gameOverTrailCount"></div>
+      <button class="btn btn-primary" onclick="backToStart()">🔄 再来一局</button>
+    </div>
+  </div>
+
+<script src="supabase-client.js">
+
+// ===== AI 对战模式 =====
+var gameMode = 'solo';
+var aiDifficulty = 'medium';
+var isPlayerTurn = true;
+
+function selectMode(mode) {
+  gameMode = mode;
+  document.getElementById('modeSolo').classList.toggle('active', mode === 'solo');
+  document.getElementById('modeAI').classList.toggle('active', mode === 'ai');
+  document.getElementById('difficultySelection').classList.toggle('show', mode === 'ai');
+}
+
+function selectDifficulty(diff) {
+  aiDifficulty = diff;
+  document.getElementById('diffEasy').classList.toggle('active', diff === 'easy');
+  document.getElementById('diffMedium').classList.toggle('active', diff === 'medium');
+  document.getElementById('diffHard').classList.toggle('active', diff === 'hard');
+}
+
+function getUsedWordSet() {
+  var s = {};
+  gameTrail.forEach(function(item) { s[item.word] = true; });
+  return s;
+}
+
+function aiPickWord(lastChar) {
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return null;
+  
+  var words = wordList.split(' ');
+  var usedSet = getUsedWordSet();
+  var available = words.filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  
+  if (available.length === 0) return null;
+  
+  if (aiDifficulty === 'easy') {
+    // 简单：随机选，偏好短词（给玩家更多机会）
+    var shortWords = available.filter(function(w) { return w.length <= 3; });
+    var pool = shortWords.length > 0 ? shortWords : available;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  
+  if (aiDifficulty === 'medium') {
+    // 普通：偏好成语（4字），偶尔随机
+    var idioms = available.filter(function(w) { return w.length === 4; });
+    if (idioms.length > 0 && Math.random() > 0.3) {
+      return idioms[Math.floor(Math.random() * idioms.length)];
+    }
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  
+  // 困难：选"堵路词"——末字对应词最少的，让玩家难接
+  var bestWord = null;
+  var bestScore = Infinity;
+  var sampleSize = Math.min(available.length, 60);
+  var sampled = [];
+  var tempAvail = available.slice();
+  for (var i = 0; i < sampleSize; i++) {
+    var idx = Math.floor(Math.random() * tempAvail.length);
+    sampled.push(tempAvail.splice(idx, 1)[0]);
+  }
+  
+  for (var i = 0; i < sampled.length; i++) {
+    var w = sampled[i];
+    var endChar = w[w.length - 1];
+    var endWords = byFirstChar[endChar];
+    var count = endWords ? endWords.split(' ').length : 0;
+    var idiomBonus = w.length === 4 ? -5 : 0;
+    var score = count + idiomBonus;
+    if (score < bestScore) {
+      bestScore = score;
+      bestWord = w;
+    }
+  }
+  
+  return bestWord || available[Math.floor(Math.random() * available.length)];
+}
+
+function setTurnUI(isPlayer) {
+  isPlayerTurn = isPlayer;
+  var indicator = document.getElementById('turnIndicator');
+  var inputArea = document.getElementById('inputArea');
+  var submitBtn = document.querySelector('.btn-primary');
+  
+  if (isPlayer) {
+    indicator.className = 'turn-indicator player-turn';
+    indicator.innerHTML = '🎮 你的回合';
+    inputArea.style.display = 'block';
+    if (submitBtn) submitBtn.style.display = 'block';
+  } else {
+    indicator.className = 'turn-indicator ai-turn';
+    indicator.innerHTML = '🤖 AI的回合';
+    inputArea.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+  }
+}
+
+function playerCanPlay() {
+  var lastChar = currentWord[currentWord.length - 1];
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return false;
+  var usedSet = getUsedWordSet();
+  var available = wordList.split(' ').filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  return available.length > 0;
+}
+
+function aiTurn() {
+  if (gameMode !== 'ai') return;
+  
+  setTurnUI(false);
+  document.getElementById('aiThinking').classList.add('show');
+  document.getElementById('resultMessage').style.display = 'none';
+  
+  var delay = 800 + Math.random() * 1200;
+  setTimeout(function() {
+    document.getElementById('aiThinking').classList.remove('show');
+    
+    var lastChar = currentWord[currentWord.length - 1];
+    var aiWord = aiPickWord(lastChar);
+    
+    if (!aiWord) {
+      showGameOver(true);
+      return;
+    }
+    
+    currentWord = aiWord;
+    gameTrail.push({ word: aiWord, type: getWordType(aiWord) });
+    
+    showResult('🤖 AI出词：' + aiWord, 'info');
+    syncDragonGameToCloud();
+    
+    if (!playerCanPlay()) {
+      setTimeout(function() {
+        showGameOver(false);
+      }, 1500);
+    } else {
+      setTimeout(function() {
+        document.getElementById('resultMessage').style.display = 'none';
+        setTurnUI(true);
+        updateUI();
+      }, 1500);
+    }
+  }, delay);
+}
+
+function showGameOver(playerWins) {
+  var overlay = document.getElementById('gameOverOverlay');
+  var title = document.getElementById('gameOverTitle');
+  var msg = document.getElementById('gameOverMsg');
+  var trailCount = document.getElementById('gameOverTrailCount');
+  
+  if (playerWins) {
+    title.innerHTML = '🎉 你赢了！';
+    msg.textContent = 'AI想不出词了！你真厉害！';
+  } else {
+    title.innerHTML = '😈 AI获胜！';
+    msg.textContent = '你无词可接了，再接再厉！';
+  }
+  trailCount.textContent = '本次接龙共 ' + gameTrail.length + ' 个词';
+  overlay.classList.add('show');
+}
+
+// ===== 重写 submitWord 支持 AI 模式 =====
+var _origSubmitWord = submitWord;
+submitWord = async function() {
+  var input = document.getElementById('wordInput').value.trim();
+  var inputField = document.getElementById('wordInput');
+  
+  if (!input) {
+    showResult('请输入一个词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (input.length < 2) {
+    showResult('词语至少需要2个字！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  var lastChar = currentWord[currentWord.length - 1];
+  var firstChar = input[0];
+  
+  if (firstChar !== lastChar) {
+    showResult('错误！上一个词以"' + lastChar + '"结尾，请输入以"' + lastChar + '"开头的词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (gameTrail.some(function(item) { return item.word === input; })) {
+    showResult('这个词已经接过去了！换一个吧！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (!wordDictionary[input]) {
+    showResult('🔍 正在验证词语...', 'info');
+    var isValid = await checkWordOnline(input);
+    if (!isValid) {
+      showResult('这个词语不在词库中！请输入正确的词语或成语！', 'error');
+      inputField.classList.add('error');
+      setTimeout(function() { inputField.classList.remove('error'); }, 500);
+      return;
+    }
+    wordDictionary[input] = { char: input[0], type: 'online' };
+  }
+  
+  showResult('接龙成功！🎉', 'success');
+  currentWord = input;
+  gameTrail.push({ word: input, type: getWordType(input) });
+  syncDragonGameToCloud();
+  
+  if (gameMode === 'ai') {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      renderTrail();
+      aiTurn();
+    }, 1000);
+  } else {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      updateUI();
+    }, 1500);
+  }
+};
+
+// ===== 重写 backToStart 支持 AI 模式重置 =====
+var _origBackToStart = backToStart;
+backToStart = function() {
+  gameMode = 'solo';
+  aiDifficulty = 'medium';
+  isPlayerTurn = true;
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  document.getElementById('inputArea').style.display = 'block';
+  _origBackToStart();
+};
+
+// ===== 重写 startGame 支持 AI 模式 =====
+var _origStartGame = startGame;
+startGame = function(word) {
+  _origStartGame(word);
+  if (gameMode === 'ai') {
+    setTurnUI(true);
+  }
+};
+
+</script>
+<script src="data.js">
+
+// ===== AI 对战模式 =====
+var gameMode = 'solo';
+var aiDifficulty = 'medium';
+var isPlayerTurn = true;
+
+function selectMode(mode) {
+  gameMode = mode;
+  document.getElementById('modeSolo').classList.toggle('active', mode === 'solo');
+  document.getElementById('modeAI').classList.toggle('active', mode === 'ai');
+  document.getElementById('difficultySelection').classList.toggle('show', mode === 'ai');
+}
+
+function selectDifficulty(diff) {
+  aiDifficulty = diff;
+  document.getElementById('diffEasy').classList.toggle('active', diff === 'easy');
+  document.getElementById('diffMedium').classList.toggle('active', diff === 'medium');
+  document.getElementById('diffHard').classList.toggle('active', diff === 'hard');
+}
+
+function getUsedWordSet() {
+  var s = {};
+  gameTrail.forEach(function(item) { s[item.word] = true; });
+  return s;
+}
+
+function aiPickWord(lastChar) {
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return null;
+  
+  var words = wordList.split(' ');
+  var usedSet = getUsedWordSet();
+  var available = words.filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  
+  if (available.length === 0) return null;
+  
+  if (aiDifficulty === 'easy') {
+    // 简单：随机选，偏好短词（给玩家更多机会）
+    var shortWords = available.filter(function(w) { return w.length <= 3; });
+    var pool = shortWords.length > 0 ? shortWords : available;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  
+  if (aiDifficulty === 'medium') {
+    // 普通：偏好成语（4字），偶尔随机
+    var idioms = available.filter(function(w) { return w.length === 4; });
+    if (idioms.length > 0 && Math.random() > 0.3) {
+      return idioms[Math.floor(Math.random() * idioms.length)];
+    }
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  
+  // 困难：选"堵路词"——末字对应词最少的，让玩家难接
+  var bestWord = null;
+  var bestScore = Infinity;
+  var sampleSize = Math.min(available.length, 60);
+  var sampled = [];
+  var tempAvail = available.slice();
+  for (var i = 0; i < sampleSize; i++) {
+    var idx = Math.floor(Math.random() * tempAvail.length);
+    sampled.push(tempAvail.splice(idx, 1)[0]);
+  }
+  
+  for (var i = 0; i < sampled.length; i++) {
+    var w = sampled[i];
+    var endChar = w[w.length - 1];
+    var endWords = byFirstChar[endChar];
+    var count = endWords ? endWords.split(' ').length : 0;
+    var idiomBonus = w.length === 4 ? -5 : 0;
+    var score = count + idiomBonus;
+    if (score < bestScore) {
+      bestScore = score;
+      bestWord = w;
+    }
+  }
+  
+  return bestWord || available[Math.floor(Math.random() * available.length)];
+}
+
+function setTurnUI(isPlayer) {
+  isPlayerTurn = isPlayer;
+  var indicator = document.getElementById('turnIndicator');
+  var inputArea = document.getElementById('inputArea');
+  var submitBtn = document.querySelector('.btn-primary');
+  
+  if (isPlayer) {
+    indicator.className = 'turn-indicator player-turn';
+    indicator.innerHTML = '🎮 你的回合';
+    inputArea.style.display = 'block';
+    if (submitBtn) submitBtn.style.display = 'block';
+  } else {
+    indicator.className = 'turn-indicator ai-turn';
+    indicator.innerHTML = '🤖 AI的回合';
+    inputArea.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+  }
+}
+
+function playerCanPlay() {
+  var lastChar = currentWord[currentWord.length - 1];
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return false;
+  var usedSet = getUsedWordSet();
+  var available = wordList.split(' ').filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  return available.length > 0;
+}
+
+function aiTurn() {
+  if (gameMode !== 'ai') return;
+  
+  setTurnUI(false);
+  document.getElementById('aiThinking').classList.add('show');
+  document.getElementById('resultMessage').style.display = 'none';
+  
+  var delay = 800 + Math.random() * 1200;
+  setTimeout(function() {
+    document.getElementById('aiThinking').classList.remove('show');
+    
+    var lastChar = currentWord[currentWord.length - 1];
+    var aiWord = aiPickWord(lastChar);
+    
+    if (!aiWord) {
+      showGameOver(true);
+      return;
+    }
+    
+    currentWord = aiWord;
+    gameTrail.push({ word: aiWord, type: getWordType(aiWord) });
+    
+    showResult('🤖 AI出词：' + aiWord, 'info');
+    syncDragonGameToCloud();
+    
+    if (!playerCanPlay()) {
+      setTimeout(function() {
+        showGameOver(false);
+      }, 1500);
+    } else {
+      setTimeout(function() {
+        document.getElementById('resultMessage').style.display = 'none';
+        setTurnUI(true);
+        updateUI();
+      }, 1500);
+    }
+  }, delay);
+}
+
+function showGameOver(playerWins) {
+  var overlay = document.getElementById('gameOverOverlay');
+  var title = document.getElementById('gameOverTitle');
+  var msg = document.getElementById('gameOverMsg');
+  var trailCount = document.getElementById('gameOverTrailCount');
+  
+  if (playerWins) {
+    title.innerHTML = '🎉 你赢了！';
+    msg.textContent = 'AI想不出词了！你真厉害！';
+  } else {
+    title.innerHTML = '😈 AI获胜！';
+    msg.textContent = '你无词可接了，再接再厉！';
+  }
+  trailCount.textContent = '本次接龙共 ' + gameTrail.length + ' 个词';
+  overlay.classList.add('show');
+}
+
+// ===== 重写 submitWord 支持 AI 模式 =====
+var _origSubmitWord = submitWord;
+submitWord = async function() {
+  var input = document.getElementById('wordInput').value.trim();
+  var inputField = document.getElementById('wordInput');
+  
+  if (!input) {
+    showResult('请输入一个词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (input.length < 2) {
+    showResult('词语至少需要2个字！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  var lastChar = currentWord[currentWord.length - 1];
+  var firstChar = input[0];
+  
+  if (firstChar !== lastChar) {
+    showResult('错误！上一个词以"' + lastChar + '"结尾，请输入以"' + lastChar + '"开头的词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (gameTrail.some(function(item) { return item.word === input; })) {
+    showResult('这个词已经接过去了！换一个吧！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (!wordDictionary[input]) {
+    showResult('🔍 正在验证词语...', 'info');
+    var isValid = await checkWordOnline(input);
+    if (!isValid) {
+      showResult('这个词语不在词库中！请输入正确的词语或成语！', 'error');
+      inputField.classList.add('error');
+      setTimeout(function() { inputField.classList.remove('error'); }, 500);
+      return;
+    }
+    wordDictionary[input] = { char: input[0], type: 'online' };
+  }
+  
+  showResult('接龙成功！🎉', 'success');
+  currentWord = input;
+  gameTrail.push({ word: input, type: getWordType(input) });
+  syncDragonGameToCloud();
+  
+  if (gameMode === 'ai') {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      renderTrail();
+      aiTurn();
+    }, 1000);
+  } else {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      updateUI();
+    }, 1500);
+  }
+};
+
+// ===== 重写 backToStart 支持 AI 模式重置 =====
+var _origBackToStart = backToStart;
+backToStart = function() {
+  gameMode = 'solo';
+  aiDifficulty = 'medium';
+  isPlayerTurn = true;
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  document.getElementById('inputArea').style.display = 'block';
+  _origBackToStart();
+};
+
+// ===== 重写 startGame 支持 AI 模式 =====
+var _origStartGame = startGame;
+startGame = function(word) {
+  _origStartGame(word);
+  if (gameMode === 'ai') {
+    setTurnUI(true);
+  }
+};
+
+</script>
+<script src="words.js">
+
+// ===== AI 对战模式 =====
+var gameMode = 'solo';
+var aiDifficulty = 'medium';
+var isPlayerTurn = true;
+
+function selectMode(mode) {
+  gameMode = mode;
+  document.getElementById('modeSolo').classList.toggle('active', mode === 'solo');
+  document.getElementById('modeAI').classList.toggle('active', mode === 'ai');
+  document.getElementById('difficultySelection').classList.toggle('show', mode === 'ai');
+}
+
+function selectDifficulty(diff) {
+  aiDifficulty = diff;
+  document.getElementById('diffEasy').classList.toggle('active', diff === 'easy');
+  document.getElementById('diffMedium').classList.toggle('active', diff === 'medium');
+  document.getElementById('diffHard').classList.toggle('active', diff === 'hard');
+}
+
+function getUsedWordSet() {
+  var s = {};
+  gameTrail.forEach(function(item) { s[item.word] = true; });
+  return s;
+}
+
+function aiPickWord(lastChar) {
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return null;
+  
+  var words = wordList.split(' ');
+  var usedSet = getUsedWordSet();
+  var available = words.filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  
+  if (available.length === 0) return null;
+  
+  if (aiDifficulty === 'easy') {
+    // 简单：随机选，偏好短词（给玩家更多机会）
+    var shortWords = available.filter(function(w) { return w.length <= 3; });
+    var pool = shortWords.length > 0 ? shortWords : available;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  
+  if (aiDifficulty === 'medium') {
+    // 普通：偏好成语（4字），偶尔随机
+    var idioms = available.filter(function(w) { return w.length === 4; });
+    if (idioms.length > 0 && Math.random() > 0.3) {
+      return idioms[Math.floor(Math.random() * idioms.length)];
+    }
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  
+  // 困难：选"堵路词"——末字对应词最少的，让玩家难接
+  var bestWord = null;
+  var bestScore = Infinity;
+  var sampleSize = Math.min(available.length, 60);
+  var sampled = [];
+  var tempAvail = available.slice();
+  for (var i = 0; i < sampleSize; i++) {
+    var idx = Math.floor(Math.random() * tempAvail.length);
+    sampled.push(tempAvail.splice(idx, 1)[0]);
+  }
+  
+  for (var i = 0; i < sampled.length; i++) {
+    var w = sampled[i];
+    var endChar = w[w.length - 1];
+    var endWords = byFirstChar[endChar];
+    var count = endWords ? endWords.split(' ').length : 0;
+    var idiomBonus = w.length === 4 ? -5 : 0;
+    var score = count + idiomBonus;
+    if (score < bestScore) {
+      bestScore = score;
+      bestWord = w;
+    }
+  }
+  
+  return bestWord || available[Math.floor(Math.random() * available.length)];
+}
+
+function setTurnUI(isPlayer) {
+  isPlayerTurn = isPlayer;
+  var indicator = document.getElementById('turnIndicator');
+  var inputArea = document.getElementById('inputArea');
+  var submitBtn = document.querySelector('.btn-primary');
+  
+  if (isPlayer) {
+    indicator.className = 'turn-indicator player-turn';
+    indicator.innerHTML = '🎮 你的回合';
+    inputArea.style.display = 'block';
+    if (submitBtn) submitBtn.style.display = 'block';
+  } else {
+    indicator.className = 'turn-indicator ai-turn';
+    indicator.innerHTML = '🤖 AI的回合';
+    inputArea.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+  }
+}
+
+function playerCanPlay() {
+  var lastChar = currentWord[currentWord.length - 1];
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return false;
+  var usedSet = getUsedWordSet();
+  var available = wordList.split(' ').filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  return available.length > 0;
+}
+
+function aiTurn() {
+  if (gameMode !== 'ai') return;
+  
+  setTurnUI(false);
+  document.getElementById('aiThinking').classList.add('show');
+  document.getElementById('resultMessage').style.display = 'none';
+  
+  var delay = 800 + Math.random() * 1200;
+  setTimeout(function() {
+    document.getElementById('aiThinking').classList.remove('show');
+    
+    var lastChar = currentWord[currentWord.length - 1];
+    var aiWord = aiPickWord(lastChar);
+    
+    if (!aiWord) {
+      showGameOver(true);
+      return;
+    }
+    
+    currentWord = aiWord;
+    gameTrail.push({ word: aiWord, type: getWordType(aiWord) });
+    
+    showResult('🤖 AI出词：' + aiWord, 'info');
+    syncDragonGameToCloud();
+    
+    if (!playerCanPlay()) {
+      setTimeout(function() {
+        showGameOver(false);
+      }, 1500);
+    } else {
+      setTimeout(function() {
+        document.getElementById('resultMessage').style.display = 'none';
+        setTurnUI(true);
+        updateUI();
+      }, 1500);
+    }
+  }, delay);
+}
+
+function showGameOver(playerWins) {
+  var overlay = document.getElementById('gameOverOverlay');
+  var title = document.getElementById('gameOverTitle');
+  var msg = document.getElementById('gameOverMsg');
+  var trailCount = document.getElementById('gameOverTrailCount');
+  
+  if (playerWins) {
+    title.innerHTML = '🎉 你赢了！';
+    msg.textContent = 'AI想不出词了！你真厉害！';
+  } else {
+    title.innerHTML = '😈 AI获胜！';
+    msg.textContent = '你无词可接了，再接再厉！';
+  }
+  trailCount.textContent = '本次接龙共 ' + gameTrail.length + ' 个词';
+  overlay.classList.add('show');
+}
+
+// ===== 重写 submitWord 支持 AI 模式 =====
+var _origSubmitWord = submitWord;
+submitWord = async function() {
+  var input = document.getElementById('wordInput').value.trim();
+  var inputField = document.getElementById('wordInput');
+  
+  if (!input) {
+    showResult('请输入一个词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (input.length < 2) {
+    showResult('词语至少需要2个字！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  var lastChar = currentWord[currentWord.length - 1];
+  var firstChar = input[0];
+  
+  if (firstChar !== lastChar) {
+    showResult('错误！上一个词以"' + lastChar + '"结尾，请输入以"' + lastChar + '"开头的词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (gameTrail.some(function(item) { return item.word === input; })) {
+    showResult('这个词已经接过去了！换一个吧！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (!wordDictionary[input]) {
+    showResult('🔍 正在验证词语...', 'info');
+    var isValid = await checkWordOnline(input);
+    if (!isValid) {
+      showResult('这个词语不在词库中！请输入正确的词语或成语！', 'error');
+      inputField.classList.add('error');
+      setTimeout(function() { inputField.classList.remove('error'); }, 500);
+      return;
+    }
+    wordDictionary[input] = { char: input[0], type: 'online' };
+  }
+  
+  showResult('接龙成功！🎉', 'success');
+  currentWord = input;
+  gameTrail.push({ word: input, type: getWordType(input) });
+  syncDragonGameToCloud();
+  
+  if (gameMode === 'ai') {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      renderTrail();
+      aiTurn();
+    }, 1000);
+  } else {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      updateUI();
+    }, 1500);
+  }
+};
+
+// ===== 重写 backToStart 支持 AI 模式重置 =====
+var _origBackToStart = backToStart;
+backToStart = function() {
+  gameMode = 'solo';
+  aiDifficulty = 'medium';
+  isPlayerTurn = true;
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  document.getElementById('inputArea').style.display = 'block';
+  _origBackToStart();
+};
+
+// ===== 重写 startGame 支持 AI 模式 =====
+var _origStartGame = startGame;
+startGame = function(word) {
+  _origStartGame(word);
+  if (gameMode === 'ai') {
+    setTurnUI(true);
+  }
+};
+
+</script>
 <script>
 var gameTrail = [];
 var currentWord = '';
@@ -492,6 +1432,17 @@ async function loadGameFromCloud(gameCode) {
 }
 
 function buildDictionary() {
+  if (typeof byFirstChar === 'object') {
+    for (var char in byFirstChar) {
+      var words = byFirstChar[char].split(' ');
+      words.forEach(function(word) {
+        if (word.length >= 2) {
+          wordDictionary[word] = { type: 'word', char: char };
+        }
+      });
+    }
+  }
+  
   ALL_NODES.forEach(function(node) {
     if (node.groupWords) {
       node.groupWords.split('|').forEach(function(word) {
@@ -765,6 +1716,262 @@ function backToStart() {
 }
 
 window.onload = init;
+
+
+// ===== AI 对战模式 =====
+var gameMode = 'solo';
+var aiDifficulty = 'medium';
+var isPlayerTurn = true;
+
+function selectMode(mode) {
+  gameMode = mode;
+  document.getElementById('modeSolo').classList.toggle('active', mode === 'solo');
+  document.getElementById('modeAI').classList.toggle('active', mode === 'ai');
+  document.getElementById('difficultySelection').classList.toggle('show', mode === 'ai');
+}
+
+function selectDifficulty(diff) {
+  aiDifficulty = diff;
+  document.getElementById('diffEasy').classList.toggle('active', diff === 'easy');
+  document.getElementById('diffMedium').classList.toggle('active', diff === 'medium');
+  document.getElementById('diffHard').classList.toggle('active', diff === 'hard');
+}
+
+function getUsedWordSet() {
+  var s = {};
+  gameTrail.forEach(function(item) { s[item.word] = true; });
+  return s;
+}
+
+function aiPickWord(lastChar) {
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return null;
+  
+  var words = wordList.split(' ');
+  var usedSet = getUsedWordSet();
+  var available = words.filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  
+  if (available.length === 0) return null;
+  
+  if (aiDifficulty === 'easy') {
+    // 简单：随机选，偏好短词（给玩家更多机会）
+    var shortWords = available.filter(function(w) { return w.length <= 3; });
+    var pool = shortWords.length > 0 ? shortWords : available;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  
+  if (aiDifficulty === 'medium') {
+    // 普通：偏好成语（4字），偶尔随机
+    var idioms = available.filter(function(w) { return w.length === 4; });
+    if (idioms.length > 0 && Math.random() > 0.3) {
+      return idioms[Math.floor(Math.random() * idioms.length)];
+    }
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  
+  // 困难：选"堵路词"——末字对应词最少的，让玩家难接
+  var bestWord = null;
+  var bestScore = Infinity;
+  var sampleSize = Math.min(available.length, 60);
+  var sampled = [];
+  var tempAvail = available.slice();
+  for (var i = 0; i < sampleSize; i++) {
+    var idx = Math.floor(Math.random() * tempAvail.length);
+    sampled.push(tempAvail.splice(idx, 1)[0]);
+  }
+  
+  for (var i = 0; i < sampled.length; i++) {
+    var w = sampled[i];
+    var endChar = w[w.length - 1];
+    var endWords = byFirstChar[endChar];
+    var count = endWords ? endWords.split(' ').length : 0;
+    var idiomBonus = w.length === 4 ? -5 : 0;
+    var score = count + idiomBonus;
+    if (score < bestScore) {
+      bestScore = score;
+      bestWord = w;
+    }
+  }
+  
+  return bestWord || available[Math.floor(Math.random() * available.length)];
+}
+
+function setTurnUI(isPlayer) {
+  isPlayerTurn = isPlayer;
+  var indicator = document.getElementById('turnIndicator');
+  var inputArea = document.getElementById('inputArea');
+  var submitBtn = document.querySelector('.btn-primary');
+  
+  if (isPlayer) {
+    indicator.className = 'turn-indicator player-turn';
+    indicator.innerHTML = '🎮 你的回合';
+    inputArea.style.display = 'block';
+    if (submitBtn) submitBtn.style.display = 'block';
+  } else {
+    indicator.className = 'turn-indicator ai-turn';
+    indicator.innerHTML = '🤖 AI的回合';
+    inputArea.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+  }
+}
+
+function playerCanPlay() {
+  var lastChar = currentWord[currentWord.length - 1];
+  var wordList = byFirstChar[lastChar];
+  if (!wordList) return false;
+  var usedSet = getUsedWordSet();
+  var available = wordList.split(' ').filter(function(w) {
+    return w.length >= 2 && !usedSet[w];
+  });
+  return available.length > 0;
+}
+
+function aiTurn() {
+  if (gameMode !== 'ai') return;
+  
+  setTurnUI(false);
+  document.getElementById('aiThinking').classList.add('show');
+  document.getElementById('resultMessage').style.display = 'none';
+  
+  var delay = 800 + Math.random() * 1200;
+  setTimeout(function() {
+    document.getElementById('aiThinking').classList.remove('show');
+    
+    var lastChar = currentWord[currentWord.length - 1];
+    var aiWord = aiPickWord(lastChar);
+    
+    if (!aiWord) {
+      showGameOver(true);
+      return;
+    }
+    
+    currentWord = aiWord;
+    gameTrail.push({ word: aiWord, type: getWordType(aiWord) });
+    
+    showResult('🤖 AI出词：' + aiWord, 'info');
+    syncDragonGameToCloud();
+    
+    if (!playerCanPlay()) {
+      setTimeout(function() {
+        showGameOver(false);
+      }, 1500);
+    } else {
+      setTimeout(function() {
+        document.getElementById('resultMessage').style.display = 'none';
+        setTurnUI(true);
+        updateUI();
+      }, 1500);
+    }
+  }, delay);
+}
+
+function showGameOver(playerWins) {
+  var overlay = document.getElementById('gameOverOverlay');
+  var title = document.getElementById('gameOverTitle');
+  var msg = document.getElementById('gameOverMsg');
+  var trailCount = document.getElementById('gameOverTrailCount');
+  
+  if (playerWins) {
+    title.innerHTML = '🎉 你赢了！';
+    msg.textContent = 'AI想不出词了！你真厉害！';
+  } else {
+    title.innerHTML = '😈 AI获胜！';
+    msg.textContent = '你无词可接了，再接再厉！';
+  }
+  trailCount.textContent = '本次接龙共 ' + gameTrail.length + ' 个词';
+  overlay.classList.add('show');
+}
+
+// ===== 重写 submitWord 支持 AI 模式 =====
+var _origSubmitWord = submitWord;
+submitWord = async function() {
+  var input = document.getElementById('wordInput').value.trim();
+  var inputField = document.getElementById('wordInput');
+  
+  if (!input) {
+    showResult('请输入一个词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (input.length < 2) {
+    showResult('词语至少需要2个字！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  var lastChar = currentWord[currentWord.length - 1];
+  var firstChar = input[0];
+  
+  if (firstChar !== lastChar) {
+    showResult('错误！上一个词以"' + lastChar + '"结尾，请输入以"' + lastChar + '"开头的词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (gameTrail.some(function(item) { return item.word === input; })) {
+    showResult('这个词已经接过去了！换一个吧！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (!wordDictionary[input]) {
+    showResult('🔍 正在验证词语...', 'info');
+    var isValid = await checkWordOnline(input);
+    if (!isValid) {
+      showResult('这个词语不在词库中！请输入正确的词语或成语！', 'error');
+      inputField.classList.add('error');
+      setTimeout(function() { inputField.classList.remove('error'); }, 500);
+      return;
+    }
+    wordDictionary[input] = { char: input[0], type: 'online' };
+  }
+  
+  showResult('接龙成功！🎉', 'success');
+  currentWord = input;
+  gameTrail.push({ word: input, type: getWordType(input) });
+  syncDragonGameToCloud();
+  
+  if (gameMode === 'ai') {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      renderTrail();
+      aiTurn();
+    }, 1000);
+  } else {
+    setTimeout(function() {
+      document.getElementById('resultMessage').style.display = 'none';
+      updateUI();
+    }, 1500);
+  }
+};
+
+// ===== 重写 backToStart 支持 AI 模式重置 =====
+var _origBackToStart = backToStart;
+backToStart = function() {
+  gameMode = 'solo';
+  aiDifficulty = 'medium';
+  isPlayerTurn = true;
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  document.getElementById('inputArea').style.display = 'block';
+  _origBackToStart();
+};
+
+// ===== 重写 startGame 支持 AI 模式 =====
+var _origStartGame = startGame;
+startGame = function(word) {
+  _origStartGame(word);
+  if (gameMode === 'ai') {
+    setTurnUI(true);
+  }
+};
+
 </script>
 </body>
 </html>
