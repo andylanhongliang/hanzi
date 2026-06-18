@@ -57,6 +57,24 @@ body {
   font-size: 14px;
   opacity: 0.9;
 }
+.back-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+}
+.back-btn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
 .game-area {
   padding: 24px;
 }
@@ -222,6 +240,11 @@ body {
   color: var(--error);
   display: block;
 }
+.result.info {
+  background: rgba(102,126,234,0.1);
+  color: var(--primary);
+  display: block;
+}
 .share-section {
   margin-top: 24px;
   padding-top: 20px;
@@ -360,6 +383,7 @@ body {
   <div class="header">
     <h1>🐉 汉字接龙</h1>
     <p>考验你的词汇量，看看能接多长！</p>
+    <button class="back-btn" onclick="window.location.href='index.html'">📚 汉字王国</button>
   </div>
   
   <div class="game-area">
@@ -413,6 +437,7 @@ body {
   </div>
 </div>
 
+<script src="supabase-client.js"></script>
 <script src="data.js"></script>
 <script>
 var wordDictionary = {};
@@ -431,6 +456,12 @@ function init() {
   var urlParams = new URLSearchParams(window.location.search);
   var startWord = urlParams.get('word');
   var trail = urlParams.get('trail');
+  var gameCode = urlParams.get('code');
+  
+  if(gameCode) {
+    currentGameCode = gameCode;
+    loadGameFromCloud(gameCode);
+  }
   
   if (startWord) {
     if (trail) {
@@ -441,6 +472,22 @@ function init() {
       }
     }
     startGame(startWord);
+  }
+}
+
+async function loadGameFromCloud(gameCode) {
+  if(!window.supabase) return;
+  try {
+    var game = await supabase.getDragonGame(gameCode);
+    if(game) {
+      console.log('从云端加载游戏:', game);
+      gameTrail = game.words.map(function(word) { return { word: word, type: getWordType(word) }; });
+      currentWord = game.current_word;
+      startGame(currentWord);
+      updateUI();
+    }
+  } catch(e) {
+    console.warn('从云端加载游戏失败:', e);
   }
 }
 
@@ -518,6 +565,31 @@ function getWordType(word) {
   return wordDictionary[word] ? wordDictionary[word].type : 'custom';
 }
 
+async function checkWordOnline(word) {
+  if(!word || word.length < 2) return false;
+  
+  try {
+    var response = await fetch(`https://glosbe.com/gapi/translate?from=zh&dest=zh&format=json&phrase=${encodeURIComponent(word)}`);
+    var data = await response.json();
+    
+    if(data && data.tuc && data.tuc.length > 0) {
+      for(var i = 0; i < data.tuc.length; i++) {
+        if(data.tuc[i].phrase && data.tuc[i].phrase.text === word) {
+          return true;
+        }
+      }
+    }
+    
+    if(data && data.examples && data.examples.length > 0) {
+      return true;
+    }
+  } catch(e) {
+    console.warn('在线查询失败:', e);
+  }
+  
+  return false;
+}
+
 function updateUI() {
   document.getElementById('currentWord').innerText = currentWord;
   
@@ -552,7 +624,7 @@ function renderTrail() {
   list.scrollTop = list.scrollHeight;
 }
 
-function submitWord() {
+async function submitWord() {
   var input = document.getElementById('wordInput').value.trim();
   var inputField = document.getElementById('wordInput');
   
@@ -587,14 +659,54 @@ function submitWord() {
     return;
   }
   
+  if (!wordDictionary[input]) {
+    showResult('🔍 正在验证词语...', 'info');
+    var isValid = await checkWordOnline(input);
+    if (!isValid) {
+      showResult('这个词语不在词库中！请输入正确的词语或成语！', 'error');
+      inputField.classList.add('error');
+      setTimeout(function() { inputField.classList.remove('error'); }, 500);
+      return;
+    }
+    
+    wordDictionary[input] = { char: input[0], type: 'online' };
+  }
+  
   showResult('接龙成功！🎉', 'success');
   currentWord = input;
   gameTrail.push({ word: input, type: getWordType(input) });
+  
+  syncDragonGameToCloud();
   
   setTimeout(function() {
     document.getElementById('resultMessage').style.display = 'none';
     updateUI();
   }, 1500);
+}
+
+var currentGameCode = '';
+
+async function syncDragonGameToCloud() {
+  if(!window.supabase) return;
+  try {
+    var words = gameTrail.map(function(item) { return item.word; });
+    if(currentGameCode) {
+      await supabase.updateDragonGame(currentGameCode, {
+        words: words,
+        current_word: currentWord,
+        last_char: currentWord[currentWord.length - 1],
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      var result = await supabase.createDragonGame(null, words, currentWord, currentWord[currentWord.length - 1]);
+      if(result && result.length > 0) {
+        currentGameCode = result[0].game_code;
+        console.log('创建接龙游戏:', currentGameCode);
+      }
+    }
+  } catch(e) {
+    console.warn('同步接龙游戏失败:', e);
+  }
 }
 
 function showResult(msg, type) {
@@ -606,6 +718,9 @@ function showResult(msg, type) {
 function copyShareLink() {
   var trailStr = encodeURIComponent(JSON.stringify(gameTrail));
   var shareUrl = window.location.origin + window.location.pathname + '?word=' + encodeURIComponent(currentWord) + '&trail=' + trailStr;
+  if(currentGameCode) {
+    shareUrl += '&code=' + currentGameCode;
+  }
   
   navigator.clipboard.writeText(shareUrl).then(function() {
     alert('链接已复制！快去分享给好友吧！');

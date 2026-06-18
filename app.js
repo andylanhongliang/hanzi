@@ -124,6 +124,7 @@
     triggerConfetti(20);
     saveCurrentUserData();
     updateMyCenter();
+    syncCheckinToCloud(currentUserData.signStreak);
     return true;
   }
   
@@ -889,6 +890,8 @@
       var guessNextBtn = document.getElementById('guessNext');
       var countdown = 5;
       var isSpeaking = true;
+      var speakFinished = false;
+      var countdownFinished = false;
       
       guessNextBtn.innerText = '🔊 正在播放...（' + countdown + '秒）';
       guessNextBtn.disabled = true;
@@ -899,7 +902,24 @@
         countdown--;
         if (countdown <= 0) {
           clearInterval(cdTimer);
+          countdownFinished = true;
+          checkReady();
+        } else {
+          guessNextBtn.innerText = '🔊 正在播放...（' + countdown + '秒）';
+        }
+      }, 1000);
+      
+      var speakEndHandler = function() {
+        if(isSpeaking) {
           isSpeaking = false;
+          speakFinished = true;
+          checkReady();
+        }
+      };
+      
+      function checkReady() {
+        if(speakFinished && countdownFinished) {
+          clearInterval(cdTimer);
           guessNextBtn.innerText = '回到图谱（回车 ↵）';
           guessNextBtn.disabled = false;
           guessNextBtn.style.opacity = '';
@@ -914,32 +934,12 @@
             fillPanel(currentGuessTarget);
             setTimeout(function() { locateToRecommended(); }, 600);
           };
-        } else {
-          guessNextBtn.innerText = '🔊 正在播放...（' + countdown + '秒）';
+        } else if(speakFinished && !countdownFinished) {
+          guessNextBtn.innerText = '播放完成！等待 ' + countdown + ' 秒...';
+        } else if(countdownFinished && !speakFinished) {
+          guessNextBtn.innerText = '🔊 正在播放...';
         }
-      }, 1000);
-      
-      // 监听语音播放完成
-      var speakEndHandler = function() {
-        if(isSpeaking) {
-          isSpeaking = false;
-          clearInterval(cdTimer);
-          guessNextBtn.innerText = '播放完成！点击返回（回车 ↵）';
-          guessNextBtn.disabled = false;
-          guessNextBtn.style.opacity = '';
-          guessNextBtn.style.cursor = '';
-          guessNextBtn.classList.add('active-btn');
-          guessNextBtn.classList.remove('secondary');
-          guessNextBtn.focus();
-          guessNextBtn.onclick = function() {
-            clearInterval(cdTimer);
-            maskEl2.removeEventListener('keydown', onKeyBack);
-            closeGuess();
-            fillPanel(currentGuessTarget);
-            setTimeout(function() { locateToRecommended(); }, 600);
-          };
-        }
-      };
+      }
       
       // 覆盖processSpeakQueue的onend来检测播放完成
       var originalProcessSpeakQueue = processSpeakQueue;
@@ -1079,6 +1079,8 @@
   }
 
   function closeGuess() {
+    window.speechSynthesis.cancel();
+    speakQueue = [];
     currentGuessTarget = null;
     document.getElementById('guessResult').classList.remove('compact');
     document.querySelector('#guessMask .modal-title').style.display = '';
@@ -1216,8 +1218,9 @@
       recordToday();
       checkAchievements();
       triggerConfetti(12);
-      // 更新每日任务进度
       updateDailyTaskProgress('learn3', 1);
+      // 同步到云端
+      syncUnlockToCloud(charId);
     }
   }
 
@@ -2217,12 +2220,14 @@
       playCorrectSound();
       speakText('答对了！');
       updateReviewRecord(q.charId, true);
+      syncGuessRecordToCloud(q.charId, true, quizState.currentAttempts);
     } else {
       fb.innerHTML = '<span class="wrong-text">❌ 正确答案是「' + q.answer + '」';
       if (q.detail) fb.innerHTML += '<br/><small>' + q.detail + '</small>';
       fb.innerHTML += '</span>';
       playWrongSound();
       updateReviewRecord(q.charId, false);
+      syncGuessRecordToCloud(q.charId, false, quizState.currentAttempts);
     }
     document.getElementById('quizNext').style.display = '';
     document.getElementById('quizSkip').style.display = 'none';
@@ -2776,6 +2781,13 @@
     };
     eyeSwitch.onclick = toggleEye;
     eyeBtn.onclick = toggleEye;
+    // 汉字接龙跳转
+    var dragonBtn = document.getElementById('dragonBtn');
+    if(dragonBtn) {
+      dragonBtn.onclick = function() {
+        window.location.href = 'dragon.html';
+      };
+    }
     // 主题皮肤切换
     var themeSel = document.getElementById('themeSelect');
     if (themeSel) {
@@ -2849,12 +2861,144 @@
       updatePetUI();
       window.addEventListener('resize', function() { if(myChart) myChart.resize(); });
       console.log('汉字王国初始化完成 | 用户: ' + (currentUser||'默认') + ' | 已解锁: ' + unlocked.size + ' 个');
+      // 尝试从云端同步数据
+      syncUserDataFromCloud();
     } catch(e) {
       console.error('初始化失败:', e);
       document.querySelector('.loading-text').innerText = '加载出错: ' + e.message;
       document.getElementById('loadingMask').classList.remove('hide');
     }
   }
-  
+
+  // ======================== 云端数据同步 ========================
+  async function syncUserDataFromCloud() {
+    if(!window.supabase || !currentUser) return;
+    try {
+      console.log('正在尝试从云端同步数据...');
+      var cloudUser = await supabase.getUser(currentUser);
+      if(cloudUser) {
+        console.log('找到云端用户:', cloudUser);
+        // 同步等级和经验
+        if(cloudUser.level && cloudUser.level > 1) {
+          currentUserData.petLevel = cloudUser.level;
+          savePetData();
+        }
+        if(cloudUser.exp && cloudUser.exp > 0) {
+          currentUserData.petExp = cloudUser.exp;
+          savePetData();
+        }
+        if(cloudUser.stars && cloudUser.stars > currentUserData.stars) {
+          currentUserData.stars = cloudUser.stars;
+          saveData('stars', currentUserData.stars);
+        }
+        // 同步解锁记录
+        var cloudUnlocked = await supabase.getUnlockedChars(cloudUser.id);
+        if(cloudUnlocked && cloudUnlocked.length > 0) {
+          var newUnlocked = [];
+          cloudUnlocked.forEach(function(item) {
+            if(!unlocked.has(item.char_name)) {
+              newUnlocked.push(item.char_name);
+            }
+          });
+          if(newUnlocked.length > 0) {
+            console.log('从云端同步了 ' + newUnlocked.length + ' 个解锁汉字');
+            newUnlocked.forEach(function(charId) {
+              unlocked.add(charId);
+            });
+            saveData('unlocked', Array.from(unlocked));
+            renderChart();
+          }
+        }
+      } else {
+        console.log('云端无此用户，将本地数据上传...');
+        await uploadUserDataToCloud();
+      }
+    } catch(e) {
+      console.warn('云端同步失败:', e);
+    }
+  }
+
+  async function uploadUserDataToCloud() {
+    if(!window.supabase || !currentUser) return;
+    try {
+      var existingUser = await supabase.getUser(currentUser);
+      if(existingUser) {
+        await supabase.updateUser(existingUser.id, {
+          level: currentUserData.petLevel,
+          exp: currentUserData.petExp,
+          stars: currentUserData.stars,
+          avatar: currentUserData.avatar
+        });
+        // 同步解锁记录
+        var cloudUnlocked = await supabase.getUnlockedChars(existingUser.id);
+        var cloudUnlockedSet = new Set(cloudUnlocked.map(function(item) { return item.char_name; }));
+        unlocked.forEach(function(charId) {
+          if(!cloudUnlockedSet.has(charId)) {
+            supabase.unlockChar(existingUser.id, charId);
+          }
+        });
+      } else {
+        var newUser = await supabase.createUser({
+          username: currentUser,
+          level: currentUserData.petLevel,
+          exp: currentUserData.petExp,
+          stars: currentUserData.stars,
+          avatar: currentUserData.avatar
+        });
+        if(newUser.length > 0) {
+          var userId = newUser[0].id;
+          unlocked.forEach(function(charId) {
+            supabase.unlockChar(userId, charId);
+          });
+        }
+      }
+      console.log('数据上传成功');
+    } catch(e) {
+      console.warn('数据上传失败:', e);
+    }
+  }
+
+  async function syncUnlockToCloud(charId) {
+    if(!window.supabase || !currentUser) return;
+    try {
+      var cloudUser = await supabase.getUser(currentUser);
+      if(cloudUser) {
+        await supabase.unlockChar(cloudUser.id, charId);
+        // 更新用户等级和经验
+        await supabase.updateUser(cloudUser.id, {
+          level: currentUserData.petLevel,
+          exp: currentUserData.petExp,
+          stars: currentUserData.stars
+        });
+      }
+    } catch(e) {
+      console.warn('同步解锁失败:', e);
+    }
+  }
+
+  async function syncCheckinToCloud(streakDays) {
+    if(!window.supabase || !currentUser) return;
+    try {
+      var cloudUser = await supabase.getUser(currentUser);
+      if(cloudUser) {
+        await supabase.checkIn(cloudUser.id, streakDays);
+      }
+    } catch(e) {
+      console.warn('同步签到失败:', e);
+    }
+  }
+
+  async function syncGuessRecordToCloud(charName, isCorrect, attempts) {
+    if(!window.supabase || !currentUser) return;
+    try {
+      var cloudUser = await supabase.getUser(currentUser);
+      if(cloudUser) {
+        await supabase.addGuessRecord(cloudUser.id, charName, isCorrect, attempts);
+      }
+    } catch(e) {
+      console.warn('同步答题记录失败:', e);
+    }
+  }
+
   init();
 })();
