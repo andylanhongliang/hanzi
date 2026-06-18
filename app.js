@@ -3,9 +3,133 @@
   var USER_KEY = 'hanzi_active_user';
   var USERS_KEY = 'hanzi_users';
   var currentUser = null;
-  var currentUserData = {}; // { unlocked, learned, stars, lastNode, recent, avatar, nickname, petLevel, petExp, petMessage, dailyTarget, lastActiveDate, streakDays, todayCount, history }
+  var currentUserData = {}; // { unlocked, learned, stars, lastNode, recent, avatar, nickname, petLevel, petExp, petMessage, dailyTarget, lastActiveDate, streakDays, todayCount, history, skillCooldowns }
   var selectedAvatar = '👤';
   var avatarOptions = ['😀','😄','😎','🐼','🦊','🐢','🦁','🐥','🌟','🍉','🍇','🍒'];
+
+  // ======================== 宠物技能系统 ========================
+  const PET_SKILLS = {
+    hint: { name: '提示', icon: '💡', unlockLevel: 1, cooldown: 2, desc: '排除一个错误答案' }
+  };
+  
+  // ======================== 宠物皮肤系统 ========================
+  const PET_SKINS = {
+    1: [
+      { id: 'tiger', name: '小老虎', emoji: '🐯', price: 0 },
+      { id: 'panda', name: '小熊猫', emoji: '🐼', price: 50 },
+      { id: 'fox', name: '小狐狸', emoji: '🦊', price: 50 }
+    ],
+    4: [
+      { id: 'dragon', name: '小龙', emoji: '🐲', price: 0 },
+      { id: 'lion', name: '小狮子', emoji: '🦁', price: 100 },
+      { id: 'wolf', name: '小狼', emoji: '🐺', price: 100 }
+    ],
+    6: [
+      { id: 'eagle', name: '雄鹰', emoji: '🦅', price: 0 },
+      { id: 'owl', name: '猫头鹰', emoji: '🦉', price: 150 },
+      { id: 'parrot', name: '鹦鹉', emoji: '🦜', price: 150 }
+    ],
+    8: [
+      { id: 'dragon2', name: '神龙', emoji: '🐉', price: 0 },
+      { id: 'unicorn', name: '独角兽', emoji: '🦄', price: 200 },
+      { id: 'griffin', name: '狮鹫', emoji: '🦁', price: 200 }
+    ]
+  };
+  
+  // ======================== 每日签到与任务系统 ========================
+  var DAILY_TASKS = [
+    { id: 'learn3', name: '学习汉字', desc: '今日学习3个新汉字', target: 3, reward: { type: 'stars', amount: 5 }, icon: '📚' },
+    { id: 'review', name: '复习巩固', desc: '完成1次复习', target: 1, reward: { type: 'stars', amount: 3 }, icon: '🔄' },
+    { id: 'guess5', name: '汉字猜猜乐', desc: '猜字5次', target: 5, reward: { type: 'petExp', amount: 2 }, icon: '🎮' }
+  ];
+  
+  var WEEKLY_TASKS = [
+    { id: 'weekLearn20', name: '本周学习', desc: '本周学习20个新汉字', target: 20, reward: { type: 'stars', amount: 20 }, icon: '📖' },
+    { id: 'weekStreak7', name: '连续签到', desc: '本周签到7天', target: 7, reward: { type: 'petExp', amount: 10 }, icon: '🔥' }
+  ];
+  
+  function getTodayStr() {
+    return new Date().toDateString();
+  }
+  
+  function getWeekStr() {
+    var now = new Date();
+    var startOfYear = new Date(now.getFullYear(), 0, 1);
+    var weekNum = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+    return now.getFullYear() + '-W' + weekNum;
+  }
+  
+  function checkDailyTasksReset() {
+    var today = getTodayStr();
+    var lastDate = currentUserData.dailyTasks.lastResetDate;
+    if(lastDate !== today) {
+      currentUserData.dailyTasks = { lastResetDate: today };
+      DAILY_TASKS.forEach(function(t) {
+        currentUserData.dailyTasks[t.id] = 0;
+      });
+      saveCurrentUserData();
+    }
+  }
+  
+  function updateDailyTaskProgress(taskId, amount) {
+    checkDailyTasksReset();
+    if(!currentUserData.dailyTasks[taskId]) {
+      currentUserData.dailyTasks[taskId] = 0;
+    }
+    currentUserData.dailyTasks[taskId] += amount;
+    var task = DAILY_TASKS.find(function(t) { return t.id === taskId; });
+    if(task && currentUserData.dailyTasks[taskId] >= task.target) {
+      if(!currentUserData.dailyTasks[taskId + '_completed']) {
+        currentUserData.dailyTasks[taskId + '_completed'] = true;
+        var reward = task.reward;
+        if(reward.type === 'stars') {
+          currentUserData.stars += reward.amount;
+          starCount += reward.amount;
+          showNotification('✨ 任务完成！获得 ' + reward.amount + ' 颗星星！', 'success');
+        } else if(reward.type === 'petExp') {
+          addPetExp(reward.amount);
+          showNotification('✨ 任务完成！宠物获得 ' + reward.amount + ' 经验！', 'success');
+        }
+        triggerConfetti(15);
+      }
+    }
+    saveCurrentUserData();
+  }
+  
+  function doSignIn() {
+    var today = getTodayStr();
+    if(currentUserData.lastSignDate === today) {
+      showNotification('今日已签到，明天再来吧！', 'info');
+      return false;
+    }
+    
+    var yesterday = new Date(Date.now() - 86400000).toDateString();
+    if(currentUserData.lastSignDate === yesterday) {
+      currentUserData.signStreak = (currentUserData.signStreak || 0) + 1;
+    } else {
+      currentUserData.signStreak = 1;
+    }
+    currentUserData.lastSignDate = today;
+    
+    // 计算签到奖励
+    var baseReward = 2;
+    var streakBonus = Math.min(currentUserData.signStreak, 7);
+    var totalReward = baseReward + streakBonus;
+    
+    currentUserData.stars += totalReward;
+    starCount += totalReward;
+    addPetExp(1);
+    
+    showNotification('🎉 签到成功！连续 ' + currentUserData.signStreak + ' 天！获得 ' + totalReward + ' 星星 + 1 经验！', 'success');
+    triggerConfetti(20);
+    saveCurrentUserData();
+    updateMyCenter();
+    return true;
+  }
+  
+  function isSignedToday() {
+    return currentUserData.lastSignDate === getTodayStr();
+  }
 
   function getUserKey(field) {
     return 'hanzi_' + (currentUser || 'default') + '_' + field;
@@ -47,7 +171,7 @@
 
   function loadCurrentUserData() {
     var u = getActiveUser();
-    if(!u) { currentUserData = { unlocked: ['一'], learned: ['一'], stars: 0, lastNode: '一', recent: [], mistakes: [], avatar: '👤', nickname: '', dailyTarget: 3, lastActiveDate: '', streakDays: 0, todayCount: 0, history: {}, petLevel: 1, petExp: 0, petMessage: '' }; return; }
+    if(!u) { currentUserData = { unlocked: ['一'], learned: ['一'], stars: 0, lastNode: '一', recent: [], mistakes: [], avatar: '👤', nickname: '', dailyTarget: 3, lastActiveDate: '', streakDays: 0, todayCount: 0, history: {}, petLevel: 1, petExp: 0, petMessage: '', skillCooldowns: {} }; return; }
     try {
       var raw = localStorage.getItem(getUserKey('unlocked'));
       if(raw) {
@@ -71,6 +195,21 @@
         currentUserData.petLevel = parseInt(localStorage.getItem(getUserKey('petLevel')) || '1', 10);
         currentUserData.petExp = parseInt(localStorage.getItem(getUserKey('petExp')) || '0', 10);
         currentUserData.petMessage = localStorage.getItem(getUserKey('petMessage')) || '';
+        raw = localStorage.getItem(getUserKey('skillCooldowns'));
+        currentUserData.skillCooldowns = raw ? JSON.parse(raw) : {};
+        raw = localStorage.getItem(getUserKey('unlockedPetSkins'));
+        currentUserData.unlockedPetSkins = raw ? JSON.parse(raw) : {};
+        currentUserData.currentPetSkin = localStorage.getItem(getUserKey('currentPetSkin')) || '';
+        // 每日签到数据
+        currentUserData.lastSignDate = localStorage.getItem(getUserKey('lastSignDate')) || '';
+        currentUserData.signStreak = parseInt(localStorage.getItem(getUserKey('signStreak')) || '0', 10);
+        // 每日任务数据
+        raw = localStorage.getItem(getUserKey('dailyTasks'));
+        currentUserData.dailyTasks = raw ? JSON.parse(raw) : {};
+        raw = localStorage.getItem(getUserKey('weeklyTasks'));
+        currentUserData.weeklyTasks = raw ? JSON.parse(raw) : {};
+        // 检查是否需要重置每日任务
+        checkDailyTasksReset();
         return;
       }
       // 尝试从旧格式迁移
@@ -89,9 +228,9 @@
         localStorage.removeItem('starNum');
         return;
       }
-      currentUserData = { unlocked: ['一'], learned: ['一'], stars: 0, lastNode: '一', recent: [], mistakes: [], avatar: '👤', nickname: '', dailyTarget: 3, lastActiveDate: '', streakDays: 0, todayCount: 0, history: {}, petLevel: 1, petExp: 0, petMessage: '' };
+      currentUserData = { unlocked: ['一'], learned: ['一'], stars: 0, lastNode: '一', recent: [], mistakes: [], avatar: '👤', nickname: '', dailyTarget: 3, lastActiveDate: '', streakDays: 0, todayCount: 0, history: {}, petLevel: 1, petExp: 0, petMessage: '', skillCooldowns: {} };
     } catch(e) {
-      currentUserData = { unlocked: ['一'], learned: ['一'], stars: 0, lastNode: '一', recent: [], mistakes: [], avatar: '👤', nickname: '', dailyTarget: 3, lastActiveDate: '', streakDays: 0, todayCount: 0, history: {}, petLevel: 1, petExp: 0, petMessage: '' };
+      currentUserData = { unlocked: ['一'], learned: ['一'], stars: 0, lastNode: '一', recent: [], mistakes: [], avatar: '👤', nickname: '', dailyTarget: 3, lastActiveDate: '', streakDays: 0, todayCount: 0, history: {}, petLevel: 1, petExp: 0, petMessage: '', skillCooldowns: {} };
     }
   }
 
@@ -122,6 +261,13 @@
       localStorage.setItem(getUserKey('petLevel'), String(currentUserData.petLevel || 1));
       localStorage.setItem(getUserKey('petExp'), String(currentUserData.petExp || 0));
       localStorage.setItem(getUserKey('petMessage'), currentUserData.petMessage || '');
+      localStorage.setItem(getUserKey('skillCooldowns'), JSON.stringify(currentUserData.skillCooldowns || {}));
+      localStorage.setItem(getUserKey('unlockedPetSkins'), JSON.stringify(currentUserData.unlockedPetSkins || {}));
+      localStorage.setItem(getUserKey('currentPetSkin'), currentUserData.currentPetSkin || '');
+      localStorage.setItem(getUserKey('lastSignDate'), currentUserData.lastSignDate || '');
+      localStorage.setItem(getUserKey('signStreak'), String(currentUserData.signStreak || 0));
+      localStorage.setItem(getUserKey('dailyTasks'), JSON.stringify(currentUserData.dailyTasks || {}));
+      localStorage.setItem(getUserKey('weeklyTasks'), JSON.stringify(currentUserData.weeklyTasks || {}));
     } catch(e) {}
   }
 
@@ -642,6 +788,10 @@
     document.getElementById('guessNext').onclick = closeGuess;
     document.querySelector('#guessMask .modal-title').innerText = '🔍 猜猜这是什么字？';
     document.getElementById('guessMask').classList.add('show');
+    
+    // 渲染宠物技能按钮
+    renderPetSkills();
+    
     setTimeout(function() { document.getElementById('guessInput').focus(); }, 200);
   }
 
@@ -668,11 +818,32 @@
       recordToday();
       checkAchievements();
       recordDailyLearn();
+      
+      // 减少技能冷却时间
+      decreaseSkillCooldowns();
+      
       showFirework();
       playCorrectSound();
       playUnlockSound();
       var praise = ['太棒啦！','你真厉害！','完美通关！','又学会一个新汉字啦！'];
       speakText(praise[Math.floor(Math.random() * praise.length)] + ' ' + n.name);
+
+      // 自动播放完整汉字信息（延迟一点开始，先播放表扬语）
+      setTimeout(function() {
+        var speakParts = [];
+        if(n.oracle) speakParts.push('汉字怎么来的？' + n.oracle);
+        if(n.origin) speakParts.push('一句话记住：' + n.origin);
+        if(n.groupWords) {
+          var words = n.groupWords.split('|');
+          speakParts.push('常用词语：' + words.join('、'));
+        }
+        if(n.idioms) {
+          var idiomList = n.idioms.split('|');
+          var idiomNames = idiomList.map(function(item) { return item.split('::')[0]; });
+          speakParts.push('相关成语：' + idiomNames.join('、'));
+        }
+        speakText(speakParts.join('。'), { cancel: false });
+      }, 1500);
 
       var detailHtml = '<div class="detail-char">' + n.name + '</div>';
       if(n.oracle) {
@@ -713,18 +884,22 @@
       document.getElementById('guessSubmit').style.display = 'none';
       document.getElementById('guessMore').style.display = 'none';
       document.getElementById('guessInput').style.display = 'none';
-      document.getElementById('attemptCount').innerText = '🎉 解锁成功！';
-      // 强制停留 5 秒，期间不可跳过
+      document.getElementById('attemptCount').style.display = 'none';
+      // 自动播放中，显示播放状态
       var guessNextBtn = document.getElementById('guessNext');
       var countdown = 5;
-      guessNextBtn.innerText = '请仔细看（' + countdown + '秒）';
+      var isSpeaking = true;
+      
+      guessNextBtn.innerText = '🔊 正在播放...（' + countdown + '秒）';
       guessNextBtn.disabled = true;
       guessNextBtn.style.opacity = '0.5';
       guessNextBtn.style.cursor = 'not-allowed';
+      
       var cdTimer = setInterval(function() {
         countdown--;
         if (countdown <= 0) {
           clearInterval(cdTimer);
+          isSpeaking = false;
           guessNextBtn.innerText = '回到图谱（回车 ↵）';
           guessNextBtn.disabled = false;
           guessNextBtn.style.opacity = '';
@@ -740,15 +915,57 @@
             setTimeout(function() { locateToRecommended(); }, 600);
           };
         } else {
-          guessNextBtn.innerText = '请仔细看（' + countdown + '秒）';
+          guessNextBtn.innerText = '🔊 正在播放...（' + countdown + '秒）';
         }
       }, 1000);
-      // 回车回到图谱（5 秒后才生效）
+      
+      // 监听语音播放完成
+      var speakEndHandler = function() {
+        if(isSpeaking) {
+          isSpeaking = false;
+          clearInterval(cdTimer);
+          guessNextBtn.innerText = '播放完成！点击返回（回车 ↵）';
+          guessNextBtn.disabled = false;
+          guessNextBtn.style.opacity = '';
+          guessNextBtn.style.cursor = '';
+          guessNextBtn.classList.add('active-btn');
+          guessNextBtn.classList.remove('secondary');
+          guessNextBtn.focus();
+          guessNextBtn.onclick = function() {
+            clearInterval(cdTimer);
+            maskEl2.removeEventListener('keydown', onKeyBack);
+            closeGuess();
+            fillPanel(currentGuessTarget);
+            setTimeout(function() { locateToRecommended(); }, 600);
+          };
+        }
+      };
+      
+      // 覆盖processSpeakQueue的onend来检测播放完成
+      var originalProcessSpeakQueue = processSpeakQueue;
+      processSpeakQueue = function() {
+        if (speakQueue.length === 0) {
+          speakEndHandler();
+          processSpeakQueue = originalProcessSpeakQueue;
+          return;
+        }
+        var text = speakQueue.shift();
+        try {
+          var utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'zh-CN';
+          utter.rate = 0.85;
+          utter.onend = function() { processSpeakQueue(); };
+          utter.onerror = function() { processSpeakQueue(); };
+          window.speechSynthesis.speak(utter);
+        } catch(e) { processSpeakQueue(); }
+      };
+      
+      // 回车回到图谱（5秒后或播放完成后才生效）
       var maskEl2 = document.getElementById('guessMask');
       maskEl2.setAttribute('tabindex', '0');
       maskEl2.focus();
       var onKeyBack = function(e) {
-        if(e.key === 'Enter' && countdown <= 0) {
+        if(e.key === 'Enter' && !guessNextBtn.disabled) {
           maskEl2.removeEventListener('keydown', onKeyBack);
           guessNextBtn.click();
         }
@@ -759,6 +976,8 @@
       useFixedPositions = true;
       renderChart();
       useFixedPositions = false;
+      // 更新猜字任务进度
+      updateDailyTaskProgress('guess5', 1);
     } else {
       // 记录错字
       if(currentGuessTarget) { mistakeSet.add(currentGuessTarget); saveUserData(); }
@@ -769,6 +988,9 @@
         var tips = ['再试一试，你可以的！','差一点点哦，再想想~','没关系，继续加油！'];
         document.getElementById('guessResult').innerHTML = '<span class="result-error">' + tips[Math.floor(Math.random() * tips.length)] + '</span>';
         document.getElementById('guessInput').select();
+        
+        // 答错也减少技能冷却时间
+        decreaseSkillCooldowns();
       } else {
         // 复习模式：放大展示正确汉字
         document.getElementById('guessHint').innerHTML = '<div class="review-char">' + n.name + '</div>';
@@ -861,10 +1083,130 @@
     document.getElementById('guessResult').classList.remove('compact');
     document.querySelector('#guessMask .modal-title').style.display = '';
     document.getElementById('guessHint').style.display = '';
+    document.getElementById('attemptCount').style.display = '';
     var btn = document.getElementById('guessNext');
     btn.classList.remove('active-btn');
     btn.classList.add('secondary');
     document.getElementById('guessMask').classList.remove('show');
+  }
+
+  // ======================== 宠物技能系统 ========================
+  function renderPetSkills() {
+    var container = document.getElementById('petSkills');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    var petLevel = currentUserData.petLevel || 1;
+    var cooldowns = currentUserData.skillCooldowns || {};
+    
+    Object.keys(PET_SKILLS).forEach(function(skillId) {
+      var skill = PET_SKILLS[skillId];
+      var cooldown = cooldowns[skillId] || 0;
+      var isUnlocked = petLevel >= skill.unlockLevel;
+      var isReady = cooldown <= 0;
+      
+      var btn = document.createElement('button');
+      btn.className = 'pet-skill-btn';
+      btn.disabled = !isUnlocked || !isReady;
+      
+      var label = skill.icon + ' ' + skill.name;
+      if(!isUnlocked) {
+        label += ' (Lv' + skill.unlockLevel + ')';
+      } else if(!isReady) {
+        label += ' (' + cooldown + ')';
+      }
+      
+      btn.innerText = label;
+      
+      if(isUnlocked && isReady) {
+        btn.onclick = function() { useSkill(skillId); };
+        btn.title = skill.desc;
+      } else if(!isUnlocked) {
+        btn.title = '宠物等级 ' + skill.unlockLevel + ' 解锁';
+      } else {
+        btn.title = '冷却中，还需 ' + cooldown + ' 题';
+      }
+      
+      container.appendChild(btn);
+    });
+  }
+  
+  function useSkill(skillId) {
+    var skill = PET_SKILLS[skillId];
+    if(!skill) return;
+    
+    var petLevel = currentUserData.petLevel || 1;
+    if(petLevel < skill.unlockLevel) {
+      alert('宠物等级 ' + skill.unlockLevel + ' 解锁此技能！');
+      return;
+    }
+    
+    var cooldowns = currentUserData.skillCooldowns || {};
+    if(cooldowns[skillId] > 0) {
+      alert('技能冷却中，还需 ' + cooldowns[skillId] + ' 题！');
+      return;
+    }
+    
+    // 执行技能效果
+    switch(skillId) {
+      case 'hint':
+        useHintSkill();
+        break;
+    }
+    
+    // 设置冷却时间
+    cooldowns[skillId] = skill.cooldown;
+    currentUserData.skillCooldowns = cooldowns;
+    saveCurrentUserData();
+    renderPetSkills();
+  }
+  
+  function useHintSkill() {
+    // 提示技能：显示一个错误选项
+    if(!currentGuessTarget) return;
+    var n = nodeMap.get(currentGuessTarget);
+    if(!n) return;
+    
+    // 生成候选答案
+    var candidates = generateCandidates(n.name);
+    var wrongCandidates = candidates.filter(function(c) { return c !== n.name; });
+    
+    if(wrongCandidates.length > 0) {
+      var wrongAnswer = wrongCandidates[0];
+      var wrap = document.getElementById('candidateWrap');
+      
+      // 显示候选按钮
+      renderCandidates(candidates, n.name);
+      
+      // 标记一个错误答案
+      var buttons = wrap.querySelectorAll('.candidate-btn');
+      buttons.forEach(function(btn) {
+        if(btn.innerText === wrongAnswer && !btn.classList.contains('correct')) {
+          btn.classList.add('wrong');
+          btn.disabled = true;
+        }
+      });
+      
+      document.getElementById('guessResult').innerHTML = '<span class="result-success">💡 提示：' + wrongAnswer + ' 不是正确答案</span>';
+    }
+  }
+  
+  function decreaseSkillCooldowns() {
+    var cooldowns = currentUserData.skillCooldowns || {};
+    var changed = false;
+    
+    Object.keys(cooldowns).forEach(function(skillId) {
+      if(cooldowns[skillId] > 0) {
+        cooldowns[skillId]--;
+        changed = true;
+      }
+    });
+    
+    if(changed) {
+      currentUserData.skillCooldowns = cooldowns;
+      saveCurrentUserData();
+      renderPetSkills();
+    }
   }
 
   function unlockNode(charId) {
@@ -873,6 +1215,9 @@
       renderChart();
       recordToday();
       checkAchievements();
+      triggerConfetti(12);
+      // 更新每日任务进度
+      updateDailyTaskProgress('learn3', 1);
     }
   }
 
@@ -968,6 +1313,65 @@
     return '小萌宠';
   }
   function getPetExpToNext(level) { return 5 + (level - 1) * 5; }
+  
+  function getPetStage(level) {
+    if(level >= 8) return 8;
+    if(level >= 6) return 6;
+    if(level >= 4) return 4;
+    return 1;
+  }
+  
+  function getCurrentPetSkinEmoji() {
+    var level = currentUserData.petLevel || 1;
+    var stage = getPetStage(level);
+    var currentSkinId = currentUserData.currentPetSkin;
+    var skins = PET_SKINS[stage];
+    
+    if(currentSkinId) {
+      var skin = skins.find(function(s) { return s.id === currentSkinId; });
+      if(skin) return skin.emoji;
+    }
+    
+    return skins[0].emoji;
+  }
+  
+  function getUnlockedPetSkins() {
+    return currentUserData.unlockedPetSkins || {};
+  }
+  
+  function isSkinUnlocked(skinId) {
+    var unlocked = getUnlockedPetSkins();
+    return unlocked[skinId] === true;
+  }
+  
+  function unlockSkin(skinId) {
+    var unlocked = getUnlockedPetSkins();
+    unlocked[skinId] = true;
+    currentUserData.unlockedPetSkins = unlocked;
+    saveCurrentUserData();
+  }
+  
+  function setCurrentSkin(skinId) {
+    currentUserData.currentPetSkin = skinId;
+    saveCurrentUserData();
+    updatePetUI();
+  }
+  
+  function buySkin(skinId) {
+    var level = currentUserData.petLevel || 1;
+    var stage = getPetStage(level);
+    var skins = PET_SKINS[stage];
+    var skin = skins.find(function(s) { return s.id === skinId; });
+    
+    if(!skin) return false;
+    if(isSkinUnlocked(skinId)) return false;
+    if(currentUserData.stars < skin.price) return false;
+    
+    currentUserData.stars -= skin.price;
+    unlockSkin(skinId);
+    setCurrentSkin(skinId);
+    return true;
+  }
 
   function updatePetUI() {
     var petStage = document.getElementById('petStageName');
@@ -976,12 +1380,7 @@
     if(petLevel) petLevel.innerText = 'Lv' + (currentUserData.petLevel || 1);
     var avatarEl = document.getElementById('petAvatar');
     if(avatarEl) {
-      var map = {1:'🐯',4:'🐲',6:'🦅',8:'🐉'};
-      var emoji = '🐯';
-      if(currentUserData.petLevel >= 8) emoji = map[8];
-      else if(currentUserData.petLevel >= 6) emoji = map[6];
-      else if(currentUserData.petLevel >= 4) emoji = map[4];
-      avatarEl.innerText = emoji;
+      avatarEl.innerText = getCurrentPetSkinEmoji();
     }
     var expFill = document.getElementById('petExpFill');
     var expFillCenter = document.getElementById('petExpFillCenter');
@@ -1006,6 +1405,29 @@
       setTimeout(function() { bubble.style.display = 'none'; }, 300);
     }, 2600);
   }
+  
+  function showNotification(message, type) {
+    type = type || 'info';
+    var colors = {
+      success: '#52c41a',
+      error: '#ff4d4f',
+      warning: '#faad14',
+      info: '#1890ff'
+    };
+    var color = colors[type] || colors.info;
+    var tip = document.getElementById('hintTip');
+    if(tip) {
+      tip.innerText = message;
+      tip.classList.add('show');
+      tip.style.color = color;
+      tip.style.fontWeight = 'bold';
+      setTimeout(function() {
+        tip.classList.remove('show');
+        tip.style.color = '';
+        tip.style.fontWeight = '';
+      }, 3000);
+    }
+  }
 
   function addPetExp(amount) {
     if(!currentUserData.petLevel) currentUserData.petLevel = 1;
@@ -1022,13 +1444,25 @@
       currentUserData.petMessage = '我获得了 +' + amount + ' 经验，继续加油～';
     }
     showPetBubble(currentUserData.petMessage);
-    if(leveled) { playUnlockSound(); speakText('太棒了！宠物进化了！'); }
+    if(leveled) { 
+      playUnlockSound(); 
+      speakText('太棒了！宠物进化了！'); 
+      triggerPetLevelUpEffect();
+      triggerConfetti(30);
+    }
     var avatarEl = document.getElementById('petAvatar');
     if(avatarEl) {
-      avatarEl.classList.remove('bounce');
-      void avatarEl.offsetWidth;
-      avatarEl.classList.add('bounce');
-      setTimeout(function(){ avatarEl.classList.remove('bounce'); }, 900);
+      if(leveled) {
+        avatarEl.classList.remove('bounce', 'levelup');
+        void avatarEl.offsetWidth;
+        avatarEl.classList.add('levelup');
+        setTimeout(function(){ avatarEl.classList.remove('levelup'); }, 1600);
+      } else {
+        avatarEl.classList.remove('bounce');
+        void avatarEl.offsetWidth;
+        avatarEl.classList.add('bounce');
+        setTimeout(function(){ avatarEl.classList.remove('bounce'); }, 900);
+      }
     }
     if(leveled) spawnConfettiAt(avatarEl);
     saveCurrentUserData();
@@ -1055,7 +1489,60 @@
       }
     } catch(e) {}
   }
-
+  
+  function triggerConfetti(count) {
+    try {
+      var zone = document.getElementById('petConfetti');
+      if(!zone) return;
+      var colors = ['#ffd666','#ff6b6b','#7bd389','#66b3ff','#f5a623','#ff85c0','#b37feb'];
+      var emojis = ['✨','⭐','🌟','💫','🎉','🎊','🏆','💖','💗'];
+      for(var i=0;i<(count||15);i++) {
+        var piece = document.createElement('div');
+        if(Math.random() > 0.5) {
+          piece.innerText = emojis[i % emojis.length];
+          piece.style.fontSize = (16 + Math.random()*12) + 'px';
+          piece.style.animation = 'confetti-fall 1800ms ease-out forwards';
+        } else {
+          piece.className = 'confetti-piece';
+          piece.style.background = colors[i % colors.length];
+          piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+          piece.style.animation = 'confetti-fall 1400ms linear forwards';
+        }
+        var left = Math.random() * window.innerWidth;
+        piece.style.left = left + 'px';
+        piece.style.top = '-20px';
+        piece.style.animationDelay = (Math.random()*0.8)+'s';
+        zone.appendChild(piece);
+        setTimeout(function() { if(piece.parentNode) piece.parentNode.removeChild(piece); }, 3000);
+      }
+    } catch(e) {}
+  }
+  
+  function triggerPetLevelUpEffect() {
+    try {
+      var zone = document.getElementById('petConfetti');
+      if(!zone) return;
+      var colors = ['#ffd700','#ffec8b','#fffacd','#fff8dc'];
+      for(var i=0;i<20;i++) {
+        var spark = document.createElement('div');
+        spark.className = 'confetti-piece';
+        spark.style.background = colors[i % colors.length];
+        spark.style.width = '8px';
+        spark.style.height = '8px';
+        spark.style.borderRadius = '50%';
+        spark.style.boxShadow = '0 0 10px #ffd700';
+        spark.style.animation = 'confetti-fall 2000ms ease-out forwards';
+        var centerX = window.innerWidth / 2;
+        var left = centerX + (Math.random()-0.5)*200;
+        spark.style.left = left + 'px';
+        spark.style.top = '120px';
+        spark.style.animationDelay = (Math.random()*1)+'s';
+        zone.appendChild(spark);
+        setTimeout(function() { if(spark.parentNode) spark.parentNode.removeChild(spark); }, 3500);
+      }
+    } catch(e) {}
+  }
+  
   // ======================== 每日学习统计 ========================
   function updateDailyTask() {
     var today = new Date().toDateString();
@@ -1282,6 +1769,22 @@
   }
 
   function updateMyCenter() {
+    // 签到状态
+    var signStreakNum = document.getElementById('signStreakNum');
+    if(signStreakNum) signStreakNum.innerText = currentUserData.signStreak || 0;
+    var signBtn = document.getElementById('signBtn');
+    if(signBtn) {
+      if(isSignedToday()) {
+        signBtn.innerText = '✅ 已签到';
+        signBtn.classList.add('signed');
+      } else {
+        signBtn.innerText = '📅 今日签到';
+        signBtn.classList.remove('signed');
+      }
+    }
+    // 渲染每日任务
+    renderDailyTasks();
+    
     document.getElementById('myCharNum').innerText = learnedSet.size;
     document.getElementById('myStarNum').innerText = starCount;
     document.getElementById('myLevel').innerText = '第' + (Math.ceil(learnedSet.size/10)+1) + '关';
@@ -1331,6 +1834,91 @@
         badgeEl.appendChild(span);
       });
     }
+    renderPetSkinsPanel();
+  }
+  
+  function renderDailyTasks() {
+    var container = document.getElementById('dailyTasks');
+    if(!container) return;
+    
+    container.innerHTML = '';
+    checkDailyTasksReset();
+    
+    DAILY_TASKS.forEach(function(task) {
+      var progress = currentUserData.dailyTasks[task.id] || 0;
+      var completed = currentUserData.dailyTasks[task.id + '_completed'] === true;
+      var percent = Math.min(100, Math.round((progress / task.target) * 100));
+      
+      var item = document.createElement('div');
+      item.className = 'task-item' + (completed ? ' completed' : '');
+      
+      var rewardText = task.reward.type === 'stars' ? task.reward.amount + '⭐' : task.reward.amount + 'exp';
+      
+      item.innerHTML = 
+        '<span class="task-icon">' + task.icon + '</span>' +
+        '<div class="task-info">' +
+          '<div class="task-name">' + task.name + '</div>' +
+          '<div class="task-desc">' + task.desc + '</div>' +
+        '</div>' +
+        '<div class="task-progress">' + progress + '/' + task.target + '</div>' +
+        (completed ? 
+          '<span class="task-check">✓</span>' : 
+          '<span class="task-reward">' + rewardText + '</span>'
+        );
+      
+      container.appendChild(item);
+    });
+  }
+  
+  function renderPetSkinsPanel() {
+    var container = document.getElementById('petSkins');
+    if(!container) return;
+    
+    container.innerHTML = '';
+    
+    var level = currentUserData.petLevel || 1;
+    var stage = getPetStage(level);
+    var skins = PET_SKINS[stage];
+    var currentSkinId = currentUserData.currentPetSkin;
+    
+    skins.forEach(function(skin) {
+      var unlocked = isSkinUnlocked(skin.id);
+      var isCurrent = currentSkinId === skin.id;
+      
+      var btn = document.createElement('button');
+      btn.className = 'pet-skin-btn';
+      if(isCurrent) btn.classList.add('active');
+      if(!unlocked) btn.classList.add('locked');
+      
+      btn.innerHTML = '<span class="skin-emoji">' + skin.emoji + '</span><span class="skin-name">' + skin.name + '</span>';
+      
+      if(unlocked) {
+        btn.onclick = function() {
+          setCurrentSkin(skin.id);
+          renderPetSkinsPanel();
+        };
+      } else {
+        btn.onclick = function() {
+          if(currentUserData.stars >= skin.price) {
+            if(buySkin(skin.id)) {
+              renderPetSkinsPanel();
+              updateMyCenter();
+            }
+          } else {
+            alert('星星不足，还需要 ' + (skin.price - currentUserData.stars) + ' 颗星星！');
+          }
+        };
+      }
+      
+      if(!unlocked) {
+        var priceBadge = document.createElement('span');
+        priceBadge.className = 'skin-price';
+        priceBadge.innerText = skin.price + '⭐';
+        btn.appendChild(priceBadge);
+      }
+      
+      container.appendChild(btn);
+    });
   }
 
   // ======================== 复习闪卡 ========================
@@ -1361,6 +1949,8 @@
     incStat('reviewCount');
     saveUserData();
     reviewList.splice(reviewIdx, 1);
+    // 更新复习任务进度
+    updateDailyTaskProgress('review', 1);
     if(reviewList.length === 0) {
       document.getElementById('reviewMask').classList.remove('show');
       updateMyCenter();
@@ -1744,12 +2334,58 @@
     addPetExp(1);
     setTimeout(function() {
       document.getElementById('writeMask').classList.remove('show');
-    }, 1500);
+    }, 150);
   }
-
+  
+  function locateToRecommended() {
+    var rec = getRecommendedNode();
+    if(!rec) {
+      var tip = document.getElementById('hintTip');
+      if(tip) { tip.innerText = '🎉 太棒了！所有汉字都解锁了！'; tip.classList.add('show'); tip.style.color = '#52c41a'; setTimeout(function(){ tip.classList.remove('show'); tip.style.color = ''; tip.innerText = '点击 ⭐? 猜字解锁 · 点击汉字查看详情 · 滚轮缩放'; }, 2000); }
+      return;
+    }
+    clearFocus();
+    locateToNode(rec);
+  }
+  
+  function clearFocus() {
+    if(!myChart) return;
+    var opt = myChart.getOption();
+    if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
+    var changed = false;
+    opt.series[0].data.forEach(function(item) {
+      if(item.itemStyle && item.itemStyle.opacity !== undefined && item.itemStyle.opacity < 1) {
+        item.itemStyle.opacity = 1;
+        item.itemStyle.shadowBlur = 0;
+        changed = true;
+      }
+    });
+    if(changed) myChart.setOption(opt);
+  }
+  
+  function locateToNode(nodeId, retryLeft) {
+    if(!nodeId || !myChart) return;
+    if(retryLeft === undefined) retryLeft = 5;
+    var opt = myChart.getOption();
+    if(!opt.series || !opt.series[0] || !opt.series[0].data) {
+      if(retryLeft > 0) setTimeout(function() { locateToNode(nodeId, retryLeft - 1); }, 400);
+      return;
+    }
+    var node = opt.series[0].data.find(function(d) { return d.id === nodeId; });
+    if(!node || node.x == null || node.y == null) {
+      if(retryLeft > 0) setTimeout(function() { locateToNode(nodeId, retryLeft - 1); }, 400);
+      return;
+    }
+    myChart.setOption({ series: [{ zoom: 1.5 }] });
+    setTimeout(function() {
+      var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
+      var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
+      myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx: dx, dy: dy });
+    }, 150);
+  }
+  
   // ======================== UI 绑定 ========================
   function bindUI() {
-    // 缩放工具（graph 类型需直接操作 zoom 属性）
     function getZoom() {
       var opt = myChart && myChart.getOption();
       return (opt && opt.series && opt.series[0] && opt.series[0].zoom) || 1;
@@ -1770,39 +2406,7 @@
       this.title = showOnlyUnlocked ? '显示全部节点' : '只看已解锁的字';
       renderChart();
     };
-    // 定位到指定节点
-    function locateToNode(nodeId, retryLeft) {
-      if(!nodeId || !myChart) return;
-      if(retryLeft === undefined) retryLeft = 5;
-      var opt = myChart.getOption();
-      if(!opt.series || !opt.series[0] || !opt.series[0].data) {
-        if(retryLeft > 0) setTimeout(function() { locateToNode(nodeId, retryLeft - 1); }, 400);
-        return;
-      }
-      var node = opt.series[0].data.find(function(d) { return d.id === nodeId; });
-      if(!node || node.x == null || node.y == null) {
-        // 节点坐标未就绪，延迟重试
-        if(retryLeft > 0) setTimeout(function() { locateToNode(nodeId, retryLeft - 1); }, 400);
-        return;
-      }
-      myChart.setOption({ series: [{ zoom: 1.5 }] });
-      setTimeout(function() {
-        var dx = (myChart.getWidth() / 2 - node.x) * 0.7;
-        var dy = (myChart.getHeight() / 2 - node.y) * 0.7;
-        myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx: dx, dy: dy });
-      }, 150);
-    }
-    function locateToRecommended() {
-      var rec = getRecommendedNode();
-      if(!rec) {
-        var tip = document.getElementById('hintTip');
-        if(tip) { tip.innerText = '🎉 太棒了！所有汉字都解锁了！'; tip.classList.add('show'); tip.style.color = '#52c41a'; setTimeout(function(){ tip.classList.remove('show'); tip.style.color = ''; tip.innerText = '点击 ⭐? 猜字解锁 · 点击汉字查看详情 · 滚轮缩放'; }, 2000); }
-        return;
-      }
-      clearFocus();
-      locateToNode(rec);
-    }
-
+    
     // 自动定位（布局已稳定，最多 3 次重试）
     function autoLocateRecommended(attempt) {
       if(attempt >= 3) return;
@@ -1830,21 +2434,7 @@
       var dy = (ch / 2 - node.y) * 0.7;
       myChart.dispatchAction({ type: 'graphRoam', seriesIndex: 0, dx: dx, dy: dy });
     }
-
-    function clearFocus() {
-      if(!myChart) return;
-      var opt = myChart.getOption();
-      if(!opt.series || !opt.series[0] || !opt.series[0].data) return;
-      var changed = false;
-      opt.series[0].data.forEach(function(item) {
-        if(item.itemStyle && item.itemStyle.opacity !== undefined && item.itemStyle.opacity < 1) {
-          item.itemStyle.opacity = 1;
-          item.itemStyle.shadowBlur = 0;
-          changed = true;
-        }
-      });
-      if(changed) myChart.setOption(opt);
-    }
+  
     document.getElementById('asideToggle').onclick = function() {
       document.getElementById('asidePanel').classList.toggle('hide');
       document.getElementById('asideToggle').classList.toggle('hide');
@@ -1953,7 +2543,8 @@
     document.getElementById('guessNext').onclick = closeGuess;
 
     document.getElementById('starClose').onclick = function() { document.getElementById('starMask').classList.remove('show'); };
-
+    document.getElementById('signBtn').onclick = function() { doSignIn(); };
+    
     var parentMask = document.getElementById('parentMask');
     document.getElementById('parentBtn').onclick = function() { parentMask.classList.add('show'); };
     document.getElementById('starBtn').onclick = function() {
@@ -1996,6 +2587,107 @@
     document.getElementById('writeClear').onclick = clearWriteCanvas;
     document.getElementById('writeDone').onclick = finishWrite;
     document.getElementById('parentClose').onclick = function() { parentMask.classList.remove('show'); };
+
+    // ======================== 数据导出/导入功能 ========================
+    function exportUserData() {
+      // 收集所有相关数据
+      var exportData = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        app: '汉字图谱',
+        data: {}
+      };
+      
+      // 导出所有 hanzi_ 开头的 localStorage 数据
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && key.indexOf('hanzi_') === 0) {
+            var value = localStorage.getItem(key);
+            try {
+              exportData.data[key] = JSON.parse(value);
+            } catch(e) {
+              exportData.data[key] = value;
+            }
+          }
+        }
+      } catch(e) {
+        console.error('导出数据失败:', e);
+        alert('导出失败：无法读取本地数据');
+        return;
+      }
+      
+      // 生成并下载 JSON 文件
+      var jsonStr = JSON.stringify(exportData, null, 2);
+      var blob = new Blob([jsonStr], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '汉字图谱数据_' + (currentUser || 'default') + '_' + getTodayStr() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showNotification('📤 数据已导出！请妥善保存文件', 'success');
+    }
+    
+    function importUserData(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var importData = JSON.parse(e.target.result);
+          
+          // 验证数据格式
+          if (!importData.app || importData.app !== '汉字图谱') {
+            alert('导入失败：文件格式不正确');
+            return;
+          }
+          
+          if (!importData.data) {
+            alert('导入失败：文件中没有数据');
+            return;
+          }
+          
+          // 确认导入
+          var confirmMsg = '确定要导入数据吗？\n这将覆盖当前的所有学习记录！\n\n导出日期：' + (importData.exportDate || '未知');
+          if (!confirm(confirmMsg)) {
+            return;
+          }
+          
+          // 导入数据到 localStorage
+          var importedCount = 0;
+          for (var key in importData.data) {
+            if (key.indexOf('hanzi_') === 0) {
+              var value = importData.data[key];
+              if (typeof value === 'object') {
+                localStorage.setItem(key, JSON.stringify(value));
+              } else {
+                localStorage.setItem(key, value);
+              }
+              importedCount++;
+            }
+          }
+          
+          showNotification('📥 数据导入成功！已恢复 ' + importedCount + ' 条记录', 'success');
+          
+          // 重新加载用户数据
+          setTimeout(function() {
+            loadUserData();
+            reloadAll();
+            document.getElementById('starMask').classList.remove('show');
+          }, 500);
+          
+        } catch(err) {
+          console.error('导入数据失败:', err);
+          alert('导入失败：文件解析错误\n' + err.message);
+        }
+      };
+      reader.onerror = function() {
+        alert('导入失败：无法读取文件');
+      };
+      reader.readAsText(file);
+    }
 
     // ======================== 用户切换 ========================
     function renderUserList() {
@@ -2097,6 +2789,20 @@
       };
     }
 
+    // ======================== 数据导出/导入 ========================
+    document.getElementById('exportDataBtn').onclick = function() {
+      exportUserData();
+    };
+    document.getElementById('importDataBtn').onclick = function() {
+      document.getElementById('importFileInput').click();
+    };
+    document.getElementById('importFileInput').onchange = function(e) {
+      if(e.target.files && e.target.files[0]) {
+        importUserData(e.target.files[0]);
+      }
+      e.target.value = ''; // 清空，允许重复导入同一文件
+    };
+
     // 遮罩点击关闭
     document.querySelectorAll('.modal-mask').forEach(function(mask) {
       mask.addEventListener('click', function(e) { if(e.target === mask) mask.classList.remove('show'); });
@@ -2149,5 +2855,6 @@
       document.getElementById('loadingMask').classList.remove('hide');
     }
   }
+  
   init();
 })();

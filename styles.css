@@ -462,8 +462,13 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
-.modal-mask.show { display: flex; }
+.modal-mask.show { 
+  display: flex; 
+  opacity: 1;
+}
 .modal-card {
   width: 90%;
   max-width: 420px;
@@ -474,6 +479,13 @@ body {
   padding: 24px;
   position: relative;
   box-shadow: var(--shadow-normal);
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  opacity: 0;
+}
+.modal-mask.show .modal-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
 }
 .modal-close {
   position: absolute;
@@ -502,9 +514,16 @@ body {
   font-size: 16px;
   cursor: pointer;
   font-family: inherit;
-  transition: var(--transition);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
 }
-.modal-btn:hover { transform: scale(1.02); }
+.modal-btn:hover { 
+  transform: scale(1.05) translateY(-2px); 
+  box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.35);
+}
+.modal-btn:active {
+  transform: scale(0.98);
+  transition-duration: 0.1s;
+}
 .modal-btn.secondary {
   background: transparent;
   border: 2px solid var(--color-border);
@@ -649,6 +668,253 @@ body {
   font-size: 14px;
   color: var(--text-secondary);
   margin-top: 8px;
+}
+
+/* ========== 宠物技能按钮 ========== */
+.pet-skills {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+.pet-skill-btn {
+  padding: 6px 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 80px;
+  justify-content: center;
+}
+.pet-skill-btn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.pet-skill-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--bg-main);
+}
+.pet-skill-btn .skill-icon {
+  font-size: 16px;
+}
+.pet-skill-btn .skill-cooldown {
+  font-size: 12px;
+  color: var(--color-error);
+}
+.pet-skill-btn .skill-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: block;
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* ========== 宠物皮肤 ========== */
+.pet-skins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.pet-skin-btn {
+  padding: 8px 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 70px;
+  transition: all 0.2s ease;
+}
+
+.pet-skin-btn:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.pet-skin-btn.active {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.pet-skin-btn.locked {
+  opacity: 0.7;
+}
+
+.pet-skin-btn.locked:hover {
+  border-color: var(--color-error);
+}
+
+.pet-skin-btn .skin-emoji {
+  font-size: 24px;
+}
+
+.pet-skin-btn .skin-name {
+  font-size: 12px;
+}
+
+.pet-skin-btn .skin-price {
+  font-size: 11px;
+  color: var(--color-warning);
+  margin-top: -2px;
+}
+
+/* ========== 签到系统 ========== */
+.sign-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.sign-streak {
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sign-flame {
+  font-size: 20px;
+  animation: flame-flicker 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes flame-flicker {
+  0% { transform: scale(1) rotate(-5deg); }
+  100% { transform: scale(1.1) rotate(5deg); }
+}
+
+.sign-btn {
+  background: rgba(255,255,255,0.95) !important;
+  color: #667eea !important;
+  font-weight: bold;
+  padding: 8px 16px;
+  margin: 0 !important;
+}
+
+.sign-btn.signed {
+  background: rgba(255,255,255,0.5) !important;
+  color: #999 !important;
+  cursor: not-allowed;
+}
+
+/* ========== 数据管理 ========== */
+.data-management {
+  margin-bottom: 16px;
+}
+
+.data-management .modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ========== 每日任务 ========== */
+.daily-tasks {
+  margin-bottom: 16px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.task-item.completed {
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.1) 0%, rgba(82, 196, 26, 0.05) 100%);
+  border-left: 3px solid #52c41a;
+}
+
+.task-icon {
+  font-size: 24px;
+  width: 36px;
+  text-align: center;
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-name {
+  font-weight: bold;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.task-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.task-progress {
+  font-size: 12px;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+.task-reward {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-warning);
+  background: rgba(250, 173, 20, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.task-item.completed .task-reward {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.task-check {
+  color: #52c41a;
+  font-size: 18px;
+}
+
+/* ========== 成就徽章增强 ========== */
+.achievement-tag {
+  background: linear-gradient(135deg, #ffd666 0%, #f5a623 100%);
+  color: #7c4a00;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 20px;
+  animation: achievement-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes achievement-glow {
+  0% { box-shadow: 0 0 5px rgba(245, 166, 35, 0.3); }
+  100% { box-shadow: 0 0 15px rgba(245, 166, 35, 0.6); }
 }
 
 /* ========== 答对详情（朗读增强） ========== */
@@ -1114,16 +1380,80 @@ body {
 
 /* ========== 小宠物样式 ========== */
 .pet-widget { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.pet-avatar { width:48px; height:48px; font-size:22px; display:flex; align-items:center; justify-content:center; border-radius:14px; transition:transform 0.3s; }
+.pet-avatar { 
+  width:48px; 
+  height:48px; 
+  font-size:22px; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  border-radius:14px; 
+  transition:transform 0.3s;
+  animation: pet-breathe 3s ease-in-out infinite;
+}
+.pet-avatar:hover {
+  animation: pet-breathe-hover 1.5s ease-in-out infinite;
+}
 .pet-avatar.bounce { animation: pet-bounce 700ms cubic-bezier(.28,.84,.42,1); }
-@keyframes pet-bounce { 0% { transform: translateY(0) scale(1); } 30% { transform: translateY(-10px) scale(1.06); } 60% { transform: translateY(-3px) scale(1.02); } 100% { transform: translateY(0) scale(1); } }
+
+@keyframes pet-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes pet-breathe-hover {
+  0%, 100% { transform: scale(1.1); }
+  50% { transform: scale(1.18); }
+}
+
+@keyframes pet-bounce { 
+  0% { transform: translateY(0) scale(1); } 
+  30% { transform: translateY(-10px) scale(1.06); } 
+  60% { transform: translateY(-3px) scale(1.02); } 
+  100% { transform: translateY(0) scale(1); } 
+}
+
+@keyframes pet-levelup {
+  0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+  25% { transform: scale(1.3) rotate(-10deg); filter: brightness(1.5) drop-shadow(0 0 20px gold); }
+  50% { transform: scale(1.4) rotate(10deg); filter: brightness(2) drop-shadow(0 0 30px gold); }
+  75% { transform: scale(1.2) rotate(-5deg); filter: brightness(1.5) drop-shadow(0 0 15px gold); }
+  100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+}
+
+.pet-avatar.levelup {
+  animation: pet-levelup 1.5s cubic-bezier(.28,.84,.42,1);
+}
+
 .pet-exp { width:54px; height:8px; background: rgba(0,0,0,0.06); border-radius:8px; overflow:hidden; border:1px solid rgba(0,0,0,0.04); }
 .pet-exp-fill { height:100%; background: linear-gradient(90deg,#f5a623,#ffd666); width:0%; transition: width 420ms ease; }
 
 /* ========== 彩花 ========== */
 .confetti-zone { position: fixed; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 120; overflow: visible; }
-.confetti-piece { position: absolute; width: 10px; height: 14px; opacity: 0.95; transform-origin: center; animation: confetti-fall 1400ms linear forwards; }
-@keyframes confetti-fall { 0% { transform: translateY(-10px) rotate(0deg); opacity:1 } 100% { transform: translateY(100vh) rotate(720deg); opacity:0 } }
+.confetti-piece { 
+  position: absolute; 
+  width: 10px; 
+  height: 14px; 
+  opacity: 0.95; 
+  transform-origin: center; 
+  animation: confetti-fall 1400ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+}
+@keyframes confetti-fall {
+  0% { 
+    opacity: 1; 
+    transform: translateY(0) rotate(0deg) scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateY(100vh) rotate(720deg) scale(0.5); 
+  }
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* ========== 用户档案编辑器 ========== */
 .profile-editor { background: rgba(74,144,226,0.05); border-radius: 12px; padding: 12px; margin: 12px 0; }

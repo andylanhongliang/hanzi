@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汉字接龙 🐉</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --primary: #667eea;
+  --primary-dark: #5a67d8;
+  --secondary: #f5a623;
+  --success: #52c41a;
+  --error: #ff4d4f;
+  --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --card-bg: rgba(255,255,255,0.95);
+  --text-primary: #1a1a2e;
+  --text-secondary: #666;
+}
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.container {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card-bg);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+.header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: #fff;
+  padding: 32px 24px;
+  text-align: center;
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.game-area {
+  padding: 24px;
+}
+.current-word {
+  background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  border: 2px solid rgba(102,126,234,0.2);
+}
+.current-word-label {
+  font-size: 12px;
+  color: var(--primary);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.current-word-text {
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--primary);
+  margin: 12px 0;
+}
+.next-char {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: bold;
+}
+.next-char span {
+  font-size: 24px;
+}
+.input-area {
+  margin-bottom: 20px;
+}
+.input-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: block;
+}
+.word-input {
+  width: 100%;
+  padding: 16px;
+  font-size: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s;
+  text-align: center;
+}
+.word-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+}
+.word-input.error {
+  border-color: var(--error);
+  animation: shake 0.5s;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+.btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 10px;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+}
+.btn-secondary {
+  background: #f0f0f0;
+  color: var(--text-primary);
+}
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+.btn-success:hover {
+  background: #389e0d;
+  transform: translateY(-2px);
+}
+.trail {
+  margin-top: 24px;
+}
+.trail-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.trail-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.trail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.trail-number {
+  background: var(--secondary);
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+.trail-word {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+.trail-arrow {
+  color: #999;
+}
+.result {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  display: none;
+}
+.result.success {
+  background: rgba(82,196,26,0.1);
+  color: var(--success);
+  display: block;
+}
+.result.error {
+  background: rgba(255,77,79,0.1);
+  color: var(--error);
+  display: block;
+}
+.share-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+.share-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-align: center;
+}
+.share-btns {
+  display: flex;
+  gap: 10px;
+}
+.share-btn {
+  flex: 1;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+.share-btn.wechat {
+  background: #52c41a;
+  color: #fff;
+}
+.share-btn.copy {
+  background: #667eea;
+  color: #fff;
+}
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.share-tip {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin-top: 10px;
+}
+.new-game-btn {
+  margin-top: 20px;
+}
+.start-screen {
+  padding: 40px 24px;
+  text-align: center;
+}
+.start-screen h2 {
+  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+.start-input {
+  width: 100%;
+  padding: 16px;
+  font-size: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  outline: none;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.start-input:focus {
+  border-color: var(--primary);
+}
+.start-btn {
+  width: 100%;
+  padding: 18px;
+  font-size: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(102,126,234,0.4);
+}
+.suggestions {
+  margin-top: 20px;
+}
+.suggestions-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.suggestion-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.suggestion-tag {
+  background: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.suggestion-tag:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🐉 汉字接龙</h1>
+    <p>考验你的词汇量，看看能接多长！</p>
+  </div>
+  
+  <div class="game-area">
+    <div id="loadingScreen" class="loading">
+      <div class="loading-spinner"></div>
+      <p>正在加载词汇数据...</p>
+    </div>
+    
+    <div id="startScreen" class="start-screen" style="display:none;">
+      <h2>开始新的接龙</h2>
+      <input type="text" id="startWordInput" class="start-input" placeholder="输入一个词语或成语" maxlength="8">
+      <button class="start-btn" onclick="startNewGame()">开始接龙 🎉</button>
+      <div class="suggestions">
+        <div class="suggestions-label">试试这些：</div>
+        <div class="suggestion-tags" id="suggestionTags"></div>
+      </div>
+    </div>
+    
+    <div id="gameScreen" style="display:none;">
+      <div class="current-word">
+        <div class="current-word-label">上一个词</div>
+        <div class="current-word-text" id="currentWord"></div>
+        <div class="next-char">接 <span id="nextChar"></span></div>
+      </div>
+      
+      <div class="result" id="resultMessage"></div>
+      
+      <div class="input-area">
+        <div class="input-label">请输入以 "<span id="inputHint"></span>" 开头的词语或成语</div>
+        <input type="text" id="wordInput" class="word-input" placeholder="输入词语..." maxlength="8">
+      </div>
+      
+      <button class="btn btn-primary" onclick="submitWord()">确认接龙 ✅</button>
+      
+      <div class="trail">
+        <div class="trail-label">📜 接龙记录</div>
+        <div class="trail-list" id="trailList"></div>
+      </div>
+      
+      <div class="share-section">
+        <div class="share-label">🔗 邀请好友来接</div>
+        <div class="share-btns">
+          <button class="share-btn copy" onclick="copyShareLink()">📋 复制链接</button>
+          <button class="share-btn wechat" onclick="shareToWechat()">💬 分享到微信</button>
+        </div>
+        <div class="share-tip">好友打开链接即可继续接龙</div>
+      </div>
+      
+      <button class="btn btn-secondary new-game-btn" onclick="backToStart()">🔄 开始新游戏</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+var wordDictionary = {};
+var gameTrail = [];
+var currentWord = '';
+
+function init() {
+  if (typeof ALL_NODES === 'undefined') {
+    setTimeout(init, 100);
+    return;
+  }
+  
+  buildDictionary();
+  showStartScreen();
+  
+  var urlParams = new URLSearchParams(window.location.search);
+  var startWord = urlParams.get('word');
+  var trail = urlParams.get('trail');
+  
+  if (startWord) {
+    if (trail) {
+      try {
+        gameTrail = JSON.parse(decodeURIComponent(trail));
+      } catch(e) {
+        gameTrail = [];
+      }
+    }
+    startGame(startWord);
+  }
+}
+
+function buildDictionary() {
+  ALL_NODES.forEach(function(node) {
+    if (node.groupWords) {
+      node.groupWords.split('|').forEach(function(word) {
+        word = word.trim();
+        if (word.length >= 2) {
+          wordDictionary[word] = { type: 'word', char: node.name };
+        }
+      });
+    }
+    if (node.idioms) {
+      node.idioms.split('|').forEach(function(item) {
+        var parts = item.split('::');
+        var word = parts[0].trim();
+        if (word.length >= 2) {
+          wordDictionary[word] = { type: 'idiom', char: node.name };
+        }
+      });
+    }
+  });
+  
+  var suggestions = [
+    '一帆风顺', '万事如意', '一心一意', '马到成功',
+    '春风得意', '前程似锦', '心想事成', '喜气洋洋'
+  ];
+  var tagContainer = document.getElementById('suggestionTags');
+  suggestions.forEach(function(word) {
+    var tag = document.createElement('div');
+    tag.className = 'suggestion-tag';
+    tag.innerText = word;
+    tag.onclick = function() {
+      document.getElementById('startWordInput').value = word;
+    };
+    tagContainer.appendChild(tag);
+  });
+}
+
+function showStartScreen() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'block';
+  document.getElementById('gameScreen').style.display = 'none';
+}
+
+function showGameScreen() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+}
+
+function startNewGame() {
+  var word = document.getElementById('startWordInput').value.trim();
+  if (!word) {
+    showResult('请输入一个词语！', 'error');
+    return;
+  }
+  if (word.length < 2) {
+    showResult('词语至少需要2个字！', 'error');
+    return;
+  }
+  
+  startGame(word);
+}
+
+function startGame(word) {
+  currentWord = word;
+  gameTrail.push({ word: word, type: getWordType(word) });
+  showGameScreen();
+  updateUI();
+}
+
+function getWordType(word) {
+  return wordDictionary[word] ? wordDictionary[word].type : 'custom';
+}
+
+function updateUI() {
+  document.getElementById('currentWord').innerText = currentWord;
+  
+  var lastChar = currentWord[currentWord.length - 1];
+  document.getElementById('nextChar').innerText = lastChar;
+  document.getElementById('inputHint').innerText = lastChar;
+  
+  document.getElementById('wordInput').value = '';
+  document.getElementById('wordInput').focus();
+  
+  renderTrail();
+}
+
+function renderTrail() {
+  var list = document.getElementById('trailList');
+  list.innerHTML = '';
+  
+  gameTrail.forEach(function(item, index) {
+    var trailItem = document.createElement('div');
+    trailItem.className = 'trail-item';
+    
+    var typeLabel = item.type === 'idiom' ? '📚' : item.type === 'word' ? '📖' : '✏️';
+    
+    trailItem.innerHTML = `
+      <div class="trail-number">${index + 1}</div>
+      <div class="trail-word">${typeLabel} ${item.word}</div>
+      ${index < gameTrail.length - 1 ? '<div class="trail-arrow">➡️</div>' : ''}
+    `;
+    list.appendChild(trailItem);
+  });
+  
+  list.scrollTop = list.scrollHeight;
+}
+
+function submitWord() {
+  var input = document.getElementById('wordInput').value.trim();
+  var inputField = document.getElementById('wordInput');
+  
+  if (!input) {
+    showResult('请输入一个词语！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (input.length < 2) {
+    showResult('词语至少需要2个字！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  var lastChar = currentWord[currentWord.length - 1];
+  var firstChar = input[0];
+  
+  if (firstChar !== lastChar) {
+    showResult(`错误！上一个词以"${lastChar}"结尾，请输入以"${lastChar}"开头的词语！`, 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  if (gameTrail.some(function(item) { return item.word === input; })) {
+    showResult('这个词已经接过去了！换一个吧！', 'error');
+    inputField.classList.add('error');
+    setTimeout(function() { inputField.classList.remove('error'); }, 500);
+    return;
+  }
+  
+  showResult('接龙成功！🎉', 'success');
+  currentWord = input;
+  gameTrail.push({ word: input, type: getWordType(input) });
+  
+  setTimeout(function() {
+    document.getElementById('resultMessage').style.display = 'none';
+    updateUI();
+  }, 1500);
+}
+
+function showResult(msg, type) {
+  var result = document.getElementById('resultMessage');
+  result.innerText = msg;
+  result.className = 'result ' + type;
+}
+
+function copyShareLink() {
+  var trailStr = encodeURIComponent(JSON.stringify(gameTrail));
+  var shareUrl = window.location.origin + window.location.pathname + '?word=' + encodeURIComponent(currentWord) + '&trail=' + trailStr;
+  
+  navigator.clipboard.writeText(shareUrl).then(function() {
+    alert('链接已复制！快去分享给好友吧！');
+  }).catch(function() {
+    var textarea = document.createElement('textarea');
+    textarea.value = shareUrl;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    alert('链接已复制！快去分享给好友吧！');
+  });
+}
+
+function shareToWechat() {
+  copyShareLink();
+  alert('链接已复制，请打开微信粘贴给好友！');
+}
+
+function backToStart() {
+  gameTrail = [];
+  currentWord = '';
+  document.getElementById('startWordInput').value = '';
+  showStartScreen();
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
