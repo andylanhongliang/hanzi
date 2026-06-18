@@ -1461,3 +1461,23 @@ body {
 .avatar-option { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.2s; background: #fff; }
 .avatar-option.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(74,144,226,0.25); }
 .avatar-option:hover { transform: scale(1.15); }
+
+/* 宠物聊天 */
+.pet-chat-card { max-width: 380px; padding: 0; overflow: hidden; }
+.pet-chat-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
+.pet-chat-header .modal-close { color: rgba(255,255,255,0.8); top: 12px; right: 16px; }
+.pet-chat-avatar { font-size: 28px; }
+.pet-chat-name { font-size: 16px; font-weight: bold; }
+.pet-chat-messages { height: 260px; overflow-y: auto; padding: 16px; background: #f8f9fa; }
+.pet-chat-msg { margin-bottom: 12px; max-width: 85%; animation: msgIn 0.3s ease; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.pet-chat-msg.pet-msg { background: #fff; border-radius: 14px 14px 14px 4px; padding: 10px 14px; color: #333; font-size: 14px; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.pet-chat-msg.user-msg { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 14px 14px 4px 14px; padding: 10px 14px; color: #fff; font-size: 14px; line-height: 1.5; margin-left: auto; }
+.pet-chat-input-row { display: flex; padding: 10px 12px; gap: 8px; border-top: 1px solid #eee; background: #fff; }
+.pet-chat-input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; font-size: 14px; outline: none; }
+.pet-chat-input:focus { border-color: var(--primary, #667eea); }
+.pet-chat-send { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 20px; padding: 8px 18px; font-size: 14px; font-weight: bold; cursor: pointer; }
+.pet-chat-quick { display: flex; gap: 6px; padding: 6px 12px 10px; flex-wrap: wrap; background: #fff; }
+.quick-btn { background: #f0f2f5; border: none; border-radius: 14px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: #666; transition: all 0.2s; }
+.quick-btn:hover { background: #667eea; color: #fff; }
+@media(max-width:768px) { .pet-chat-messages { height: 220px; } }

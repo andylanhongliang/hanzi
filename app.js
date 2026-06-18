@@ -1444,7 +1444,7 @@
       currentUserData.petMessage = '我长大啦！现在我是' + getPetStageName(currentUserData.petLevel) + '！';
       leveled = true;
     } else {
-      currentUserData.petMessage = '我获得了 +' + amount + ' 经验，继续加油～';
+      currentUserData.petMessage = getPetExpMessage(amount);
     }
     showPetBubble(currentUserData.petMessage);
     if(leveled) { 
@@ -2014,11 +2014,12 @@
         petAvatar.style.outline = '3px solid #ff6b6b';
         petAvatar.style.outlineOffset = '3px';
         petAvatar.title = '点击开始复习闯关';
-        petAvatar.onclick = function(e) { e.stopPropagation(); startQuiz(); };
+        petAvatar._quizOnClick = function(e) { e.stopPropagation(); startQuiz(); };
+        petAvatar.onclick = petAvatar._quizOnClick;
         setTimeout(function() {
           petAvatar.style.outline = '';
-          petAvatar.title = '我的小宠物';
-          petAvatar.onclick = null;
+          petAvatar.title = '跟宠物聊天';
+          petAvatar.onclick = function(e) { e.stopPropagation(); openPetChat(); };
         }, 10000);
       }
     }
@@ -2815,6 +2816,21 @@
       e.target.value = ''; // 清空，允许重复导入同一文件
     };
 
+    // 宠物点击聊天
+    var petAvatarBtn = document.getElementById('petAvatar');
+    if(petAvatarBtn) {
+      petAvatarBtn.onclick = function(e) { e.stopPropagation(); openPetChat(); };
+      petAvatarBtn.title = '跟宠物聊天';
+    }
+    // 宠物聊天事件
+    document.getElementById('petChatClose').onclick = closePetChat;
+    document.getElementById('petChatMask').onclick = function(e) { if(e.target === this) closePetChat(); };
+    document.getElementById('petChatSend').onclick = sendPetChat;
+    document.getElementById('petChatInput').onkeydown = function(e) { if(e.key === 'Enter') sendPetChat(); };
+    document.querySelectorAll('.quick-btn').forEach(function(btn) {
+      btn.onclick = function() { handlePetChatQuick(this.getAttribute('data-q')); };
+    });
+
     // 遮罩点击关闭
     document.querySelectorAll('.modal-mask').forEach(function(mask) {
       mask.addEventListener('click', function(e) { if(e.target === mask) mask.classList.remove('show'); });
@@ -2859,6 +2875,11 @@
       }, 800);
       updateDailyTask();
       updatePetUI();
+      // 宠物主动打招呼
+      setTimeout(function() {
+        var greeting = getPetContextMessage();
+        showPetBubble(greeting);
+      }, 3000);
       window.addEventListener('resize', function() { if(myChart) myChart.resize(); });
       console.log('汉字王国初始化完成 | 用户: ' + (currentUser||'默认') + ' | 已解锁: ' + unlocked.size + ' 个');
       // 尝试从云端同步数据
@@ -3001,4 +3022,279 @@
   }
 
   init();
+
+
+  // ======================== 宠物AI对话系统（本地离线） ========================
+  var petChatOpen = false;
+  
+  // 宠物性格模板（根据宠物阶段变化）
+  function getPetPersonality() {
+    var level = currentUserData.petLevel || 1;
+    var skinEmoji = getCurrentPetSkinEmoji();
+    var stageName = getPetStageName(level);
+    
+    // 不同皮肤有不同口癖
+    var quirks = {
+      '🐯': '嗷呜～', '🐼': '嘿咻～', '🦊': '嘻嘻～',
+      '🐲': '吼～', '🦁': '嗷～', '🐺': '嗷呜～',
+      '🦅': '唳～', '🦉': '咕咕～', '🦜': '叽叽～',
+      '🐉': '昂～', '🦄': '叮铃～'
+    };
+    var quirk = quirks[skinEmoji] || '～';
+    
+    return { emoji: skinEmoji, name: stageName, level: level, quirk: quirk };
+  }
+  
+  // 生成情境对话（不依赖用户输入，宠物主动说）
+  function getPetContextMessage() {
+    var p = getPetPersonality();
+    var hour = new Date().getHours();
+    var learned = learnedSet.size;
+    var todayCount = currentUserData.todayCount || 0;
+    var streak = currentUserData.streakDays || 0;
+    var target = currentUserData.dailyTarget || 3;
+    
+    var msgs = [];
+    
+    // 时间问候
+    if (hour < 9) msgs.push(p.quirk + ' 早上好！新的一天，一起认识新汉字吧！');
+    else if (hour < 12) msgs.push(p.quirk + ' 上午好！今天学字了吗？');
+    else if (hour < 14) msgs.push(p.quirk + ' 午安～吃饱了来学几个字吧！');
+    else if (hour < 18) msgs.push(p.quirk + ' 下午好！来跟我聊聊汉字吧～');
+    else if (hour < 21) msgs.push(p.quirk + ' 晚上好！今天的学习任务完成了吗？');
+    else msgs.push(p.quirk + ' 夜深了，早点休息哦～明天再战！');
+    
+    // 学习进度
+    if (todayCount >= target) msgs.push('太厉害了，今天的任务已经完成啦！🌟');
+    else if (todayCount > 0) msgs.push('今天已学了' + todayCount + '个字，再学' + (target - todayCount) + '个就达标了！');
+    else msgs.push('今天还没开始学呢，快来猜几个字吧！');
+    
+    // 连续学习
+    if (streak >= 7) msgs.push('哇！连续学习' + streak + '天了，你是最棒的！');
+    else if (streak >= 3) msgs.push('连续学习' + streak + '天了，坚持就是胜利！');
+    
+    // 总量里程碑
+    if (learned >= 100) msgs.push('你已经认识' + learned + '个汉字了，真是汉字小博士！');
+    else if (learned >= 50) msgs.push('认识了' + learned + '个字，超过一半啦！');
+    else if (learned >= 20) msgs.push('已经学了' + learned + '个字了，继续加油！');
+    
+    // 宠物等级
+    if (p.level >= 8) msgs.push('我现在是' + p.name + '，谢谢你带我成长！' + p.emoji);
+    else if (p.level >= 4) msgs.push('我进化成' + p.name + '了！一起变得更厉害吧！');
+    
+    return msgs[Math.floor(Math.random() * msgs.length)];
+  }
+  
+  // 核心：根据用户输入生成回复
+  function petAIReply(userText) {
+    var p = getPetPersonality();
+    var text = userText.trim();
+    var learned = learnedSet.size;
+    var todayCount = currentUserData.todayCount || 0;
+    var streak = currentUserData.streakDays || 0;
+    var lastChar = lastUnlockedNodeId;
+    var lastNode = nodeMap.get(lastChar);
+    
+    // ===== 关键词匹配 =====
+    
+    // 成语相关
+    if (/成语/.test(text)) {
+      return pickPetIdiom(p);
+    }
+    
+    // 考试/测验
+    if (/考考|测验|测试|挑战/.test(text)) {
+      return pickPetQuiz(p);
+    }
+    
+    // 成绩/进度
+    if (/多少|成绩|进度|学了|学会/.test(text)) {
+      return p.quirk + ' 你已经认识了' + learned + '个汉字！今天学了' + todayCount + '个，连续学习' + streak + '天。' + (learned >= 50 ? '太厉害了！🌟' : '继续加油！💪');
+    }
+    
+    // 鼓励
+    if (/鼓励|加油|累了|不想|难|不会/.test(text)) {
+      var encourages = [
+        p.quirk + ' 别灰心！每一个汉字都是一步，你已经走了' + learned + '步了！',
+        p.quirk + ' 学习就像爬山，休息一下再继续，我陪你！',
+        p.quirk + ' 当初我学这些字的时候也觉得难，多看几遍就记住啦～',
+        '加油呀！你已经比昨天的自己更厉害了！' + p.emoji,
+        p.quirk + ' 慢慢来，不着急！学一个算一个！'
+      ];
+      return encourages[Math.floor(Math.random() * encourages.length)];
+    }
+    
+    // 问候
+    if (/你好|嗨|hi|hello|早上|下午|晚上/.test(text)) {
+      return p.quirk + ' 你好呀！我是' + p.name + '，今天想学什么字？';
+    }
+    
+    // 问某个字
+    var charMatch = text.match(/["""]?([\u4e00-\u9fff])["""]?.*[怎么|什么|意思|写|读|讲]/);
+    if (!charMatch) charMatch = text.match(/讲讲.*?["""]?([\u4e00-\u9fff])["""]?/);
+    if (charMatch) {
+      var ch = charMatch[1];
+      var node = nodeMap.get(ch);
+      if (node) {
+        var parts = [];
+        if (node.pinyin) parts.push('读音是"' + node.pinyin + '"');
+        if (node.oracle) parts.push(node.oracle);
+        if (node.origin) parts.push('记住：' + node.origin);
+        if (parts.length > 0) return p.quirk + ' 「' + ch + '」' + parts.join('。') + '。';
+        return p.quirk + ' 「' + ch + '」我也在学呢，一起加油！';
+      }
+      return p.quirk + ' 「' + ch + '」这个字我还没学到，等你解锁了告诉我哦～';
+    }
+    
+    // 聊天/闲聊
+    if (/喜欢|爱|开心|高兴|好玩|有趣/.test(text)) {
+      return p.quirk + ' 我也觉得学汉字很好玩！每个字都有自己的故事呢～';
+    }
+    
+    if (/谢谢|感谢|谢了/.test(text)) {
+      return p.quirk + ' 不客气！能陪你学习我很开心！' + p.emoji;
+    }
+    
+    if (/你是谁|你叫什么|自我介绍/.test(text)) {
+      return p.quirk + ' 我是' + p.name + '，等级Lv' + p.level + '！你学汉字我长大，我们一起进步！' + p.emoji;
+    }
+    
+    // 最近学的字
+    if (/最近|上次|刚学/.test(text)) {
+      if (lastNode) {
+        var info = '你最近学了「' + lastChar + '」';
+        if (lastNode.origin) info += '，' + lastNode.origin;
+        return p.quirk + ' ' + info + '。要不要再学几个新的？';
+      }
+      return p.quirk + ' 还没有学习记录呢，快去猜字吧！';
+    }
+    
+    // 默认回复（带上下文）
+    var defaults = [
+      p.quirk + ' 嗯嗯，要不我们学个新字？点击图谱上的问号试试！',
+      p.quirk + ' 我在想…你觉得最近学的哪个字最有意思？',
+      p.quirk + ' 学汉字就像交朋友，多见面就认识了～',
+      p.quirk + ' 你知道吗？汉字已经有三千多年的历史了！',
+      p.quirk + ' 点我身上的💡可以在猜字时获得提示哦！',
+      p.quirk + ' 我现在Lv' + p.level + '，你多学字我就能进化！',
+      '有什么想知道的字直接告诉我吧！' + p.emoji,
+    ];
+    return defaults[Math.floor(Math.random() * defaults.length)];
+  }
+  
+  // 随机讲一个成语（从已解锁的字中找）
+  function pickPetIdiom(p) {
+    var charWithIdioms = [];
+    unlocked.forEach(function(id) {
+      var n = nodeMap.get(id);
+      if (n && n.idioms) charWithIdioms.push(n);
+    });
+    
+    if (charWithIdioms.length === 0) {
+      return p.quirk + ' 你还没解锁有成语的字哦，快去学几个吧！';
+    }
+    
+    var node = charWithIdioms[Math.floor(Math.random() * charWithIdioms.length)];
+    var idiomList = node.idioms.split('|');
+    var item = idiomList[Math.floor(Math.random() * idiomList.length)];
+    var parts = item.split('::');
+    var idiom = parts[0];
+    var meaning = parts[1] || '';
+    
+    var msg = p.quirk + ' 给你讲个成语：「' + idiom + '」';
+    if (meaning) msg += '，意思是' + meaning;
+    msg += '。里面有你学过的「' + node.name + '」哦！';
+    return msg;
+  }
+  
+  // 考考用户
+  function pickPetQuiz(p) {
+    var pool = [];
+    unlocked.forEach(function(id) {
+      var n = nodeMap.get(id);
+      if (n && n.origin) pool.push(n);
+    });
+    
+    if (pool.length < 3) {
+      return p.quirk + ' 你学的字还不够多，先多学几个再来考吧！';
+    }
+    
+    var node = pool[Math.floor(Math.random() * pool.length)];
+    return p.quirk + ' 考考你！哪个字的由来是："' + node.oracle + '"？点击图谱去找到它吧！💡（答案是「' + node.name + '」）';
+  }
+  
+  
+  function getPetExpMessage(amount) {
+    var p = getPetPersonality();
+    var msgs = [
+      p.quirk + ' +' + amount + '经验！又变强了一点点！',
+      p.quirk + ' 谢谢你带我长大！+' + amount + '经验～',
+      '哇，+' + amount + '经验！继续学字我就能进化了！',
+      p.quirk + ' +' + amount + '！你学字我长大，真好～',
+      '收到' + amount + '点经验！' + p.emoji
+    ];
+    return msgs[Math.floor(Math.random() * msgs.length)];
+  }
+
+  // ===== 聊天UI =====
+  function openPetChat() {
+    petChatOpen = true;
+    var mask = document.getElementById('petChatMask');
+    var avatar = document.getElementById('petChatAvatar');
+    var nameEl = document.getElementById('petChatName');
+    var msgs = document.getElementById('petChatMessages');
+    var input = document.getElementById('petChatInput');
+    
+    var p = getPetPersonality();
+    avatar.innerText = p.emoji;
+    nameEl.innerText = p.name + ' Lv' + p.level;
+    
+    // 如果是第一次打开，显示欢迎语
+    if (msgs.children.length === 0) {
+      addPetChatMsg('pet', getPetContextMessage());
+    }
+    
+    mask.classList.add('show');
+    setTimeout(function() { input.focus(); }, 200);
+  }
+  
+  function closePetChat() {
+    petChatOpen = false;
+    document.getElementById('petChatMask').classList.remove('show');
+  }
+  
+  function addPetChatMsg(type, text) {
+    var msgs = document.getElementById('petChatMessages');
+    var div = document.createElement('div');
+    div.className = 'pet-chat-msg ' + (type === 'pet' ? 'pet-msg' : 'user-msg');
+    div.innerText = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    
+    // 最多保留30条
+    while (msgs.children.length > 30) {
+      msgs.removeChild(msgs.firstChild);
+    }
+  }
+  
+  function sendPetChat() {
+    var input = document.getElementById('petChatInput');
+    var text = input.value.trim();
+    if (!text) return;
+    
+    addPetChatMsg('user', text);
+    input.value = '';
+    
+    // 延迟回复，模拟思考
+    setTimeout(function() {
+      var reply = petAIReply(text);
+      addPetChatMsg('pet', reply);
+    }, 400 + Math.random() * 600);
+  }
+  
+  function handlePetChatQuick(question) {
+    document.getElementById('petChatInput').value = question;
+    sendPetChat();
+  }
+
 })();
