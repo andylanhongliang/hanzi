@@ -1330,6 +1330,11 @@
     var currentSkinId = currentUserData.currentPetSkin;
     var skins = PET_SKINS[stage];
     
+    if(!skins) {
+      console.warn('宠物皮肤数据异常，stage:', stage);
+      return '🐯';
+    }
+    
     if(currentSkinId) {
       var skin = skins.find(function(s) { return s.id === currentSkinId; });
       if(skin) return skin.emoji;
@@ -2823,11 +2828,16 @@
       petAvatarBtn.title = '跟宠物聊天';
     }
     // 宠物聊天事件
-    document.getElementById('petChatClose').onclick = closePetChat;
-    document.getElementById('petChatMask').onclick = function(e) { if(e.target === this) closePetChat(); };
-    document.getElementById('petChatSend').onclick = sendPetChat;
-    document.getElementById('petChatInput').onkeydown = function(e) { if(e.key === 'Enter') sendPetChat(); };
-    document.querySelectorAll('.quick-btn').forEach(function(btn) {
+    var petChatClose = document.getElementById('petChatClose');
+    if(petChatClose) petChatClose.onclick = closePetChat;
+    var petChatMask = document.getElementById('petChatMask');
+    if(petChatMask) petChatMask.onclick = function(e) { if(e.target === this) closePetChat(); };
+    var petChatSend = document.getElementById('petChatSend');
+    if(petChatSend) petChatSend.onclick = sendPetChat;
+    var petChatInput = document.getElementById('petChatInput');
+    if(petChatInput) petChatInput.onkeydown = function(e) { if(e.key === 'Enter') sendPetChat(); };
+    var quickBtns = document.querySelectorAll('.quick-btn');
+    if(quickBtns) quickBtns.forEach(function(btn) {
       btn.onclick = function() { handlePetChatQuick(this.getAttribute('data-q')); };
     });
 
@@ -2846,46 +2856,79 @@
   // ======================== 启动 ========================
   function init() {
     try {
+      console.log('开始初始化...');
+      
       if(typeof ALL_NODES === 'undefined' || typeof ALL_LINKS === 'undefined') {
         document.querySelector('.loading-text').innerText = '数据加载失败';
+        console.error('ALL_NODES 或 ALL_LINKS 未定义');
         return;
       }
+      console.log('数据加载成功 | 节点数:', ALL_NODES.length, '| 链接数:', ALL_LINKS.length);
+      
       initDataStructures();
+      console.log('数据结构初始化完成');
+      
       initZones();
+      console.log('区域初始化完成');
+      
       loadUserData();
+      console.log('用户数据加载完成:', currentUser);
+      
       // 恢复主题皮肤
       var savedTheme = localStorage.getItem('hanzi_theme') || 'default';
       if (savedTheme && savedTheme !== 'default') {
         document.documentElement.classList.add('theme-' + savedTheme);
       }
       updateUserDisplay();
+      console.log('主题恢复完成');
+      
       // 初始化里程碑状态
       for(var mi = milestones.length-1; mi >= 0; mi--) {
         if(unlocked.size >= milestones[mi].count) { lastMilestone = milestones[mi].count; break; }
       }
       updateProgress();
+      console.log('进度更新完成');
+      
       var chartDom = document.getElementById('chart');
       if(!chartDom) throw new Error('找不到图表容器');
       myChart = echarts.init(chartDom);
       renderChart();
+      console.log('图表渲染完成');
+      
       bindUI();
+      console.log('UI绑定完成');
+      
       // 启动后自动定位到推荐节点
       setTimeout(function() {
         locateToRecommended();
       }, 800);
+      
       updateDailyTask();
+      console.log('每日任务更新完成');
+      
       updatePetUI();
+      console.log('宠物UI更新完成');
+      
       // 宠物主动打招呼
       setTimeout(function() {
-        var greeting = getPetContextMessage();
-        showPetBubble(greeting);
+        try {
+          var greeting = getPetContextMessage();
+          showPetBubble(greeting);
+          console.log('宠物打招呼:', greeting);
+        } catch(e) {
+          console.error('宠物打招呼失败:', e);
+        }
       }, 3000);
+      
       window.addEventListener('resize', function() { if(myChart) myChart.resize(); });
       console.log('汉字王国初始化完成 | 用户: ' + (currentUser||'默认') + ' | 已解锁: ' + unlocked.size + ' 个');
+      
       // 尝试从云端同步数据
       syncUserDataFromCloud();
+      
     } catch(e) {
       console.error('初始化失败:', e);
+      console.error('错误堆栈:', e.stack);
       document.querySelector('.loading-text').innerText = '加载出错: ' + e.message;
       document.getElementById('loadingMask').classList.remove('hide');
     }
@@ -3021,7 +3064,11 @@
     }
   }
 
-  init();
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
 
   // ======================== 宠物AI对话系统（本地离线） ========================
