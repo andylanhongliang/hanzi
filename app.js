@@ -1511,5 +1511,10 @@
       document.getElementById('loadingMask').classList.remove('hide');
     }
   }
-  init();
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    init();
+  } else if (typeof module !== 'undefined' && module.exports) {
+    // Prevent Node from executing browser-only initialization; export init for external use
+    module.exports = { init };
+  }
 })();
