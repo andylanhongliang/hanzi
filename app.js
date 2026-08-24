@@ -590,22 +590,6 @@
         fillPanel(currentGuessTarget);
         setTimeout(function() { locateToRecommended(); }, 600);
       };
-      // 将 "回到图谱" 也显示为候选项，方便按回车直接触发（并尝试把焦点放到该按钮上）
-      var wrap = document.getElementById('candidateWrap');
-      if (wrap) {
-        wrap.innerHTML = '';
-        var backBtn = document.createElement('button');
-        backBtn.className = 'candidate-btn';
-        backBtn.innerText = '回到图谱';
-        backBtn.onclick = function() {
-          closeGuess();
-          fillPanel(currentGuessTarget);
-          setTimeout(function() { locateToRecommended(); }, 600);
-        };
-        wrap.appendChild(backBtn);
-        wrap.style.display = '';
-        try { backBtn.focus(); } catch(e) {}
-      }
 
       captureNodePositions();
       useFixedPositions = true;
@@ -1527,10 +1511,5 @@
       document.getElementById('loadingMask').classList.remove('hide');
     }
   }
-  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    init();
-  } else if (typeof module !== 'undefined' && module.exports) {
-    // Prevent Node from executing browser-only initialization; export init for external use
-    module.exports = { init };
-  }
+  init();
 })();
